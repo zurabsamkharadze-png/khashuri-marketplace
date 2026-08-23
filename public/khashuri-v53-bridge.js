@@ -1,0 +1,14 @@
+(()=>{
+'use strict';
+const SB='https://eppyjmtowtkxcwwhvwzp.supabase.co',UUID=/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/i;
+function b64(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return atob(s)}
+function payload(t){try{return JSON.parse(b64((t||'').split('.')[1]||''))}catch{return{}}}
+function auth(){try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i)||'';if(k.startsWith('sb-')&&k.endsWith('-auth-token')){const v=JSON.parse(localStorage.getItem(k)||'{}');if(v?.access_token)return v.access_token}}}catch{}return''}
+function anon(){if(window.SUPABASE_ANON_KEY)return window.SUPABASE_ANON_KEY;const re=/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g;for(const s of document.scripts){for(const x of (s.textContent||'').match(re)||[])if(payload(x)?.role==='anon')return x}return''}
+async function isOwner(id){const t=auth(),key=anon(),uid=payload(t)?.sub;if(!t||!key||!uid)return false;try{const r=await fetch(`${SB}/rest/v1/classified_listings?id=eq.${encodeURIComponent(id)}&select=user_id&limit=1`,{headers:{apikey:key,Authorization:'Bearer '+t}});if(!r.ok)return false;const a=await r.json();return a?.[0]?.user_id===uid}catch{return false}}
+function idFrom(el){for(let n=el,d=0;n&&d<7;n=n.parentElement,d++){for(const a of [...(n.attributes||[])]){const m=String(a.value||'').match(UUID);if(m)return m[0]}const m=(n.textContent||'').length<1200?String(n.getAttribute?.('onclick')||'').match(UUID):null;if(m)return m[0]}return''}
+function visibleDialog(){const q=['[role="dialog"]','.modal','.sheet','.drawer','.overlayCard','.modalCard','.bottomSheet','.bottom-sheet'];for(const s of q){const a=[...document.querySelectorAll(s)].filter(x=>{const c=getComputedStyle(x),r=x.getBoundingClientRect();return c.display!=='none'&&c.visibility!=='hidden'&&r.width>260&&r.height>180});if(a.length)return a.at(-1)}const a=[...document.querySelectorAll('body *')].filter(x=>{const c=getComputedStyle(x),r=x.getBoundingClientRect();return c.position==='fixed'&&r.width>300&&r.height>220&&r.top<innerHeight&&r.bottom>0});return a.at(-1)||null}
+async function mount(id){if(!id||!window.kh53Gallery)return;for(const wait of [180,450,800]){await new Promise(r=>setTimeout(r,wait));const host=visibleDialog();if(!host)continue;if(host.querySelector(`[data-kh53-bridge="${id}"]`))return;const sec=document.createElement('section');sec.dataset.kh53Bridge=id;sec.className='kh53-host';const body=host.querySelector('.modalBody,.sheetBody,.modal-body,.sheet-body')||host;const heading=body.querySelector('h1,h2,h3,.modalTitle,.sheetTitle');if(heading?.parentNode)heading.parentNode.insertBefore(sec,heading.nextSibling);else body.prepend(sec);await window.kh53Gallery.render(id,sec,await isOwner(id));return}}
+document.addEventListener('click',e=>{const id=idFrom(e.target);if(!id)return;setTimeout(()=>mount(id),0)},true);
+window.kh53BridgeMount=mount;
+})();
