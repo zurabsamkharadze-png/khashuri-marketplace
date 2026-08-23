@@ -1,7 +1,6 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/khashuri-v53.js", "destination": "/public/khashuri-v53.js" },
     { "source": "/(.*)", "destination": "/api/app" }
   ]
 }
