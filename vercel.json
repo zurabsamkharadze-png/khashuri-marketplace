@@ -1,6 +1,7 @@
 {
   "version": 2,
   "rewrites": [
+    { "source": "/business/(.*)", "destination": "/api/business" },
     { "source": "/(.*)", "destination": "/api/app2" }
   ]
 }
