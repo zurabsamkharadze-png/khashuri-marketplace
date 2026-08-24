@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const INBOX='/inbox?v=9';
+const INBOX='/inbox?v=10';
 function openInbox(e){if(e){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation()}try{sessionStorage.setItem('kh_return_cabinet','1')}catch{}location.assign(INBOX)}
 function visible(el){if(!el)return false;const r=el.getBoundingClientRect(),cs=getComputedStyle(el);return r.width>30&&r.height>18&&r.bottom>0&&r.top<innerHeight&&cs.display!=='none'&&cs.visibility!=='hidden'&&cs.opacity!=='0'&&cs.pointerEvents!=='none'}
 function txt(el){return(el?.textContent||'').replace(/\s+/g,' ').trim()}
@@ -10,17 +10,17 @@ function wantsCabinet(){let q=false;try{q=new URLSearchParams(location.search).g
 function cabinetIsOpen(){const body=txt(document.body);const nav=document.getElementById('nav-account');return !!(nav?.classList.contains('on')||body.includes('Ваш кабинет')||body.includes('Кабинет владельца')||body.includes('Мои заявки'))}
 function appIsLoading(){for(const n of document.querySelectorAll('div,p,span')){if(!visible(n))continue;const t=txt(n);if(t.includes('Загружаю каталог Хашури')||t.includes('Загрузка каталога'))return true}return false}
 function finishCabinetReturn(){try{sessionStorage.removeItem('kh_return_cabinet')}catch{}try{const u=new URL(location.href);u.searchParams.delete('open');history.replaceState(history.state,'',u.pathname+(u.searchParams.toString()?'?'+u.searchParams.toString():'')+u.hash)}catch{}}
-function findAccountTarget(){const byId=document.getElementById('nav-account');if(byId&&visible(byId))return byId;let best=null;for(const n of document.querySelectorAll('button,a,[role="button"],div,span')){if(!visible(n)||txt(n)!=='Кабинет')continue;const r=n.getBoundingClientRect();if(r.top<innerHeight*.65)continue;let c=n.closest('button,a,[role="button"],[onclick]');if(!c){c=n.parentElement;for(let i=0;c&&i<3;i++,c=c.parentElement){if(visible(c)&&c.getBoundingClientRect().height>=45&&c.getBoundingClientRect().height<=140)break}}
-if(c&&visible(c)){const cr=c.getBoundingClientRect();if(!best||cr.width*cr.height<best.getBoundingClientRect().width*best.getBoundingClientRect().height)best=c}}
-return best}
-function clickAccountNav(){const nav=findAccountTarget();if(!nav)return false;try{nav.click();return true}catch{return false}}
+function fireTap(el,x,y){try{const o={bubbles:true,cancelable:true,clientX:x,clientY:y,view:window};try{el.dispatchEvent(new PointerEvent('pointerdown',{...o,pointerId:1,pointerType:'touch',isPrimary:true}))}catch{}el.dispatchEvent(new MouseEvent('mousedown',o));try{el.dispatchEvent(new PointerEvent('pointerup',{...o,pointerId:1,pointerType:'touch',isPrimary:true}))}catch{}el.dispatchEvent(new MouseEvent('mouseup',o));el.dispatchEvent(new MouseEvent('click',o));if(typeof el.click==='function')el.click();return true}catch{return false}}
+function targetFromPoint(){const xs=[innerWidth*.86,innerWidth*.88,innerWidth*.82],ys=[innerHeight-55,innerHeight-75,innerHeight-95];for(const y of ys){for(const x of xs){let e=document.elementFromPoint(x,y);for(let i=0;e&&i<5;i++,e=e.parentElement){if(!visible(e))continue;const t=txt(e);if(t==='Кабинет'||t.includes('Кабинет'))return {el:e,x,y}}}}return null}
+function findAccountTarget(){const byId=document.getElementById('nav-account');if(byId&&visible(byId))return byId;let best=null;for(const n of document.querySelectorAll('button,a,[role="button"],div,span')){if(!visible(n)||txt(n)!=='Кабинет')continue;const r=n.getBoundingClientRect();if(r.top<innerHeight*.65)continue;let c=n.closest('button,a,[role="button"],[onclick]')||n.parentElement;if(c&&visible(c)){const cr=c.getBoundingClientRect();if(!best||cr.width*cr.height<best.getBoundingClientRect().width*best.getBoundingClientRect().height)best=c}}return best}
+function clickAccountNav(){const p=targetFromPoint();if(p&&fireTap(p.el,p.x,p.y))return true;const nav=findAccountTarget();if(!nav)return false;const r=nav.getBoundingClientRect();return fireTap(nav,r.left+r.width/2,r.top+r.height/2)}
 let lastAccountTry=0;
-function reopenCabinet(){if(location.pathname==='/inbox'||!wantsCabinet())return;if(cabinetIsOpen()){finishCabinetReturn();return}if(appIsLoading())return;const now=Date.now();if(now-lastAccountTry<900)return;lastAccountTry=now;if(clickAccountNav())setTimeout(()=>{if(cabinetIsOpen())finishCabinetReturn()},400)}
+function reopenCabinet(){if(location.pathname==='/inbox'||!wantsCabinet())return;if(cabinetIsOpen()){finishCabinetReturn();return}if(appIsLoading())return;const now=Date.now();if(now-lastAccountTry<1200)return;lastAccountTry=now;if(clickAccountNav())setTimeout(()=>{if(cabinetIsOpen())finishCabinetReturn()},500)}
 window.addEventListener('pointerdown',e=>{if(location.pathname==='/inbox')return;const p=e.composedPath?.()||[];for(const n of p){if(n&&n.nodeType===1){const t=txt(n);if(t.includes('Центр входящих')&&t.length<500){openInbox(e);return}}}},true);
 const mo=new MutationObserver(()=>{if(!suppressLegacy()){ensureHit();reopenCabinet()}});
 mo.observe(document.documentElement,{subtree:true,childList:true,attributes:true});
-ensureHit();reopenCabinet();setInterval(()=>{if(!suppressLegacy()){ensureHit();reopenCabinet()}},300);
-window.addEventListener('pageshow',()=>{setTimeout(()=>{suppressLegacy();reopenCabinet();ensureHit()},150)});
-window.addEventListener('load',()=>{setTimeout(reopenCabinet,500)});
+ensureHit();reopenCabinet();setInterval(()=>{if(!suppressLegacy()){ensureHit();reopenCabinet()}},350);
+window.addEventListener('pageshow',()=>{setTimeout(()=>{suppressLegacy();reopenCabinet();ensureHit()},250)});
+window.addEventListener('load',()=>{setTimeout(reopenCabinet,800)});
 window.addEventListener('resize',ensureHit);window.addEventListener('scroll',ensureHit,true);window.khInboxDirectOpen=()=>openInbox();
 })();
