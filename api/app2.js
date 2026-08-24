@@ -22,7 +22,7 @@ module.exports=async(req,res)=>{
       const ct=String(res.getHeader('content-type')||'');
       if(ct.includes('text/html')&&body){
         let html=Buffer.isBuffer(body)?body.toString('utf8'):String(body);
-        const tag='<script src="/khashuri-inbox-reopen.js?v=1.1"></script>';
+        const tag='<script src="/khashuri-inbox-reopen.js?v=1.2"></script>';
         if(!html.includes('/khashuri-inbox-reopen.js')){
           html=html.includes('</body>')?html.replace('</body>',tag+'</body>'):html+tag;
         }
