@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const INBOX='/inbox?v=7';
+const INBOX='/inbox?v=8';
 function openInbox(e){if(e){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation()}try{sessionStorage.setItem('kh_return_cabinet','1')}catch{}location.assign(INBOX)}
 function visible(el){if(!el)return false;const r=el.getBoundingClientRect(),cs=getComputedStyle(el);return r.width>30&&r.height>18&&r.bottom>0&&r.top<innerHeight&&cs.display!=='none'&&cs.visibility!=='hidden'&&cs.pointerEvents!=='none'}
 function txt(el){return(el?.textContent||'').replace(/\s+/g,' ').trim()}
@@ -7,14 +7,17 @@ function findCard(){let best=null;for(const n of document.querySelectorAll('div,
 function ensureHit(){if(location.pathname==='/inbox')return;let h=document.querySelector('.kh-inbox-route-hit');if(!h){h=document.createElement('button');h.type='button';h.className='kh-inbox-route-hit';h.setAttribute('aria-label','Открыть Центр входящих');Object.assign(h.style,{position:'fixed',zIndex:'2147483647',border:'0',background:'transparent',opacity:'0',padding:'0',margin:'0',cursor:'pointer'});h.addEventListener('pointerdown',openInbox,true);h.addEventListener('touchstart',openInbox,{capture:true,passive:false});h.addEventListener('click',openInbox,true);document.body.appendChild(h)}const c=findCard();if(!c){h.style.display='none';return}const r=c.getBoundingClientRect();h.style.display='block';h.style.left=r.left+'px';h.style.top=r.top+'px';h.style.width=r.width+'px';h.style.height=r.height+'px'}
 function suppressLegacy(){if(location.pathname==='/inbox')return false;for(const el of document.querySelectorAll('div,section,aside')){const t=txt(el);if(!t.includes('Центр входящих'))continue;const r=el.getBoundingClientRect(),cs=getComputedStyle(el);const modalLike=(cs.position==='fixed'||cs.position==='absolute')&&r.width>250&&r.height>180&&r.bottom>=innerHeight-60;const hasClose=!!el.querySelector('button');if(modalLike&&hasClose){el.style.display='none';el.setAttribute('aria-hidden','true');setTimeout(()=>{try{el.remove()}catch{}},0);openInbox();return true}}return false}
 function wantsCabinet(){let q=false;try{q=new URLSearchParams(location.search).get('open')==='cabinet'}catch{}let s=false;try{s=sessionStorage.getItem('kh_return_cabinet')==='1'}catch{}return q||s}
-function cabinetIsOpen(){const body=txt(document.body);const nav=document.getElementById('nav-account');return !!(nav?.classList.contains('on')||body.includes('Ваш кабинет')||body.includes('Кабинет владельца'))}
+function cabinetIsOpen(){const body=txt(document.body);const nav=document.getElementById('nav-account');return !!(nav?.classList.contains('on')||body.includes('Ваш кабинет')||body.includes('Кабинет владельца')||body.includes('Мои заявки'))}
+function appIsLoading(){const body=txt(document.body);return body.includes('Загружаю каталог Хашури')||body.includes('Загрузка каталога')||body.includes('Загрузка…')}
 function finishCabinetReturn(){try{sessionStorage.removeItem('kh_return_cabinet')}catch{}try{const u=new URL(location.href);u.searchParams.delete('open');history.replaceState(history.state,'',u.pathname+(u.searchParams.toString()?'?'+u.searchParams.toString():'')+u.hash)}catch{}}
+function clickAccountNav(){let nav=document.getElementById('nav-account');if(!nav){for(const n of document.querySelectorAll('button,a,[role="button"],div')){const t=txt(n);if(t==='Кабинет'&&visible(n)){nav=n;break}}}if(!nav)return false;try{nav.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,view:window}));if(typeof nav.click==='function')nav.click();return true}catch{return false}}
 let lastAccountTry=0;
-function reopenCabinet(){if(location.pathname==='/inbox'||!wantsCabinet())return;if(cabinetIsOpen()){finishCabinetReturn();return}const now=Date.now();if(now-lastAccountTry<350)return;lastAccountTry=now;try{if(typeof window.go==='function'){window.go('account');setTimeout(()=>{if(cabinetIsOpen())finishCabinetReturn()},120)}}catch(e){}}
+function reopenCabinet(){if(location.pathname==='/inbox'||!wantsCabinet())return;if(cabinetIsOpen()){finishCabinetReturn();return}if(appIsLoading())return;const nav=document.getElementById('nav-account');if(!nav&&!document.querySelector('nav,footer,[class*="bottom"],[class*="nav"]'))return;const now=Date.now();if(now-lastAccountTry<700)return;lastAccountTry=now;if(clickAccountNav())setTimeout(()=>{if(cabinetIsOpen())finishCabinetReturn()},250)}
 window.addEventListener('pointerdown',e=>{if(location.pathname==='/inbox')return;const p=e.composedPath?.()||[];for(const n of p){if(n&&n.nodeType===1){const t=txt(n);if(t.includes('Центр входящих')&&t.length<500){openInbox(e);return}}}},true);
 const mo=new MutationObserver(()=>{if(!suppressLegacy()){ensureHit();reopenCabinet()}});
 mo.observe(document.documentElement,{subtree:true,childList:true,attributes:true});
-ensureHit();reopenCabinet();setInterval(()=>{if(!suppressLegacy()){ensureHit();reopenCabinet()}},250);
-window.addEventListener('pageshow',()=>{setTimeout(()=>{suppressLegacy();reopenCabinet();ensureHit()},50)});
+ensureHit();reopenCabinet();setInterval(()=>{if(!suppressLegacy()){ensureHit();reopenCabinet()}},300);
+window.addEventListener('pageshow',()=>{setTimeout(()=>{suppressLegacy();reopenCabinet();ensureHit()},150)});
+window.addEventListener('load',()=>{setTimeout(reopenCabinet,500)});
 window.addEventListener('resize',ensureHit);window.addEventListener('scroll',ensureHit,true);window.khInboxDirectOpen=()=>openInbox();
 })();
