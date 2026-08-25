@@ -3,6 +3,7 @@
   "rewrites": [
     { "source": "/business-index.json", "destination": "/api/business-index" },
     { "source": "/business/(.*)", "destination": "/api/business" },
+    { "source": "/valuation-client.js", "destination": "/api/valuation-assets" },
     { "source": "/valuation", "destination": "/api/valuation" },
     { "source": "/valuation/(.*)", "destination": "/api/valuation" },
     { "source": "/(.*)", "destination": "/api/app2" }
