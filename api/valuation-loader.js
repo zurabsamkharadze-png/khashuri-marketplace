@@ -26,8 +26,15 @@ module.exports=(req,res)=>{
     const originalEnd=res.end.bind(res);
     res.end=(body,...args)=>{
       if(typeof body==='string'&&body.includes('</body>')){
-        const scripts=(clickfix?`<script>${clickfix}<\/script>`:'')+(fallback?`<script>${fallback}<\/script>`:'')+(resultfix?`<script>${resultfix}<\/script>`:'');
-        if(scripts)body=body.replace('</body>',scripts+'</body>');
+        const pathname=(req.url||'').split('?')[0];
+        const isResult=/^\/valuation\/result\//.test(pathname);
+        if(isResult){
+          body=body.replace(/<script\s+src=["']\/valuation-client\.js[^"']*["']><\/script>/gi,'');
+          if(resultfix)body=body.replace('</body>',`<script>${resultfix}<\/script></body>`);
+        }else{
+          const scripts=(clickfix?`<script>${clickfix}<\/script>`:'')+(fallback?`<script>${fallback}<\/script>`:'');
+          if(scripts)body=body.replace('</body>',scripts+'</body>');
+        }
       }
       return originalEnd(body,...args);
     };
