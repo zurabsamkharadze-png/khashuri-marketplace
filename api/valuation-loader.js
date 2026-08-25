@@ -3,6 +3,7 @@ const path=require('path');
 const Module=require('module');
 let handler=null;
 let fallback='';
+const clickPatch=`(()=>{function prep(){const f=document.getElementById('vf');if(!f)return;f.noValidate=true;f.querySelectorAll('[required]').forEach(x=>x.removeAttribute('required'))}document.addEventListener('DOMContentLoaded',prep);setTimeout(prep,0);document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('button');if(!b)return;const txt=(b.textContent||'').trim();if(!/Рассчитать стоимость/i.test(txt))return;const f=document.getElementById('vf');if(!f)return;e.preventDefault();e.stopImmediatePropagation();prep();f.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}))},true)})();`;
 function load(){
   if(handler)return handler;
   const file=path.join(__dirname,'valuation.js');
@@ -22,7 +23,7 @@ module.exports=(req,res)=>{
     const originalEnd=res.end.bind(res);
     res.end=(body,...args)=>{
       if(typeof body==='string'&&body.includes('</body>')&&fallback){
-        body=body.replace('</body>',`<script>${fallback}<\/script></body>`);
+        body=body.replace('</body>',`<script>${fallback}<\/script><script>${clickPatch}<\/script></body>`);
       }
       return originalEnd(body,...args);
     };
