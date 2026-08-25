@@ -5,10 +5,10 @@ const app=require('./app');
 module.exports=async(req,res)=>{
   const pathname=(req.url||'').split('?')[0];
 
-  // Kept only to neutralize stale cached references from older builds.
-  if(pathname==='/khashuri-inbox-reopen.js'){
+  if(pathname==='/khashuri-inbox-reopen.js'||pathname==='/valuation-entry.js'){
     try{
-      const file=path.join(process.cwd(),'public','khashuri-inbox-reopen.js');
+      const name=pathname==='/valuation-entry.js'?'valuation-entry.js':'khashuri-inbox-reopen.js';
+      const file=path.join(process.cwd(),'public',name);
       const js=fs.readFileSync(file,'utf8');
       res.statusCode=200;
       res.setHeader('content-type','application/javascript; charset=utf-8');
@@ -20,6 +20,15 @@ module.exports=async(req,res)=>{
     }
   }
 
-  // The active SPA bundle now owns the Inbox UI and navigation.
+  const originalEnd=res.end.bind(res);
+  res.end=(body,...args)=>{
+    try{
+      const ct=String(res.getHeader('content-type')||'');
+      if(ct.includes('text/html')&&typeof body==='string'&&!body.includes('/valuation-entry.js')){
+        body=body.includes('</body>')?body.replace('</body>','<script src="/valuation-entry.js?v=1.0"></script></body>'):body+'<script src="/valuation-entry.js?v=1.0"></script>';
+      }
+    }catch(e){}
+    return originalEnd(body,...args);
+  };
   return app(req,res);
 };
