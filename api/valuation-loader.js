@@ -25,18 +25,20 @@ module.exports=(req,res)=>{
     const h=load();
     const originalEnd=res.end.bind(res);
     res.end=(body,...args)=>{
-      if(typeof body==='string'&&body.includes('</body>')){
+      const wasBuffer=Buffer.isBuffer(body);
+      let html=wasBuffer?body.toString('utf8'):body;
+      if(typeof html==='string'&&html.includes('</body>')){
         const pathname=(req.url||'').split('?')[0];
         const isResult=/^\/valuation\/result\//.test(pathname);
         if(isResult){
-          body=body.replace(/<script\s+src=["']\/valuation-client\.js[^"']*["']><\/script>/gi,'');
-          if(resultfix)body=body.replace('</body>',`<script>${resultfix}<\/script></body>`);
+          html=html.replace(/<script\s+src=["']\/valuation-client\.js[^"']*["']><\/script>/gi,'');
+          if(resultfix)html=html.replace('</body>',`<script>${resultfix}<\/script></body>`);
         }else{
           const scripts=(clickfix?`<script>${clickfix}<\/script>`:'')+(fallback?`<script>${fallback}<\/script>`:'');
-          if(scripts)body=body.replace('</body>',scripts+'</body>');
+          if(scripts)html=html.replace('</body>',scripts+'</body>');
         }
       }
-      return originalEnd(body,...args);
+      return originalEnd(wasBuffer&&typeof html==='string'?Buffer.from(html,'utf8'):html,...args);
     };
     return h(req,res);
   }catch(err){
