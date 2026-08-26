@@ -4,9 +4,24 @@ const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJlIiwicmVmIjoiZXBweWpt
 function safe(v){try{return JSON.parse(v||'null')}catch(e){return null}}
 function norm(x){if(!x)return null;return x.access_token?x:(x.currentSession||x.session||x.data?.session||null)}
 function tokenExp(token){try{let s=token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return Number(JSON.parse(atob(s)).exp||0)}catch(e){return 0}}
-function records(){const out=[];try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i)||'';if(!/^sb-.*-auth-token$/.test(k))continue;const raw=safe(localStorage.getItem(k)),s=norm(raw);if(s?.access_token)out.push({key:k,s})}const raw=safe(localStorage.getItem('kh_session')),s=norm(raw);if(s?.access_token)out.push({key:'kh_session',s})}catch(e){}return out}
+function records(){
+  const out=[];
+  for(const storage of [sessionStorage,localStorage]){
+    try{
+      for(let i=0;i<storage.length;i++){
+        const k=storage.key(i)||'';
+        if(!k.includes('auth-token'))continue;
+        const raw=safe(storage.getItem(k)),s=norm(raw);
+        if(s?.access_token)out.push({storage,key:k,s});
+      }
+      const raw=safe(storage.getItem('kh_session')),s=norm(raw);
+      if(s?.access_token)out.push({storage,key:'kh_session',s});
+    }catch(e){}
+  }
+  return out;
+}
 function expired(s){const exp=Number(s?.expires_at||tokenExp(s?.access_token||''));return !exp||exp<=Math.floor(Date.now()/1000)+60}
-async function refresh(rec){if(!rec?.s?.refresh_token)return null;try{const r=await fetch(SB+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:rec.s.refresh_token})});if(!r.ok)return null;const fresh=await r.json();if(!fresh?.access_token)return null;try{localStorage.setItem(rec.key,JSON.stringify(fresh))}catch(e){}return fresh}catch(e){return null}}
+async function refresh(rec){if(!rec?.s?.refresh_token)return null;try{const r=await fetch(SB+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:rec.s.refresh_token})});if(!r.ok)return null;const fresh=await r.json();if(!fresh?.access_token)return null;try{rec.storage.setItem(rec.key,JSON.stringify(fresh))}catch(e){}return fresh}catch(e){return null}}
 async function validSession(force=false){for(const rec of records()){if(!force&&!expired(rec.s))return rec.s;const fresh=await refresh(rec);if(fresh)return fresh}return null}
 async function postSave(obj,s){let r=await fetch(SB+'/rest/v1/rpc/save_property_valuation',{method:'POST',keepalive:true,headers:{apikey:KEY,Authorization:'Bearer '+s.access_token,'Content-Type':'application/json'},body:JSON.stringify({payload:obj})});if((r.status===401||r.status===403)){const fresh=await validSession(true);if(fresh)r=await fetch(SB+'/rest/v1/rpc/save_property_valuation',{method:'POST',keepalive:true,headers:{apikey:KEY,Authorization:'Bearer '+fresh.access_token,'Content-Type':'application/json'},body:JSON.stringify({payload:obj})})}return r}
 async function save(key,raw){
