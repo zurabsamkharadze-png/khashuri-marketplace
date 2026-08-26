@@ -23,9 +23,10 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,
 .badge{display:inline-block;margin-top:5px;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:850;background:#eef2f5;color:#5f6878}.badge.cloud{background:#e8f8f4;color:#0f7468}
 .price{font-size:31px;font-weight:950;margin:12px 0 4px}.range{color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:13px}.metric{padding:10px;background:#f7f8fa;border-radius:12px}.metric small{display:block;color:var(--muted);font-size:11px}.metric b{display:block;margin-top:3px}
 .actions{display:flex;gap:8px;margin-top:13px;flex-wrap:wrap}.btn{border:0;border-radius:13px;padding:11px 14px;font-weight:850;background:var(--teal);color:#fff}.btn.alt{background:#fff;color:var(--ink);border:1px solid var(--line)}.error{color:var(--danger)}
-@media(max-width:650px){.top h1{font-size:21px}.grid{grid-template-columns:1fr 1fr}.price{font-size:28px}}
+@media(max-width:650px){.top h1{font-size:21px}.grid{grid-template-columns:1fr 1fr}.price{font-size:28px}.actions .btn{padding:10px 12px;font-size:13px}}
 </style>
-<script defer src="/valuation-history-client.js?v=9"></script>
+<script defer src="/valuation-history-client.js?v=10"></script>
+<script defer src="/valuation-history-actions.js?v=1"></script>
 </head>
 <body>
 <header class="top"><button class="back" onclick="location.href='/valuation'">←</button><h1>📊 История оценок</h1></header>
