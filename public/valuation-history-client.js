@@ -12,17 +12,22 @@ function norm(x){if(!x)return null;if(x.access_token)return x;if(x.currentSessio
 function tokenExp(token){try{let s=token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return Number(JSON.parse(atob(s)).exp||0)}catch(e){return 0}}
 function records(){
   const out=[];
-  try{
-    for(let i=0;i<localStorage.length;i++){
-      const k=localStorage.key(i)||'';
-      if(k.startsWith('sb-')&&k.endsWith('-auth-token')){const raw=safe(localStorage.getItem(k)),s=norm(raw);if(s?.access_token)out.push({key:k,raw,s})}
-    }
-    const raw=safe(localStorage.getItem('kh_session')),s=norm(raw);if(s?.access_token)out.push({key:'kh_session',raw,s});
-  }catch(e){}
+  for(const storage of [sessionStorage,localStorage]){
+    try{
+      for(let i=0;i<storage.length;i++){
+        const k=storage.key(i)||'';
+        if(!k.includes('auth-token'))continue;
+        const raw=safe(storage.getItem(k)),s=norm(raw);
+        if(s?.access_token)out.push({storage,key:k,raw,s});
+      }
+      const raw=safe(storage.getItem('kh_session')),s=norm(raw);
+      if(s?.access_token)out.push({storage,key:'kh_session',raw,s});
+    }catch(e){}
+  }
   return out;
 }
 function expired(s){const exp=Number(s?.expires_at||tokenExp(s?.access_token||''));return !exp||exp<=Math.floor(Date.now()/1000)+60}
-function storeSession(rec,s){try{localStorage.setItem(rec.key,JSON.stringify(s))}catch(e){}}
+function storeSession(rec,s){try{rec.storage.setItem(rec.key,JSON.stringify(s))}catch(e){}}
 async function refresh(rec){
   const rt=rec?.s?.refresh_token;if(!rt)return null;
   try{
