@@ -25,8 +25,8 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,
 .actions{display:flex;gap:8px;margin-top:13px;flex-wrap:wrap}.btn{border:0;border-radius:13px;padding:11px 14px;font-weight:850;background:var(--teal);color:#fff}.btn.alt{background:#fff;color:var(--ink);border:1px solid var(--line)}.error{color:var(--danger)}
 @media(max-width:650px){.top h1{font-size:21px}.grid{grid-template-columns:1fr 1fr}.price{font-size:28px}.actions .btn{padding:10px 12px;font-size:13px}}
 </style>
-<script defer src="/valuation-history-client.js?v=10"></script>
-<script defer src="/valuation-history-actions.js?v=1"></script>
+<script defer src="/valuation-history-client.js?v=11"></script>
+<script defer src="/valuation-history-actions.js?v=2"></script>
 </head>
 <body>
 <header class="top"><button class="back" onclick="location.href='/valuation'">←</button><h1>📊 История оценок</h1></header>
