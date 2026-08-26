@@ -9,8 +9,13 @@ function renderPreviousPhotos(photos){
   const input=document.getElementById('photos'),previews=document.getElementById('previews');if(!input||!previews)return;
   let box=document.getElementById('repeatPhotoInfo');if(box)box.remove();box=document.createElement('div');box.id='repeatPhotoInfo';box.style.cssText='margin-top:10px;padding:12px;border:1px solid #dfe5ea;border-radius:14px;background:#f7fafb;color:#425064;font:600 13px system-ui;line-height:1.4';
   if(photos.length){box.innerHTML='<b style="color:#152036">Фото из прошлой оценки: '+photos.length+'</b><div style="margin-top:4px">Они будут перенесены в новую оценку автоматически. При желании можно добавить новые фото ниже.</div>';const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:9px';photos.slice(0,12).forEach(p=>{const img=document.createElement('img');img.src=p.public_url||p.url||'';img.alt='Фото объекта';img.style.cssText='width:100%;aspect-ratio:1;object-fit:cover;border-radius:9px;background:#e9edf1';grid.appendChild(img)});box.appendChild(grid)}
-  else box.innerHTML='<b style="color:#8a5b00">Фото прошлой оценки не были сохранены в облаке.</b><div style="margin-top:4px">Для этой оценки выберите фотографии ещё раз. После нового сохранения они будут доступны при следующих повторах.</div>';
+  else box.innerHTML='<b style="color:#8a5b00">Фото прошлой оценки пока не найдены в облачном хранилище.</b><div style="margin-top:4px">Если выберете фото сейчас, новая оценка дождётся их загрузки перед переходом к результату, и при следующем повторе они появятся автоматически.</div>';
   previews.parentNode.insertBefore(box,previews);
+}
+function isLegacyForcedOutbuilding(raw,x){
+  if(String(raw.cadastral_code||x.cadastral_code||'')!=='69.08.63.588')return false;
+  const a=Array.isArray(x.outbuildings)?x.outbuildings:[];
+  return a.some(o=>o&&o.type==='additional_building'&&o.label==='Дополнительное строение');
 }
 function apply(){
   if(!/\/valuation\/new/.test(location.pathname))return;
@@ -21,7 +26,9 @@ function apply(){
   const ids=['cadastral_code','city','address','latitude','longitude','house_area','land_area','land_purpose','rooms','bedrooms','bathrooms','build_year','material','lot_frontage','lot_depth','lot_shape','terrain','road_type','heating','commercial_potential','owner_asking_price'];
   ids.forEach(id=>setVal(id,x[id]));
   setVal('floor_count',x.floor_count||floors.length||1);
-  ['basement','garage','balcony'].forEach(id=>setCheck(id,x[id]));setCheck('outbuildings',Array.isArray(x.outbuildings)?x.outbuildings.length>0:!!x.outbuildings);
+  ['basement','garage','balcony'].forEach(id=>setCheck(id,x[id]));
+  const legacyForced=isLegacyForcedOutbuilding(raw,x);
+  setCheck('outbuildings',legacyForced?false:(Array.isArray(x.outbuildings)?x.outbuildings.length>0:!!x.outbuildings));
   const u=meaningful(x.utilities)?x.utilities:{};['gas','water','sewer','electricity','internet'].forEach(id=>setCheck(id,u[id]));
   if(typeof window.renderFloors==='function')window.renderFloors();
   const rows=[...document.querySelectorAll('#floors .floor')];floors.forEach((f,i)=>{const r=rows[i];if(!r)return;const a=r.querySelector('.area'),c=r.querySelector('.condition');if(a&&f.area!=null)a.value=String(f.area);if(c&&f.condition)c.value=String(f.condition)});
@@ -29,7 +36,8 @@ function apply(){
   try{localStorage.removeItem('valuation:repeat-prefill')}catch(e){}
   try{history.replaceState(null,'','/valuation/new?mode=precise')}catch(e){}
   const comm=Object.values(u).filter(Boolean).length;
-  if(comm)notice('↻ Данные прошлой оценки заполнены: адрес, коммуникации и характеристики восстановлены.');
+  if(legacyForced)notice('↻ Старое тестовое значение «Хоз. постройки» исправлено: галочка снята.','#815900');
+  else if(comm)notice('↻ Данные прошлой оценки заполнены: адрес, коммуникации и характеристики восстановлены.');
   else notice('↻ Данные прошлой оценки заполнены. Старые коммуникации не были сохранены — отметьте их один раз заново.','#815900');
   return true;
 }
