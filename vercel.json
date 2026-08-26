@@ -6,7 +6,7 @@
     { "source": "/valuation-client.js", "destination": "/api/valuation-assets" },
     { "source": "/valuation", "destination": "/api/valuation-router?route=home" },
     { "source": "/valuation/new", "destination": "/api/valuation-router?route=new" },
-    { "source": "/valuation/history", "destination": "/api/valuation-router?route=history" },
+    { "source": "/valuation/history", "destination": "/api/valuation-history" },
     { "source": "/valuation/result/:id", "destination": "/api/valuation-result?id=:id" },
     { "source": "/(.*)", "destination": "/api/app2" }
   ]
