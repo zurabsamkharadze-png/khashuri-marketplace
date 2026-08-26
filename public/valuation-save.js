@@ -11,24 +11,22 @@ function records(){
   const out=[],seen=new Set();
   for(const storage of [sessionStorage,localStorage]){
     try{
-      const keys=['sb-'+PROJECT+'-auth-token','kh_session'];
       for(let i=0;i<storage.length;i++){
-        const k=storage.key(i)||'';
-        if(k.includes('auth-token')&&!keys.includes(k))keys.push(k);
-      }
-      for(const k of keys){
-        const s=norm(safe(storage.getItem(k)));
+        const k=storage.key(i)||'',raw=safe(storage.getItem(k)),s=norm(raw);
         if(!s?.access_token||!belongs(s)||seen.has(s.access_token))continue;
-        seen.add(s.access_token);out.push({storage,key:k,s});
+        seen.add(s.access_token);out.push({storage,key:k,raw,s});
       }
     }catch(e){}
   }
   return out.sort((a,b)=>tokenExp(b.s.access_token)-tokenExp(a.s.access_token));
 }
-function expired(s){const exp=Number(s?.expires_at||tokenExp(s?.access_token||''));return !exp||exp<=Math.floor(Date.now()/1000)+60}
-async function refresh(rec){if(!rec?.s?.refresh_token)return null;try{const r=await fetch(SB+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:rec.s.refresh_token})});if(!r.ok)return null;const fresh=await r.json();if(!fresh?.access_token||!belongs(fresh))return null;try{rec.storage.setItem(rec.key,JSON.stringify(fresh))}catch(e){}return fresh}catch(e){return null}}
-async function validSession(force=false){for(const rec of records()){if(!force&&!expired(rec.s))return rec.s;const fresh=await refresh(rec);if(fresh)return fresh}return null}
-async function postSave(obj,s){let r=await fetch(SB+'/rest/v1/rpc/save_property_valuation',{method:'POST',keepalive:true,headers:{apikey:KEY,Authorization:'Bearer '+s.access_token,'Content-Type':'application/json'},body:JSON.stringify({payload:obj})});if((r.status===401||r.status===403)){const fresh=await validSession(true);if(fresh)r=await fetch(SB+'/rest/v1/rpc/save_property_valuation',{method:'POST',keepalive:true,headers:{apikey:KEY,Authorization:'Bearer '+fresh.access_token,'Content-Type':'application/json'},body:JSON.stringify({payload:obj})})}return r}
+function expired(s){const exp=Number(s?.expires_at||tokenExp(s?.access_token||''));return !exp||exp<=Math.floor(Date.now()/1000)+30}
+function timeout(ms){return new Promise((_,reject)=>setTimeout(()=>reject(new Error('timeout')),ms))}
+function storeSession(rec,s){try{let raw=rec.raw;if(raw?.currentSession)raw={...raw,currentSession:s};else if(raw?.session)raw={...raw,session:s};else if(raw?.data?.session)raw={...raw,data:{...raw.data,session:s}};else raw=s;rec.storage.setItem(rec.key,JSON.stringify(raw));rec.raw=raw;rec.s=s}catch(e){}}
+async function probe(s){if(!s?.access_token||expired(s))return false;try{const r=await Promise.race([fetch(SB+'/auth/v1/user',{headers:{apikey:KEY,Authorization:'Bearer '+s.access_token}}),timeout(5000)]);return r.ok}catch(e){return false}}
+async function refresh(rec){if(!rec?.s?.refresh_token)return null;try{const r=await Promise.race([fetch(SB+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:rec.s.refresh_token})}),timeout(6000)]);if(!r.ok)return null;const fresh=await r.json();if(!fresh?.access_token||!belongs(fresh))return null;storeSession(rec,fresh);return fresh}catch(e){return null}}
+async function validSession(force=false){const rs=records();for(const rec of rs){if(await probe(rec.s))return rec.s}for(const rec of rs){const fresh=await refresh(rec);if(fresh&&await probe(fresh))return fresh}return null}
+async function postSave(obj,s){let r=await fetch(SB+'/rest/v1/rpc/save_property_valuation',{method:'POST',keepalive:true,headers:{apikey:KEY,Authorization:'Bearer '+s.access_token,'Content-Type':'application/json'},body:JSON.stringify({payload:obj})});if(r.status===401||r.status===403){const fresh=await validSession(true);if(fresh)r=await fetch(SB+'/rest/v1/rpc/save_property_valuation',{method:'POST',keepalive:true,headers:{apikey:KEY,Authorization:'Bearer '+fresh.access_token,'Content-Type':'application/json'},body:JSON.stringify({payload:obj})})}return r}
 async function save(key,raw){
   const s=await validSession();if(!s?.access_token)return null;
   let obj;try{obj=JSON.parse(raw)}catch(e){return null}
