@@ -1,5 +1,6 @@
 (()=>{'use strict';
 if(!/\/valuation\/new/.test(location.pathname))return;
+const SB='https://eppyjmtowtkxcwwhvwzp.supabase.co';
 const $=id=>document.getElementById(id);
 const safe=v=>{try{return JSON.parse(v||'null')}catch(e){return null}};
 const val=id=>$(id)?.value??null;
@@ -35,17 +36,17 @@ async function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 async function uploadBlob(id,blob,name,headers,index){
   const auth=headers.authorization||headers.Authorization,apikey=headers.apikey;if(!auth||!apikey)return;
   const ext=(String(name||'jpg').split('.').pop()||'jpg').replace(/[^a-z0-9]/gi,'').toLowerCase()||'jpg';
-  let uid='repeat';try{const p=JSON.parse(atob(String(auth).replace(/^Bearer\s+/i,'').split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));uid=p.sub||uid}catch(e){}
+  let uid='repeat';try{let p=String(auth).replace(/^Bearer\s+/i,'').split('.')[1].replace(/-/g,'+').replace(/_/g,'/');while(p.length%4)p+='=';uid=JSON.parse(atob(p)).sub||uid}catch(e){}
   const path=uid+'/'+id+'/'+(index+1)+'-'+Date.now()+'.'+ext;
-  const up=await origFetch('/storage/v1/object/valuation-photos/'+path,{method:'POST',headers:{apikey,Authorization:auth,'Content-Type':blob.type||'image/jpeg','x-upsert':'false'},body:blob});
+  const up=await origFetch(SB+'/storage/v1/object/valuation-photos/'+path,{method:'POST',headers:{apikey,Authorization:auth,'Content-Type':blob.type||'image/jpeg','x-upsert':'false'},body:blob});
   if(!up.ok)return;
-  const base='https://eppyjmtowtkxcwwhvwzp.supabase.co/storage/v1/object/public/valuation-photos/';
-  await origFetch('https://eppyjmtowtkxcwwhvwzp.supabase.co/rest/v1/valuation_photos',{method:'POST',headers:{apikey,Authorization:auth,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({valuation_id:id,storage_path:path,public_url:base+path,sort_order:index})});
+  const base=SB+'/storage/v1/object/public/valuation-photos/';
+  await origFetch(SB+'/rest/v1/valuation_photos',{method:'POST',headers:{apikey,Authorization:auth,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify({valuation_id:id,storage_path:path,public_url:base+path,sort_order:index})});
 }
 async function ensurePhotos(id,headers){
   await sleep(1600);
   const auth=headers.authorization||headers.Authorization,apikey=headers.apikey;if(!auth||!apikey)return;
-  let existing=[];try{const r=await origFetch('https://eppyjmtowtkxcwwhvwzp.supabase.co/rest/v1/valuation_photos?valuation_id=eq.'+encodeURIComponent(id)+'&select=id,storage_path,public_url',{headers:{apikey,Authorization:auth}});if(r.ok)existing=await r.json()}catch(e){}
+  let existing=[];try{const r=await origFetch(SB+'/rest/v1/valuation_photos?valuation_id=eq.'+encodeURIComponent(id)+'&select=id,storage_path,public_url',{headers:{apikey,Authorization:auth}});if(r.ok)existing=await r.json()}catch(e){}
   let index=existing.length;
   if(!existing.length&&submittedFiles.length){for(const f of submittedFiles){try{await uploadBlob(id,f,f.name,headers,index++)}catch(e){}}}
   const repeats=safe(localStorage.getItem('valuation:repeat-photos'))||[];
