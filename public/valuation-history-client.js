@@ -94,21 +94,35 @@ async function openCloud(id){
   try{const [vals,comps]=await Promise.all([authedJson(SB+'/rest/v1/property_valuations?id=eq.'+encodeURIComponent(id)+'&select=*',{},s),authedJson(SB+'/rest/v1/valuation_comparables?valuation_id=eq.'+encodeURIComponent(id)+'&select=*',{},s)]);const v=vals&&vals[0];if(!v){alert('Оценка не найдена.');return}const fa=Array.isArray(v.floor_areas)?v.floor_areas:[],fc=Array.isArray(v.floor_conditions)?v.floor_conditions:[];const floors=fa.map((f,i)=>({floor:f.floor||i+1,area:Number(f.area||0),condition:fc[i]?.condition||'average'}));location.href='/valuation/result/'+encodeURIComponent(id)+'?data='+encodeURIComponent(pack({...v,floors,comparables:comps||[]}))+'&v=history'}catch(e){alert('Не удалось открыть оценку. Обновите страницу и попробуйте ещё раз.')}
 }
 function openLocal(id){const v=safe(localStorage.getItem('valuation:'+id));if(!v){alert('Локальная оценка не найдена.');return}location.href='/valuation/result/'+encodeURIComponent(id)+'?data='+encodeURIComponent(pack(v))+'&v=history'}
+function openLogin(){try{localStorage.setItem('valuation:return-after-login','1')}catch(e){}location.href='/?valuationReturn=history'}
 app.addEventListener('click',e=>{const open=e.target.closest?.('.openVal');if(open){open.dataset.local==='1'?openLocal(open.dataset.id):openCloud(open.dataset.id);return}if(e.target.closest?.('.newVal'))location.href='/valuation/new?mode=precise'});
+document.addEventListener('click',e=>{if(e.target.closest?.('.loginBtn'))openLogin();if(e.target.closest?.('.retrySync'))load()});
 
+let loading=false;
 async function load(){
-  const locals=localRows();render(locals);
-  const existing=records();if(!existing.length){syncState.innerHTML='<b style="color:#131c31">📱 Сейчас оценки хранятся на этом устройстве.</b><div style="margin-top:6px">Войдите в кабинет на главной странице, чтобы синхронизировать их с облачной историей.</div>';return}
-  syncState.innerHTML='<b style="color:#131c31">🔐 Проверяю действующую сессию аккаунта…</b>';
-  const s=await validSession();
-  if(!s){syncState.innerHTML='<b class="error">Сессия входа устарела.</b><div style="margin-top:6px">Оценка на телефоне сохранена. Откройте кабинет, войдите заново и затем вернитесь в историю.</div>';return}
-  syncState.innerHTML='<b style="color:#131c31">☁️ Облачная история включена</b><div style="margin-top:6px">Сессия подтверждена Supabase. Проверяю историю и синхронизирую локальные оценки.</div>';
-  let cloud=[];
-  try{cloud=await fetchCloud(s);render(mergeRows(cloud,locals))}catch(e){syncState.innerHTML=e.status===401||e.status===403?'<b class="error">Сессия входа требует обновления.</b><div style="margin-top:6px">Откройте кабинет, войдите заново и вернитесь в историю. Локальная оценка сохранена.</div>':'<b class="error">Облачная история временно недоступна.</b><div style="margin-top:6px">Локальные оценки уже показаны ниже и не потеряны.</div>';return}
-  const unsynced=locals.filter(v=>!mappedCloudId(v.id));
-  if(unsynced.length){await Promise.allSettled(unsynced.map(v=>syncOne(v,s)));try{cloud=await fetchCloud(await validSession()||s);render(mergeRows(cloud,locals));const left=locals.filter(v=>!mappedCloudId(v.id)).length;syncState.innerHTML=left?'<b class="error">Облако подключено, но часть оценок ещё не синхронизирована.</b><div style="margin-top:6px">Обновите страницу через несколько секунд.</div>':'<b style="color:#131c31">✅ Синхронизация завершена</b><div style="margin-top:6px">Оценки сохранены в вашем аккаунте.</div>'}catch(e){}}
-  else syncState.innerHTML='<b style="color:#131c31">✅ Облачная история подключена</b>';
+  if(loading)return;loading=true;
+  try{
+    const locals=localRows();render(locals);
+    const existing=records();if(!existing.length){syncState.innerHTML='<b style="color:#131c31">📱 Сейчас оценки хранятся на этом устройстве.</b><div style="margin-top:6px">Войдите в кабинет на главной странице, чтобы синхронизировать их с облачной историей.</div><div class="actions"><button class="btn loginBtn">Войти в кабинет</button><button class="btn alt retrySync">Проверить снова</button></div>';return}
+    syncState.innerHTML='<b style="color:#131c31">🔐 Проверяю действующую сессию аккаунта…</b>';
+    const s=await validSession();
+    if(!s){syncState.innerHTML='<b class="error">Сессия входа устарела.</b><div style="margin-top:6px">Оценка на телефоне сохранена. Войдите в кабинет заново. После входа вернитесь на эту страницу — синхронизация запустится автоматически.</div><div class="actions"><button class="btn loginBtn">Войти в кабинет</button><button class="btn alt retrySync">Проверить снова</button></div>';return}
+    try{localStorage.removeItem('valuation:return-after-login')}catch(e){}
+    syncState.innerHTML='<b style="color:#131c31">☁️ Облачная история включена</b><div style="margin-top:6px">Сессия подтверждена Supabase. Проверяю историю и синхронизирую локальные оценки.</div>';
+    let cloud=[];
+    try{cloud=await fetchCloud(s);render(mergeRows(cloud,locals))}catch(e){syncState.innerHTML=e.status===401||e.status===403?'<b class="error">Сессия входа требует обновления.</b><div style="margin-top:6px">Войдите в кабинет заново. Локальная оценка сохранена.</div><div class="actions"><button class="btn loginBtn">Войти в кабинет</button><button class="btn alt retrySync">Проверить снова</button></div>':'<b class="error">Облачная история временно недоступна.</b><div style="margin-top:6px">Локальные оценки уже показаны ниже и не потеряны.</div><div class="actions"><button class="btn alt retrySync">Проверить снова</button></div>';return}
+    const unsynced=locals.filter(v=>!mappedCloudId(v.id));
+    if(unsynced.length){await Promise.allSettled(unsynced.map(v=>syncOne(v,s)));try{cloud=await fetchCloud(await validSession()||s);render(mergeRows(cloud,locals));const left=locals.filter(v=>!mappedCloudId(v.id)).length;syncState.innerHTML=left?'<b class="error">Облако подключено, но часть оценок ещё не синхронизирована.</b><div style="margin-top:6px">Нажмите «Проверить снова» через несколько секунд.</div><div class="actions"><button class="btn alt retrySync">Проверить снова</button></div>':'<b style="color:#131c31">✅ Синхронизация завершена</b><div style="margin-top:6px">Оценки сохранены в вашем аккаунте.</div>'}catch(e){}}
+    else syncState.innerHTML='<b style="color:#131c31">✅ Облачная история подключена</b>';
+  }finally{loading=false}
 }
+async function retryAfterReturn(){
+  let waiting=false;try{waiting=localStorage.getItem('valuation:return-after-login')==='1'}catch(e){}
+  if(!waiting)return;
+  const s=await validSession();if(s){try{localStorage.removeItem('valuation:return-after-login')}catch(e){}load()}
+}
+window.addEventListener('pageshow',()=>setTimeout(retryAfterReturn,250));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(retryAfterReturn,350)});
 window.addEventListener('error',()=>{if(app.textContent.includes('Загружаю историю'))render(localRows())});
 load();
 })();
