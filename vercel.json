@@ -5,9 +5,11 @@
     { "source": "/business/(.*)", "destination": "/api/business" },
     { "source": "/valuation-client.js", "destination": "/api/valuation-assets" },
     { "source": "/valuation-history-client.js", "destination": "/api/valuation-history-client" },
+    { "source": "/valuation-history-actions.js", "destination": "/api/valuation-history-actions" },
     { "source": "/valuation", "destination": "/api/valuation-router?route=home" },
     { "source": "/valuation/new", "destination": "/api/valuation-router?route=new" },
     { "source": "/valuation/history", "destination": "/api/valuation-history" },
+    { "source": "/valuation/report", "destination": "/api/valuation-report" },
     { "source": "/valuation/result/:id", "destination": "/api/valuation-result?id=:id" },
     { "source": "/(.*)", "destination": "/api/app2" }
   ]
