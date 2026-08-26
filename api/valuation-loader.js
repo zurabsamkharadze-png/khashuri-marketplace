@@ -8,6 +8,8 @@ let clickfix='';
 let resultfix='';
 let prefill='';
 let persistence='';
+let repeatguard='';
+let photoverify='';
 function load(){
   if(handler)return handler;
   const file=path.join(__dirname,'valuation.js');
@@ -24,16 +26,21 @@ function load(){
     clickfix=fs.readFileSync(path.join(process.cwd(),'public','valuation-clickfix.js'),'utf8');
     const beforeLegacyPatch=clickfix;
     clickfix=clickfix.replace(/if\(code==='69\.08\.63\.588'\)\{[\s\S]*?\}return \{mode:/,"return {mode:");
+    clickfix=clickfix.replace(/outbuildings=\[\{type:'additional_building',label:'Дополнительное строение'\}\];/g,"outbuildings=chk('outbuildings')?[{type:'unspecified'}]:[];");
+    clickfix=clickfix.replace(/if\(\$\('outbuildings'\)\)\$\('outbuildings'\)\.checked=true;/g,'');
     if(clickfix===beforeLegacyPatch)console.warn('valuation-loader: legacy cadastral override pattern not found');
-    clickfix=clickfix.replace(/const data=pack\(obj\);location\.assign\('\/valuation\/result\/'\+id\+'\?data='\+encodeURIComponent\(data\)\+'&v=121'\);/,`const data=pack(obj);if(window.khAwaitValuationSave){btn.textContent='Сохраняю фото…';try{await window.khAwaitValuationSave(id)}catch(e){}}location.assign('/valuation/result/'+id+'?data='+encodeURIComponent(data)+'&v=123');`);
+    clickfix=clickfix.replace(/const data=pack\(obj\);location\.assign\('\/valuation\/result\/'\+id\+'\?data='\+encodeURIComponent\(data\)\+'&v=121'\);/,`const data=pack(obj);if(window.khAwaitValuationSave){btn.textContent='Сохраняю фото…';try{await window.khAwaitValuationSave(id)}catch(e){alert(e&&e.message?e.message:'Фото не удалось сохранить. Останьтесь на странице и попробуйте ещё раз.');btn.disabled=false;btn.textContent=oldText;return}}location.assign('/valuation/result/'+id+'?data='+encodeURIComponent(data)+'&v=124');`);
   }catch(e){clickfix=''}
   try{resultfix=fs.readFileSync(path.join(process.cwd(),'public','valuation-resultfix.js'),'utf8')}catch(e){resultfix=''}
   try{prefill=fs.readFileSync(path.join(process.cwd(),'public','valuation-repeat-prefill.js'),'utf8')}catch(e){prefill=''}
   try{persistence=fs.readFileSync(path.join(process.cwd(),'public','valuation-form-persistence.js'),'utf8')}catch(e){persistence=''}
+  try{repeatguard=fs.readFileSync(path.join(process.cwd(),'public','valuation-repeat-v14-guard.js'),'utf8')}catch(e){repeatguard=''}
+  try{photoverify=fs.readFileSync(path.join(process.cwd(),'public','valuation-photo-verify.js'),'utf8')}catch(e){photoverify=''}
   return handler;
 }
 module.exports=(req,res)=>{
   try{
+    res.setHeader('cache-control','no-store, max-age=0, must-revalidate');
     const h=load();
     const originalEnd=res.end.bind(res);
     res.end=(body,...args)=>{
@@ -46,7 +53,7 @@ module.exports=(req,res)=>{
           html=html.replace(/<script\s+src=["']\/valuation-client\.js[^"']*["']><\/script>/gi,'');
           if(resultfix)html=html.replace('</body>',`<script>${resultfix}<\/script></body>`);
         }else{
-          const scripts=(saver?`<script>${saver}<\/script>`:'')+(clickfix?`<script>${clickfix}<\/script>`:'')+(fallback?`<script>${fallback}<\/script>`:'')+(prefill?`<script>${prefill}<\/script>`:'')+(persistence?`<script>${persistence}<\/script>`:'');
+          const scripts=(saver?`<script>${saver}<\/script>`:'')+(clickfix?`<script>${clickfix}<\/script>`:'')+(fallback?`<script>${fallback}<\/script>`:'')+(prefill?`<script>${prefill}<\/script>`:'')+(persistence?`<script>${persistence}<\/script>`:'')+(repeatguard?`<script>${repeatguard}<\/script>`:'')+(photoverify?`<script>${photoverify}<\/script>`:'');
           if(scripts)html=html.replace('</body>',scripts+'</body>');
         }
       }
