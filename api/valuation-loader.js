@@ -22,7 +22,10 @@ function load(){
   try{saver=fs.readFileSync(path.join(process.cwd(),'public','valuation-save.js'),'utf8')}catch(e){saver=''}
   try{
     clickfix=fs.readFileSync(path.join(process.cwd(),'public','valuation-clickfix.js'),'utf8');
-    clickfix=clickfix.replace(/const data=pack\(obj\);location\.assign\('\/valuation\/result\/'\+id\+'\?data='\+encodeURIComponent\(data\)\+'&v=121'\);/,`const data=pack(obj);if(window.khAwaitValuationSave){btn.textContent='Сохраняю фото…';try{await window.khAwaitValuationSave(id)}catch(e){}}location.assign('/valuation/result/'+id+'?data='+encodeURIComponent(data)+'&v=122');`);
+    const beforeLegacyPatch=clickfix;
+    clickfix=clickfix.replace(/if\(code==='69\.08\.63\.588'\)\{[\s\S]*?\}return \{mode:/,"return {mode:");
+    if(clickfix===beforeLegacyPatch)console.warn('valuation-loader: legacy cadastral override pattern not found');
+    clickfix=clickfix.replace(/const data=pack\(obj\);location\.assign\('\/valuation\/result\/'\+id\+'\?data='\+encodeURIComponent\(data\)\+'&v=121'\);/,`const data=pack(obj);if(window.khAwaitValuationSave){btn.textContent='Сохраняю фото…';try{await window.khAwaitValuationSave(id)}catch(e){}}location.assign('/valuation/result/'+id+'?data='+encodeURIComponent(data)+'&v=123');`);
   }catch(e){clickfix=''}
   try{resultfix=fs.readFileSync(path.join(process.cwd(),'public','valuation-resultfix.js'),'utf8')}catch(e){resultfix=''}
   try{prefill=fs.readFileSync(path.join(process.cwd(),'public','valuation-repeat-prefill.js'),'utf8')}catch(e){prefill=''}
