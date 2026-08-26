@@ -1,5 +1,6 @@
 (()=>{'use strict';
 const SB='https://eppyjmtowtkxcwwhvwzp.supabase.co';
+const PROJECT='eppyjmtowtkxcwwhvwzp';
 const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJlIiwicmVmIjoiZXBweWptdG93dGt4Y3d3aHZ3enAiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc4NzI0MzQ3MSwiZXhwIjoyMTAyODE5NDcxfQ.FBxRhLMZgObwy5cofdKs4k0nsDxr-LhUqu3R30uwIfk';
 const app=document.getElementById('app');
 const syncState=document.getElementById('syncState');
@@ -9,22 +10,26 @@ function money(x){return '$'+Math.round(Number(x||0)).toLocaleString('en-US')}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function safe(v){try{return JSON.parse(v||'null')}catch(e){return null}}
 function norm(x){if(!x)return null;if(x.access_token)return x;if(x.currentSession?.access_token)return x.currentSession;if(x.session?.access_token)return x.session;if(x.data?.session?.access_token)return x.data.session;return null}
-function tokenExp(token){try{let s=token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return Number(JSON.parse(atob(s)).exp||0)}catch(e){return 0}}
+function tokenPayload(token){try{let s=String(token||'').split('.')[1].replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return JSON.parse(atob(s))}catch(e){return {}}}
+function tokenExp(token){return Number(tokenPayload(token).exp||0)}
+function belongs(s){const p=tokenPayload(s?.access_token||'');const iss=String(p.iss||'');return p.ref===PROJECT||iss===SB+'/auth/v1'||iss.startsWith(SB+'/auth/v1')}
 function records(){
-  const out=[];
+  const out=[],seen=new Set();
   for(const storage of [sessionStorage,localStorage]){
     try{
+      const keys=['sb-'+PROJECT+'-auth-token','kh_session'];
       for(let i=0;i<storage.length;i++){
         const k=storage.key(i)||'';
-        if(!k.includes('auth-token'))continue;
-        const raw=safe(storage.getItem(k)),s=norm(raw);
-        if(s?.access_token)out.push({storage,key:k,raw,s});
+        if(k.includes('auth-token')&&!keys.includes(k))keys.push(k);
       }
-      const raw=safe(storage.getItem('kh_session')),s=norm(raw);
-      if(s?.access_token)out.push({storage,key:'kh_session',raw,s});
+      for(const k of keys){
+        const raw=safe(storage.getItem(k)),s=norm(raw);
+        if(!s?.access_token||!belongs(s)||seen.has(s.access_token))continue;
+        seen.add(s.access_token);out.push({storage,key:k,raw,s});
+      }
     }catch(e){}
   }
-  return out;
+  return out.sort((a,b)=>tokenExp(b.s.access_token)-tokenExp(a.s.access_token));
 }
 function expired(s){const exp=Number(s?.expires_at||tokenExp(s?.access_token||''));return !exp||exp<=Math.floor(Date.now()/1000)+60}
 function storeSession(rec,s){try{rec.storage.setItem(rec.key,JSON.stringify(s))}catch(e){}}
@@ -33,7 +38,7 @@ async function refresh(rec){
   try{
     const r=await fetch(SB+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:rt})});
     if(!r.ok)return null;
-    const fresh=await r.json();if(!fresh?.access_token)return null;
+    const fresh=await r.json();if(!fresh?.access_token||!belongs(fresh))return null;
     storeSession(rec,fresh);return fresh;
   }catch(e){return null}
 }
