@@ -17,13 +17,8 @@ function records(){
   const out=[],seen=new Set();
   for(const storage of [sessionStorage,localStorage]){
     try{
-      const keys=['sb-'+PROJECT+'-auth-token','kh_session'];
       for(let i=0;i<storage.length;i++){
-        const k=storage.key(i)||'';
-        if(k.includes('auth-token')&&!keys.includes(k))keys.push(k);
-      }
-      for(const k of keys){
-        const raw=safe(storage.getItem(k)),s=norm(raw);
+        const k=storage.key(i)||'',raw=safe(storage.getItem(k)),s=norm(raw);
         if(!s?.access_token||!belongs(s)||seen.has(s.access_token))continue;
         seen.add(s.access_token);out.push({storage,key:k,raw,s});
       }
@@ -31,12 +26,29 @@ function records(){
   }
   return out.sort((a,b)=>tokenExp(b.s.access_token)-tokenExp(a.s.access_token));
 }
-function expired(s){const exp=Number(s?.expires_at||tokenExp(s?.access_token||''));return !exp||exp<=Math.floor(Date.now()/1000)+60}
-function storeSession(rec,s){try{rec.storage.setItem(rec.key,JSON.stringify(s))}catch(e){}}
+function expired(s){const exp=Number(s?.expires_at||tokenExp(s?.access_token||''));return !exp||exp<=Math.floor(Date.now()/1000)+30}
+function timeout(ms){return new Promise((_,reject)=>setTimeout(()=>reject(new Error('timeout')),ms))}
+function storeSession(rec,s){
+  try{
+    let raw=rec.raw;
+    if(raw?.currentSession){raw={...raw,currentSession:s}}
+    else if(raw?.session){raw={...raw,session:s}}
+    else if(raw?.data?.session){raw={...raw,data:{...raw.data,session:s}}}
+    else raw=s;
+    rec.storage.setItem(rec.key,JSON.stringify(raw));rec.raw=raw;rec.s=s;
+  }catch(e){}
+}
+async function probe(s){
+  if(!s?.access_token||expired(s))return false;
+  try{
+    const r=await Promise.race([fetch(SB+'/auth/v1/user',{headers:{apikey:KEY,Authorization:'Bearer '+s.access_token}}),timeout(5000)]);
+    return r.ok;
+  }catch(e){return false}
+}
 async function refresh(rec){
   const rt=rec?.s?.refresh_token;if(!rt)return null;
   try{
-    const r=await fetch(SB+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:rt})});
+    const r=await Promise.race([fetch(SB+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:rt})}),timeout(6000)]);
     if(!r.ok)return null;
     const fresh=await r.json();if(!fresh?.access_token||!belongs(fresh))return null;
     storeSession(rec,fresh);return fresh;
@@ -44,10 +56,8 @@ async function refresh(rec){
 }
 async function validSession(forceRefresh=false){
   const rs=records();
-  for(const rec of rs){
-    if(!forceRefresh&&!expired(rec.s))return rec.s;
-    const fresh=await refresh(rec);if(fresh)return fresh;
-  }
+  for(const rec of rs){if(await probe(rec.s))return rec.s}
+  for(const rec of rs){const fresh=await refresh(rec);if(fresh&&await probe(fresh))return fresh}
   return null;
 }
 function localRows(){
@@ -55,7 +65,6 @@ function localRows(){
   try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i)||'';if(!k.startsWith('valuation:local-'))continue;const x=safe(localStorage.getItem(k));if(x&&x.id)rows.push({...x,_local:true})}}catch(e){}
   return rows;
 }
-function timeout(ms){return new Promise((_,reject)=>setTimeout(()=>reject(new Error('timeout')),ms))}
 async function rawJson(url,opt){const r=await Promise.race([fetch(url,opt||{}),timeout(8000)]);let data=null;try{data=await r.json()}catch(e){};if(!r.ok){const er=new Error('HTTP '+r.status);er.status=r.status;er.data=data;throw er}return data}
 async function authedJson(url,opt,s){
   const make=session=>({...opt,headers:{...(opt?.headers||{}),apikey:KEY,Authorization:'Bearer '+session.access_token}});
@@ -90,14 +99,14 @@ app.addEventListener('click',e=>{const open=e.target.closest?.('.openVal');if(op
 async function load(){
   const locals=localRows();render(locals);
   const existing=records();if(!existing.length){syncState.innerHTML='<b style="color:#131c31">📱 Сейчас оценки хранятся на этом устройстве.</b><div style="margin-top:6px">Войдите в кабинет на главной странице, чтобы синхронизировать их с облачной историей.</div>';return}
-  syncState.innerHTML='<b style="color:#131c31">🔐 Проверяю сессию аккаунта…</b>';
+  syncState.innerHTML='<b style="color:#131c31">🔐 Проверяю действующую сессию аккаунта…</b>';
   const s=await validSession();
-  if(!s){syncState.innerHTML='<b class="error">Сессия входа устарела.</b><div style="margin-top:6px">Оценки на телефоне сохранены. Откройте кабинет, войдите заново и вернитесь в историю.</div>';return}
-  syncState.innerHTML='<b style="color:#131c31">☁️ Облачная история включена</b><div style="margin-top:6px">Локальные оценки показаны сразу. Проверяю облако и синхронизирую в фоне.</div>';
+  if(!s){syncState.innerHTML='<b class="error">Сессия входа устарела.</b><div style="margin-top:6px">Оценка на телефоне сохранена. Откройте кабинет, войдите заново и затем вернитесь в историю.</div>';return}
+  syncState.innerHTML='<b style="color:#131c31">☁️ Облачная история включена</b><div style="margin-top:6px">Сессия подтверждена Supabase. Проверяю историю и синхронизирую локальные оценки.</div>';
   let cloud=[];
-  try{cloud=await fetchCloud(s);render(mergeRows(cloud,locals))}catch(e){syncState.innerHTML='<b class="error">Облачная история временно недоступна.</b><div style="margin-top:6px">Локальные оценки уже показаны ниже и не потеряны.</div>';return}
+  try{cloud=await fetchCloud(s);render(mergeRows(cloud,locals))}catch(e){syncState.innerHTML=e.status===401||e.status===403?'<b class="error">Сессия входа требует обновления.</b><div style="margin-top:6px">Откройте кабинет, войдите заново и вернитесь в историю. Локальная оценка сохранена.</div>':'<b class="error">Облачная история временно недоступна.</b><div style="margin-top:6px">Локальные оценки уже показаны ниже и не потеряны.</div>';return}
   const unsynced=locals.filter(v=>!mappedCloudId(v.id));
-  if(unsynced.length){await Promise.allSettled(unsynced.map(v=>syncOne(v,s)));try{cloud=await fetchCloud(await validSession()||s);render(mergeRows(cloud,locals));syncState.innerHTML='<b style="color:#131c31">✅ Синхронизация завершена</b><div style="margin-top:6px">Оценки сохранены в вашем аккаунте.</div>'}catch(e){}}
+  if(unsynced.length){await Promise.allSettled(unsynced.map(v=>syncOne(v,s)));try{cloud=await fetchCloud(await validSession()||s);render(mergeRows(cloud,locals));const left=locals.filter(v=>!mappedCloudId(v.id)).length;syncState.innerHTML=left?'<b class="error">Облако подключено, но часть оценок ещё не синхронизирована.</b><div style="margin-top:6px">Обновите страницу через несколько секунд.</div>':'<b style="color:#131c31">✅ Синхронизация завершена</b><div style="margin-top:6px">Оценки сохранены в вашем аккаунте.</div>'}catch(e){}}
   else syncState.innerHTML='<b style="color:#131c31">✅ Облачная история подключена</b>';
 }
 window.addEventListener('error',()=>{if(app.textContent.includes('Загружаю историю'))render(localRows())});
