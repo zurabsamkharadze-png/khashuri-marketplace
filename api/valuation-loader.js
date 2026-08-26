@@ -6,6 +6,7 @@ let fallback='';
 let saver='';
 let clickfix='';
 let resultfix='';
+let prefill='';
 function load(){
   if(handler)return handler;
   const file=path.join(__dirname,'valuation.js');
@@ -20,6 +21,7 @@ function load(){
   try{saver=fs.readFileSync(path.join(process.cwd(),'public','valuation-save.js'),'utf8')}catch(e){saver=''}
   try{clickfix=fs.readFileSync(path.join(process.cwd(),'public','valuation-clickfix.js'),'utf8')}catch(e){clickfix=''}
   try{resultfix=fs.readFileSync(path.join(process.cwd(),'public','valuation-resultfix.js'),'utf8')}catch(e){resultfix=''}
+  try{prefill=fs.readFileSync(path.join(process.cwd(),'public','valuation-repeat-prefill.js'),'utf8')}catch(e){prefill=''}
   return handler;
 }
 module.exports=(req,res)=>{
@@ -36,7 +38,7 @@ module.exports=(req,res)=>{
           html=html.replace(/<script\s+src=["']\/valuation-client\.js[^"']*["']><\/script>/gi,'');
           if(resultfix)html=html.replace('</body>',`<script>${resultfix}<\/script></body>`);
         }else{
-          const scripts=(saver?`<script>${saver}<\/script>`:'')+(clickfix?`<script>${clickfix}<\/script>`:'')+(fallback?`<script>${fallback}<\/script>`:'');
+          const scripts=(saver?`<script>${saver}<\/script>`:'')+(clickfix?`<script>${clickfix}<\/script>`:'')+(fallback?`<script>${fallback}<\/script>`:'')+(prefill?`<script>${prefill}<\/script>`:'');
           if(scripts)html=html.replace('</body>',scripts+'</body>');
         }
       }
