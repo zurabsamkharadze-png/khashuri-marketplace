@@ -1,7 +1,7 @@
 (()=>{'use strict';
 const SB='https://eppyjmtowtkxcwwhvwzp.supabase.co';
 const PROJECT='eppyjmtowtkxcwwhvwzp';
-const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJlIiwicmVmIjoiZXBweWptdG93dGt4Y3d3aHZ3enAiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc4NzI0MzQ3MSwiZXhwIjoyMTAyODE5NDcxfQ.FBxRhLMZgObwy5cofdKs4k0nsDxr-LhUqu3R30uwIfk';
+const KEY='sb_publishable_3oEkPaexOGYojb-9imVJjw_2SCQ7WRr';
 function safe(v){try{return JSON.parse(v||'null')}catch(e){return null}}
 function norm(x){if(!x)return null;return x.access_token?x:(x.currentSession||x.session||x.data?.session||null)}
 function tokenPayload(token){try{let s=String(token||'').split('.')[1].replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return JSON.parse(atob(s))}catch(e){return {}}}
