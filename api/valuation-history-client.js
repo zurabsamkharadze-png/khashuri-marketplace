@@ -2,7 +2,9 @@ const fs=require('fs');
 const path=require('path');
 module.exports=(req,res)=>{
   try{
-    const file=path.join(process.cwd(),'public','valuation-history-client.js');
+    const u=new URL(req.url||'','https://khashuri-marketplace.vercel.app');
+    const name=u.searchParams.get('asset')==='actions'?'valuation-history-actions.js':'valuation-history-client.js';
+    const file=path.join(process.cwd(),'public',name);
     const js=fs.readFileSync(file,'utf8');
     res.statusCode=200;
     res.setHeader('content-type','application/javascript; charset=utf-8');
