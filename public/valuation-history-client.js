@@ -1,7 +1,7 @@
 (()=>{'use strict';
 const SB='https://eppyjmtowtkxcwwhvwzp.supabase.co';
 const PROJECT='eppyjmtowtkxcwwhvwzp';
-const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJlIiwicmVmIjoiZXBweWptdG93dGt4Y3d3aHZ3enAiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc4NzI0MzQ3MSwiZXhwIjoyMTAyODE5NDcxfQ.FBxRhLMZgObwy5cofdKs4k0nsDxr-LhUqu3R30uwIfk';
+const KEY='sb_publishable_3oEkPaexOGYojb-9imVJjw_2SCQ7WRr';
 const app=document.getElementById('app');
 const syncState=document.getElementById('syncState');
 if(!app||!syncState)return;
