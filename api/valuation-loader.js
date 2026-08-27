@@ -2,8 +2,8 @@ const fs=require('fs');
 const path=require('path');
 const Module=require('module');
 let handler=null;
-let fallback='',saver='',modelv3='',resultfix='',prefill='',persistence='',repeatguard='',photoverify='',optionguard='';
-const i18nScript='<script src="/valuation-i18n.js?v=27"><\/script>';
+let fallback='',saver='',modelv4='',resultfix='',resultv28='',prefill='',persistence='',repeatguard='',photoverify='',optionguard='';
+const i18nScript='<script src="/valuation-i18n.js?v=28"><\/script>';
 function readPublic(name){try{return fs.readFileSync(path.join(process.cwd(),'public',name),'utf8')}catch(e){return''}}
 function load(){
   if(handler)return handler;
@@ -15,8 +15,9 @@ function load(){
   handler=m.exports;
   fallback=readPublic('valuation-fallback.js');
   saver=readPublic('valuation-save.js');
-  modelv3=readPublic('valuation-model-v3.js');
+  modelv4=readPublic('valuation-model-v4.js');
   resultfix=readPublic('valuation-resultfix.js');
+  resultv28=readPublic('valuation-v28-result.js');
   prefill=readPublic('valuation-repeat-prefill.js');
   persistence=readPublic('valuation-form-persistence.js');
   repeatguard=readPublic('valuation-repeat-v14-guard.js');
@@ -37,13 +38,13 @@ module.exports=(req,res)=>{
         const isResult=/^\/valuation\/result\//.test(pathname);
         if(isResult){
           html=html.replace(/<script\s+src=["']\/valuation-client\.js[^"']*["']><\/script>/gi,'');
-          const scripts=(resultfix?`<script>${resultfix}<\/script>`:'')+i18nScript;
+          const scripts=(resultfix?`<script>${resultfix}<\/script>`:'')+i18nScript+(resultv28?`<script>${resultv28}<\/script>`:'');
           html=html.replace('</body>',scripts+'</body>');
         }else{
           const scripts=
             (optionguard?`<script>${optionguard}<\/script>`:'')+
             (saver?`<script>${saver}<\/script>`:'')+
-            (modelv3?`<script>${modelv3}<\/script>`:'')+
+            (modelv4?`<script>${modelv4}<\/script>`:'')+
             (fallback?`<script>${fallback}<\/script>`:'')+
             (prefill?`<script>${prefill}<\/script>`:'')+
             (persistence?`<script>${persistence}<\/script>`:'')+
