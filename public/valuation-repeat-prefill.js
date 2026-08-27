@@ -5,41 +5,8 @@ function merge(raw){const x={...raw},i=raw.input_data||{};for(const [k,v] of Obj
 function setVal(id,v){const e=document.getElementById(id);if(!e||v===undefined||v===null||v==='')return;e.value=String(v);e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}))}
 function setCheck(id,v){const e=document.getElementById(id);if(!e)return;e.checked=!!v;e.dispatchEvent(new Event('change',{bubbles:true}))}
 function notice(text,bg='#102f3e'){const d=document.createElement('div');d.textContent=text;d.style.cssText=`position:fixed;left:14px;right:14px;top:82px;z-index:9999;background:${bg};color:#fff;padding:13px 15px;border-radius:14px;font:700 13px system-ui;box-shadow:0 8px 28px rgba(0,0,0,.16)`;document.body.appendChild(d);setTimeout(()=>d.remove(),5200)}
-function renderPreviousPhotos(photos){
-  const input=document.getElementById('photos'),previews=document.getElementById('previews');if(!input||!previews)return;
-  let box=document.getElementById('repeatPhotoInfo');if(box)box.remove();box=document.createElement('div');box.id='repeatPhotoInfo';box.style.cssText='margin-top:10px;padding:12px;border:1px solid #dfe5ea;border-radius:14px;background:#f7fafb;color:#425064;font:600 13px system-ui;line-height:1.4';
-  if(photos.length){box.innerHTML='<b style="color:#152036">Фото из прошлой оценки: '+photos.length+'</b><div style="margin-top:4px">Они будут перенесены в новую оценку автоматически. При желании можно добавить новые фото ниже.</div>';const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:9px';photos.slice(0,12).forEach(p=>{const img=document.createElement('img');img.src=p.public_url||p.url||'';img.alt='Фото объекта';img.style.cssText='width:100%;aspect-ratio:1;object-fit:cover;border-radius:9px;background:#e9edf1';grid.appendChild(img)});box.appendChild(grid)}
-  else box.innerHTML='<b style="color:#8a5b00">Фото прошлой оценки пока не найдены в облачном хранилище.</b><div style="margin-top:4px">Если выберете фото сейчас, новая оценка дождётся их загрузки перед переходом к результату, и при следующем повторе они появятся автоматически.</div>';
-  previews.parentNode.insertBefore(box,previews);
-}
-function isLegacyForcedOutbuilding(raw,x){
-  if(String(raw.cadastral_code||x.cadastral_code||'')!=='69.08.63.588')return false;
-  const a=Array.isArray(x.outbuildings)?x.outbuildings:[];
-  return a.some(o=>o&&o.type==='additional_building'&&o.label==='Дополнительное строение');
-}
-function apply(){
-  if(!/\/valuation\/new/.test(location.pathname))return;
-  const raw=safe(localStorage.getItem('valuation:repeat-prefill'));if(!raw)return;
-  const x=merge(raw);
-  const floors=Array.isArray(x.floors)&&x.floors.length?x.floors:(Array.isArray(raw.floor_areas)?raw.floor_areas.map((f,i)=>({floor:f.floor||i+1,area:f.area,condition:raw.floor_conditions?.[i]?.condition||'average'})):[]);
-  if(!document.getElementById('vf'))return false;
-  const ids=['cadastral_code','city','address','latitude','longitude','house_area','land_area','land_purpose','rooms','bedrooms','bathrooms','build_year','material','lot_frontage','lot_depth','lot_shape','terrain','road_type','heating','commercial_potential','owner_asking_price'];
-  ids.forEach(id=>setVal(id,x[id]));
-  setVal('floor_count',x.floor_count||floors.length||1);
-  ['basement','garage','balcony'].forEach(id=>setCheck(id,x[id]));
-  const legacyForced=isLegacyForcedOutbuilding(raw,x);
-  setCheck('outbuildings',legacyForced?false:(Array.isArray(x.outbuildings)?x.outbuildings.length>0:!!x.outbuildings));
-  const u=meaningful(x.utilities)?x.utilities:{};['gas','water','sewer','electricity','internet'].forEach(id=>setCheck(id,u[id]));
-  if(typeof window.renderFloors==='function')window.renderFloors();
-  const rows=[...document.querySelectorAll('#floors .floor')];floors.forEach((f,i)=>{const r=rows[i];if(!r)return;const a=r.querySelector('.area'),c=r.querySelector('.condition');if(a&&f.area!=null)a.value=String(f.area);if(c&&f.condition)c.value=String(f.condition)});
-  const photos=Array.isArray(raw._repeat_photos)?raw._repeat_photos:(safe(localStorage.getItem('valuation:repeat-photos'))||[]);renderPreviousPhotos(photos);
-  try{localStorage.removeItem('valuation:repeat-prefill')}catch(e){}
-  try{history.replaceState(null,'','/valuation/new?mode=precise')}catch(e){}
-  const comm=Object.values(u).filter(Boolean).length;
-  if(legacyForced)notice('↻ Старое тестовое значение «Хоз. постройки» исправлено: галочка снята.','#815900');
-  else if(comm)notice('↻ Данные прошлой оценки заполнены: адрес, коммуникации и характеристики восстановлены.');
-  else notice('↻ Данные прошлой оценки заполнены. Старые коммуникации не были сохранены — отметьте их один раз заново.','#815900');
-  return true;
-}
+function renderPreviousPhotos(photos){const input=document.getElementById('photos'),previews=document.getElementById('previews');if(!input||!previews)return;let box=document.getElementById('repeatPhotoInfo');if(box)box.remove();box=document.createElement('div');box.id='repeatPhotoInfo';box.style.cssText='margin-top:10px;padding:12px;border:1px solid #dfe5ea;border-radius:14px;background:#f7fafb;color:#425064;font:600 13px system-ui;line-height:1.4';if(photos.length){box.innerHTML='<b style="color:#152036">Фото из прошлой оценки: '+photos.length+'</b><div style="margin-top:4px">Они будут перенесены в новую оценку автоматически. При желании можно добавить новые фото ниже.</div>';const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:9px';photos.slice(0,12).forEach(p=>{const img=document.createElement('img');img.src=p.public_url||p.url||'';img.alt='Фото объекта';img.style.cssText='width:100%;aspect-ratio:1;object-fit:cover;border-radius:9px;background:#e9edf1';grid.appendChild(img)});box.appendChild(grid)}else box.innerHTML='<b style="color:#8a5b00">Фото прошлой оценки пока не найдены в облачном хранилище.</b><div style="margin-top:4px">Если выберете фото сейчас, новая оценка дождётся их загрузки перед переходом к результату, и при следующем повторе они появятся автоматически.</div>';previews.parentNode.insertBefore(box,previews)}
+function isLegacyForcedOutbuilding(raw,x){if(String(raw.cadastral_code||x.cadastral_code||'')!=='69.08.63.588')return false;const a=Array.isArray(x.outbuildings)?x.outbuildings:[];return a.some(o=>o&&o.type==='additional_building'&&o.label==='Дополнительное строение')}
+function apply(){if(!/\/valuation\/new/.test(location.pathname))return;const raw=safe(localStorage.getItem('valuation:repeat-prefill'));if(!raw)return;const x=merge(raw);const floors=Array.isArray(x.floors)&&x.floors.length?x.floors:(Array.isArray(raw.floor_areas)?raw.floor_areas.map((f,i)=>({floor:f.floor||i+1,area:f.area,condition:raw.floor_conditions?.[i]?.condition||'average'})):[]);if(!document.getElementById('vf'))return false;const ids=['cadastral_code','city','address','latitude','longitude','house_area','land_area','land_purpose','rooms','bedrooms','bathrooms','build_year','material','lot_frontage','lot_depth','lot_shape','terrain','road_type','heating','structural_condition','commercial_potential','owner_asking_price'];ids.forEach(id=>setVal(id,x[id]));setVal('floor_count',x.floor_count||floors.length||1);['basement','garage','balcony'].forEach(id=>setCheck(id,x[id]));const legacyForced=isLegacyForcedOutbuilding(raw,x);setCheck('outbuildings',legacyForced?false:(Array.isArray(x.outbuildings)?x.outbuildings.length>0:!!x.outbuildings));const u=meaningful(x.utilities)?x.utilities:{};['gas','water','sewer','electricity','internet'].forEach(id=>setCheck(id,u[id]));if(typeof window.renderFloors==='function')window.renderFloors();const rows=[...document.querySelectorAll('#floors .floor')];floors.forEach((f,i)=>{const r=rows[i];if(!r)return;const a=r.querySelector('.area'),c=r.querySelector('.condition');if(a&&f.area!=null)a.value=String(f.area);if(c&&f.condition)c.value=String(f.condition)});const photos=Array.isArray(raw._repeat_photos)?raw._repeat_photos:(safe(localStorage.getItem('valuation:repeat-photos'))||[]);renderPreviousPhotos(photos);try{localStorage.removeItem('valuation:repeat-prefill')}catch(e){}try{history.replaceState(null,'','/valuation/new?mode=precise')}catch(e){}const comm=Object.values(u).filter(Boolean).length;if(legacyForced)notice('↻ Старое тестовое значение «Хоз. постройки» исправлено: галочка снята.','#815900');else if(comm)notice('↻ Данные прошлой оценки заполнены: адрес, коммуникации и характеристики восстановлены.');else notice('↻ Данные прошлой оценки заполнены. Старые коммуникации не были сохранены — отметьте их один раз заново.','#815900');return true}
 let n=0,t=setInterval(()=>{if(apply()||++n>40)clearInterval(t)},150);if(document.readyState!=='loading')setTimeout(apply,50);else document.addEventListener('DOMContentLoaded',()=>setTimeout(apply,50));
 })();
