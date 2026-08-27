@@ -2,8 +2,8 @@ const fs=require('fs');
 const path=require('path');
 const Module=require('module');
 let handler=null;
-let fallback='',saver='',modelv2='',resultfix='',prefill='',persistence='',repeatguard='',photoverify='',optionguard='';
-const i18nScript='<script src="/valuation-i18n.js?v=26"><\/script>';
+let fallback='',saver='',modelv3='',resultfix='',prefill='',persistence='',repeatguard='',photoverify='',optionguard='';
+const i18nScript='<script src="/valuation-i18n.js?v=27"><\/script>';
 function readPublic(name){try{return fs.readFileSync(path.join(process.cwd(),'public',name),'utf8')}catch(e){return''}}
 function load(){
   if(handler)return handler;
@@ -15,7 +15,7 @@ function load(){
   handler=m.exports;
   fallback=readPublic('valuation-fallback.js');
   saver=readPublic('valuation-save.js');
-  modelv2=readPublic('valuation-model-v2.js');
+  modelv3=readPublic('valuation-model-v3.js');
   resultfix=readPublic('valuation-resultfix.js');
   prefill=readPublic('valuation-repeat-prefill.js');
   persistence=readPublic('valuation-form-persistence.js');
@@ -43,7 +43,7 @@ module.exports=(req,res)=>{
           const scripts=
             (optionguard?`<script>${optionguard}<\/script>`:'')+
             (saver?`<script>${saver}<\/script>`:'')+
-            (modelv2?`<script>${modelv2}<\/script>`:'')+
+            (modelv3?`<script>${modelv3}<\/script>`:'')+
             (fallback?`<script>${fallback}<\/script>`:'')+
             (prefill?`<script>${prefill}<\/script>`:'')+
             (persistence?`<script>${persistence}<\/script>`:'')+
