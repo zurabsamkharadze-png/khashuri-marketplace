@@ -3,7 +3,7 @@ const path=require('path');
 const Module=require('module');
 let handler=null;
 let fallback='',saver='',modelv2='',resultfix='',prefill='',persistence='',repeatguard='',photoverify='',optionguard='';
-const i18nScript='<script src="/valuation-i18n.js?v=25"><\/script>';
+const i18nScript='<script src="/valuation-i18n.js?v=26"><\/script>';
 function readPublic(name){try{return fs.readFileSync(path.join(process.cwd(),'public',name),'utf8')}catch(e){return''}}
 function load(){
   if(handler)return handler;
