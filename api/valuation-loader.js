@@ -2,8 +2,8 @@ const fs=require('fs');
 const path=require('path');
 const Module=require('module');
 let handler=null;
-let fallback='',saver='',modelv4='',v31house='',v32mobile='',v33ux='',v34states='',resultfix='',resultv28='',v28prefill='',prefill='',persistence='',repeatguard='',photoverify='',optionguard='';
-const i18nScript='<script src="/valuation-i18n.js?v=34"><\/script>';
+let fallback='',saver='',modelv4='',v31house='',v32mobile='',v33ux='',v34states='',v35result='',resultfix='',resultv28='',v28prefill='',prefill='',persistence='',repeatguard='',photoverify='',optionguard='';
+const i18nScript='<script src="/valuation-i18n.js?v=35"><\/script>';
 function readPublic(name){try{return fs.readFileSync(path.join(process.cwd(),'public',name),'utf8')}catch(e){return''}}
 function patchModelV34(src){
   if(!src)return src;
@@ -30,6 +30,7 @@ function load(){
   v32mobile=readPublic('valuation-v32-mobile-fix.js');
   v33ux=readPublic('valuation-v33-form-ux.js');
   v34states=readPublic('valuation-v34-floor-severe-states.js');
+  v35result=readPublic('valuation-v35-result-display-fix.js');
   resultfix=readPublic('valuation-resultfix.js');
   resultv28=readPublic('valuation-v28-result.js');
   v28prefill=readPublic('valuation-v28-prefill.js');
@@ -53,7 +54,7 @@ module.exports=(req,res)=>{
         const isResult=/^\/valuation\/result\//.test(pathname);
         if(isResult){
           html=html.replace(/<script\s+src=["']\/valuation-client\.js[^"']*["']><\/script>/gi,'');
-          const scripts=(resultfix?`<script>${resultfix}<\/script>`:'')+i18nScript+(resultv28?`<script>${resultv28}<\/script>`:'')+(v34states?`<script>${v34states}<\/script>`:'');
+          const scripts=(resultfix?`<script>${resultfix}<\/script>`:'')+i18nScript+(resultv28?`<script>${resultv28}<\/script>`:'')+(v34states?`<script>${v34states}<\/script>`:'')+(v35result?`<script>${v35result}<\/script>`:'');
           html=html.replace('</body>',scripts+'</body>');
         }else{
           const scripts=
