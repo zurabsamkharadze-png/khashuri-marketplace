@@ -2,8 +2,8 @@ const fs=require('fs');
 const path=require('path');
 const Module=require('module');
 let handler=null;
-let fallback='',saver='',modelv4='',v31house='',v32mobile='',resultfix='',resultv28='',v28prefill='',prefill='',persistence='',repeatguard='',photoverify='',optionguard='';
-const i18nScript='<script src="/valuation-i18n.js?v=32"><\/script>';
+let fallback='',saver='',modelv4='',v31house='',v32mobile='',v33ux='',resultfix='',resultv28='',v28prefill='',prefill='',persistence='',repeatguard='',photoverify='',optionguard='';
+const i18nScript='<script src="/valuation-i18n.js?v=33"><\/script>';
 function readPublic(name){try{return fs.readFileSync(path.join(process.cwd(),'public',name),'utf8')}catch(e){return''}}
 function load(){
   if(handler)return handler;
@@ -18,6 +18,7 @@ function load(){
   modelv4=readPublic('valuation-model-v4.js');
   v31house=readPublic('valuation-v31-house-condition-ui.js');
   v32mobile=readPublic('valuation-v32-mobile-fix.js');
+  v33ux=readPublic('valuation-v33-form-ux.js');
   resultfix=readPublic('valuation-resultfix.js');
   resultv28=readPublic('valuation-v28-result.js');
   v28prefill=readPublic('valuation-v28-prefill.js');
@@ -50,6 +51,7 @@ module.exports=(req,res)=>{
             (modelv4?`<script>${modelv4}<\/script>`:'')+
             (v31house?`<script>${v31house}<\/script>`:'')+
             (v32mobile?`<script>${v32mobile}<\/script>`:'')+
+            (v33ux?`<script>${v33ux}<\/script>`:'')+
             (v28prefill?`<script>${v28prefill}<\/script>`:'')+
             (fallback?`<script>${fallback}<\/script>`:'')+
             (prefill?`<script>${prefill}<\/script>`:'')+
