@@ -47,6 +47,7 @@ function reportEnhancement(x){
   return `<section class="section kh-v30"><h2>Техническое состояние и дополнительные постройки</h2><div class="kh-v30-grid">${cards.join('')}</div>${aiHtml}</section>`;
 }
 const reportCss=`<style>.kh-v30-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.kh-v30-card{border:1px solid #e2e6eb;border-radius:14px;padding:11px;background:#fff}.kh-v30-card small,.kh-v30-card b,.kh-v30-card span{display:block}.kh-v30-card small{color:#727c8c}.kh-v30-card b{font-size:14px;margin-top:3px}.kh-v30-card span{color:#687283;font-size:11px;margin-top:3px}.kh-v30-ai{margin-top:8px;padding:10px;border-radius:12px;background:#f6f8fa;color:#4f5969;line-height:1.4;font-size:11px}.kh-v30-ai ul{margin:6px 0 0;padding-left:18px}@media(max-width:650px){.kh-v30-grid{grid-template-columns:1fr 1fr}}</style>`;
+function humanizeSevereStates(html){if(typeof html!=='string')return html;return html.replace(/\breconstruction\b/g,'Реконструкция').replace(/\bdemolition\b/g,'Под снос')}
 module.exports=(req,res)=>{
   const u=new URL(req.url||'','https://khashuri-marketplace.vercel.app');
   const route=u.searchParams.get('route')||'home',id=u.searchParams.get('id')||'';
@@ -66,6 +67,7 @@ module.exports=(req,res)=>{
         const marker='<section class="section"><h2>Факторы оценки</h2>';
         html=html.includes(marker)?html.replace(marker,enhancement+marker):html.replace('</main>',enhancement+'</main>');
       }
+      html=humanizeSevereStates(html);
       return originalEnd(wasBuffer&&typeof html==='string'?Buffer.from(html,'utf8'):html,...args)
     };
     return report(req,res);
@@ -75,7 +77,7 @@ module.exports=(req,res)=>{
     const params=new URLSearchParams(u.searchParams);params.delete('route');
     req.url='/valuation/result/'+safeId+'?'+params.toString();
     const originalEnd=res.end.bind(res);
-    res.end=(body,...args)=>{const wasBuffer=Buffer.isBuffer(body);let html=wasBuffer?body.toString('utf8'):body;if(typeof html==='string'&&html.includes('</body>'))html=html.replace('</body>','<script src="/valuation-i18n.js?v=26"><\/script></body>');return originalEnd(wasBuffer&&typeof html==='string'?Buffer.from(html,'utf8'):html,...args)};
+    res.end=(body,...args)=>{const wasBuffer=Buffer.isBuffer(body);let html=wasBuffer?body.toString('utf8'):body;if(typeof html==='string'&&html.includes('</body>'))html=html.replace('</body>','<script src="/valuation-i18n.js?v=34"><\/script></body>');return originalEnd(wasBuffer&&typeof html==='string'?Buffer.from(html,'utf8'):html,...args)};
     return valuationResult(req,res);
   }
   let target='/valuation';
