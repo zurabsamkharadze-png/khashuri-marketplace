@@ -11,7 +11,11 @@ const legacyShape=arr.some(o=>o&&(['additional_building','unspecified'].includes
 const legacy=code==='69.08.63.588'&&legacyShape&&(!created||created<cutoff);
 if(!legacy)return;
 let userTouched=false;
-document.addEventListener('click',e=>{if(e.target&&e.target.id==='outbuildings'&&e.isTrusted)userTouched=true},true);
+const touched=e=>{if(e.target&&e.target.id==='outbuildings'&&e.isTrusted)userTouched=true};
+document.addEventListener('click',touched,true);
+document.addEventListener('change',touched,true);
 function fix(){if(userTouched)return;const el=document.getElementById('outbuildings');if(el)el.checked=false}
-[0,60,150,300,600,1000,1600].forEach(ms=>setTimeout(fix,ms));
+[0,60,150,300,600,1000,1600,2500,4000].forEach(ms=>setTimeout(fix,ms));
+document.addEventListener('submit',e=>{if(e.target?.id==='vf')fix()},true);
+document.addEventListener('click',e=>{const b=e.target?.closest?.('button');if(!b)return;const form=b.closest?.('#vf');if(form&&(b.type==='submit'||String(b.textContent||'').toLowerCase().includes('рассчитать')))fix()},true);
 })();
