@@ -2,8 +2,8 @@ const fs=require('fs');
 const path=require('path');
 const Module=require('module');
 let handler=null;
-let fallback='',saver='',modelv4='',v31house='',v32mobile='',v33ux='',v34states='',v35result='',v37cad='',resultfix='',resultv28='',v28prefill='',prefill='',persistence='',repeatguard='',photoverify='',optionguard='';
-const i18nScript='<script src="/valuation-i18n.js?v=37"><\/script>';
+let fallback='',saver='',modelv4='',v31house='',v32mobile='',v33ux='',v34states='',v35result='',v37cad='',v40condition='',resultfix='',resultv28='',v28prefill='',prefill='',persistence='',repeatguard='',photoverify='',optionguard='';
+const i18nScript='<script src="/valuation-i18n.js?v=40"><\/script>';
 function readPublic(name){try{return fs.readFileSync(path.join(process.cwd(),'public',name),'utf8')}catch(e){return''}}
 function patchModelV34(src){
   if(!src)return src;
@@ -32,6 +32,7 @@ function load(){
   v34states=readPublic('valuation-v34-floor-severe-states.js');
   v35result=readPublic('valuation-v35-result-display-fix.js');
   v37cad=readPublic('valuation-v37-cadastral-autofill.js');
+  v40condition=readPublic('valuation-v40-condition-source.js');
   resultfix=readPublic('valuation-resultfix.js');
   resultv28=readPublic('valuation-v28-result.js');
   v28prefill=readPublic('valuation-v28-prefill.js');
@@ -67,6 +68,7 @@ module.exports=(req,res)=>{
             (v33ux?`<script>${v33ux}<\/script>`:'')+
             (v34states?`<script>${v34states}<\/script>`:'')+
             (v37cad?`<script>${v37cad}<\/script>`:'')+
+            (v40condition?`<script>${v40condition}<\/script>`:'')+
             (v28prefill?`<script>${v28prefill}<\/script>`:'')+
             (fallback?`<script>${fallback}<\/script>`:'')+
             (prefill?`<script>${prefill}<\/script>`:'')+
