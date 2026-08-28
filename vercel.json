@@ -7,7 +7,7 @@
     { "source": "/valuation-history-client.js", "destination": "/api/valuation-history-client" },
     { "source": "/valuation-history-actions.js", "destination": "/api/valuation-history-client?asset=actions" },
     { "source": "/estimate", "destination": "/estimate.html" },
-    { "source": "/valuation/crm", "destination": "/valuation-crm-v46.html" },
+    { "source": "/valuation/crm", "destination": "/valuation-crm-v47.html" },
     { "source": "/valuation", "destination": "/api/valuation-router?route=home" },
     { "source": "/valuation/new", "destination": "/api/valuation-router?route=new" },
     { "source": "/valuation/history", "destination": "/api/valuation-history" },
