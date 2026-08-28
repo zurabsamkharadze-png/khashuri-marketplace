@@ -34,7 +34,7 @@ async function lookup(force=false){
   if(!force&&code===lastCode)return;lastCode=code;const my=++seq;setHint(msg.searching);
   try{
     const headers={};const t=token();if(t)headers.Authorization='Bearer '+t;
-    const r=await fetch('/api/cadastral-lookup?code='+encodeURIComponent(code),{headers,cache:'no-store'});const data=await r.json().catch(()=>null);
+    const r=await fetch('/api/valuation-router?route=cadastral&code='+encodeURIComponent(code),{headers,cache:'no-store'});const data=await r.json().catch(()=>null);
     if(my!==seq||String(cad.value||'').trim()!==code)return;
     if(!r.ok||!data?.ok){setHint(msg.notFound,'warn');return}
     const cityOk=setCity(data.city);
