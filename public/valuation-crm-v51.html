@@ -20,10 +20,11 @@ body{margin:0;background:#f4f6f9;color:#131c31;font-family:Inter,system-ui,-appl
     const centerTag='<script src="/valuation-notifications-v48.js?v=51" defer></scr'+'ipt>';
     const scoringTag='<script src="/valuation-scoring-v49.js?v=51" defer></scr'+'ipt>';
     const planTag='<script src="/valuation-daily-plan-v50.js?v=51" defer></scr'+'ipt>';
+    const contactFixTag='<script src="/valuation-v50-contact-fix-v51.js?v=51" defer></scr'+'ipt>';
     const assistantTag='<script src="/valuation-manager-assistant-v51.js?v=51" defer></scr'+'ipt>';
     html=html.replace('<title>CRM V46 | Khashuri Marketplace</title>','<title>CRM V51 | Khashuri Marketplace</title>')
       .replace('CRM недвижимости · V46','CRM недвижимости · V51')
-      .replace('</body>',pushTag+centerTag+scoringTag+planTag+assistantTag+'</body>');
+      .replace('</body>',pushTag+centerTag+scoringTag+planTag+contactFixTag+assistantTag+'</body>');
     document.open();document.write(html);document.close();
   }catch(e){
     document.body.innerHTML='<div class="load"><b>CRM V51</b><p>Основной интерфейс временно не загрузился.</p><a href="/valuation-crm-v50.html">Открыть резервную CRM V50</a></div>';
