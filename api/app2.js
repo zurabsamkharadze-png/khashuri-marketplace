@@ -89,7 +89,7 @@ module.exports=async(req,res)=>{
     try{
       const ct=String(res.getHeader('content-type')||'');
       if(ct.includes('text/html')&&typeof body==='string'&&!body.includes('/valuation-entry.js')){
-        body=body.includes('</body>')?body.replace('</body>','<script src="/valuation-entry.js?v=1.0"></script></body>'):body+'<script src="/valuation-entry.js?v=1.0"></script>';
+        body=body.includes('</body>')?body.replace('</body>','<script src="/valuation-entry.js?v=46"></script></body>'):body+'<script src="/valuation-entry.js?v=46"></script>';
       }
     }catch(e){}
     return originalEnd(body,...args);
