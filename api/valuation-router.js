@@ -1,6 +1,7 @@
 const valuation=require('./valuation-loader');
 const valuationResult=require('./valuation-result');
 const report=require('../lib/valuation-report');
+const cadastral=require('../lib/cadastral-lookup');
 function unpack(v){if(!v)return null;try{let s=String(v).replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return JSON.parse(Buffer.from(s,'base64').toString('utf8'))}catch(e){return null}}
 function pack(x){return Buffer.from(JSON.stringify(x),'utf8').toString('base64').replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
@@ -48,10 +49,16 @@ function reportEnhancement(x){
 }
 const reportCss=`<style>.kh-v30-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.kh-v30-card{border:1px solid #e2e6eb;border-radius:14px;padding:11px;background:#fff}.kh-v30-card small,.kh-v30-card b,.kh-v30-card span{display:block}.kh-v30-card small{color:#727c8c}.kh-v30-card b{font-size:14px;margin-top:3px}.kh-v30-card span{color:#687283;font-size:11px;margin-top:3px}.kh-v30-ai{margin-top:8px;padding:10px;border-radius:12px;background:#f6f8fa;color:#4f5969;line-height:1.4;font-size:11px}.kh-v30-ai ul{margin:6px 0 0;padding-left:18px}@media(max-width:650px){.kh-v30-grid{grid-template-columns:1fr 1fr}}</style>`;
 function humanizeSevereStates(html){if(typeof html!=='string')return html;return html.replace(/\breconstruction\b/g,'Реконструкция').replace(/\bdemolition\b/g,'Под снос')}
-module.exports=(req,res)=>{
+module.exports=async(req,res)=>{
   const u=new URL(req.url||'','https://khashuri-marketplace.vercel.app');
   const route=u.searchParams.get('route')||'home',id=u.searchParams.get('id')||'';
   const lang=u.searchParams.get('lang')==='ka'?'ka':'ru';
+  if(route==='cadastral'){
+    res.setHeader('content-type','application/json; charset=utf-8');
+    res.setHeader('cache-control','private, max-age=60');
+    try{const data=await cadastral.lookup(u.searchParams.get('code')||'',req.headers?.authorization||'');res.statusCode=data?.error?400:200;return res.end(JSON.stringify(data))}
+    catch(e){res.statusCode=200;return res.end(JSON.stringify({ok:false,error:'lookup_unavailable'}))}
+  }
   if(route==='estimate'){
     res.statusCode=302;res.setHeader('location','/estimate?lang='+lang);return res.end();
   }
@@ -77,7 +84,7 @@ module.exports=(req,res)=>{
     const params=new URLSearchParams(u.searchParams);params.delete('route');
     req.url='/valuation/result/'+safeId+'?'+params.toString();
     const originalEnd=res.end.bind(res);
-    res.end=(body,...args)=>{const wasBuffer=Buffer.isBuffer(body);let html=wasBuffer?body.toString('utf8'):body;if(typeof html==='string'&&html.includes('</body>'))html=html.replace('</body>','<script src="/valuation-i18n.js?v=34"><\/script></body>');return originalEnd(wasBuffer&&typeof html==='string'?Buffer.from(html,'utf8'):html,...args)};
+    res.end=(body,...args)=>{const wasBuffer=Buffer.isBuffer(body);let html=wasBuffer?body.toString('utf8'):body;if(typeof html==='string'&&html.includes('</body>'))html=html.replace('</body>','<script src="/valuation-i18n.js?v=37"><\/script></body>');return originalEnd(wasBuffer&&typeof html==='string'?Buffer.from(html,'utf8'):html,...args)};
     return valuationResult(req,res);
   }
   let target='/valuation';
