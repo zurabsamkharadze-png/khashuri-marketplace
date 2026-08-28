@@ -5,6 +5,7 @@ const router=require('./valuation-router');
 function readPublic(name){try{return fs.readFileSync(path.join(process.cwd(),'public',name),'utf8')}catch(e){return''}}
 const v34=readPublic('valuation-v34-floor-severe-states.js');
 const v35=readPublic('valuation-v35-result-display-fix.js');
+const v42=readPublic('valuation-v42-client-lead.js');
 
 function unpack(v){
   if(!v)return null;
@@ -63,7 +64,7 @@ const printCss=`<style id="khV36ServerPrint">
 @media print{
 @page{size:A4 portrait;margin:2.5mm!important}
 html,body{margin:0!important;padding:0!important;background:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.top,.stickyActions,.kh-screen-comps,.sourceLink,#khLangSwitch,.kh-lang-switch,.language-switch,.lang-switch,[data-lang-switch]{display:none!important}
+.top,.stickyActions,.kh-screen-comps,.sourceLink,#khLangSwitch,.kh-lang-switch,.language-switch,.lang-switch,[data-lang-switch],.khLead{display:none!important}
 .wrap{max-width:none!important;padding:0!important;margin:0!important;zoom:.60!important;width:166.67%!important}
 .resultHero{padding:8px 12px!important;border-radius:9px!important}.price{font-size:30px!important;line-height:1!important}
 .metrics{grid-template-columns:repeat(4,1fr)!important;gap:4px!important;margin-top:4px!important}.metric{padding:5px!important;border-radius:7px!important}.metric small{font-size:8px!important;line-height:1.05!important}.metric b{font-size:12px!important;margin-top:1px!important;line-height:1.05!important}
@@ -91,7 +92,7 @@ module.exports=(req,res)=>{
       const summary=compactComparableSummary(x);
       if(summary&&html.includes('<section class="section kh-screen-comps">'))html=html.replace('<section class="section kh-screen-comps">',summary+'<section class="section kh-screen-comps">');
       if(html.includes('</head>'))html=html.replace('</head>',printCss+'</head>');
-      if(html.includes('</body>'))html=html.replace('</body>',inlineScript(v34)+inlineScript(v35)+'</body>');
+      if(html.includes('</body>'))html=html.replace('</body>',inlineScript(v34)+inlineScript(v35)+inlineScript(v42)+'</body>');
     }
     return originalEnd(wasBuffer&&typeof html==='string'?Buffer.from(html,'utf8'):html,...args);
   };
