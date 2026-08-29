@@ -13,6 +13,6 @@
     { "source": "/valuation/history", "destination": "/api/valuation-history" },
     { "source": "/valuation/report", "destination": "/api/valuation-router?route=report" },
     { "source": "/valuation/result/:id", "destination": "/api/valuation-result-v36?route=result&id=:id" },
-    { "source": "/(.*)", "destination": "/api/app2" }
+    { "source": "/(.*)", "destination": "/api/app3" }
   ]
 }
