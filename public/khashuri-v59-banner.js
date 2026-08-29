@@ -1,0 +1,32 @@
+(()=>{'use strict';
+if(location.pathname!=='/'||window.__kh59Banner)return;window.__kh59Banner=true;
+const slides=[
+ {key:'realty',title:'Недвижимость в Хашури',sub:'Купить, продать или снять жильё',icon:'🏠',bg:'linear-gradient(135deg,#d8ebff,#c7e3ff 58%,#a9d2ff)'},
+ {key:'services',title:'Услуги рядом',sub:'Найдите мастера в своём городе',icon:'🛠️',bg:'linear-gradient(135deg,#dff8f1,#c9f1e6 58%,#afe7d9)'},
+ {key:'sell',title:'Продайте быстрее',sub:'Разместите объявление за пару минут',icon:'📦',bg:'linear-gradient(135deg,#ffe9db,#ffdcc7 58%,#ffc9ab)'},
+ {key:'valuation',title:'Оценка недвижимости',sub:'Узнайте ориентировочную цену объекта',icon:'📊',bg:'linear-gradient(135deg,#ebe5ff,#dcd3ff 58%,#c8baff)'}
+];
+function style(){if(document.getElementById('kh59Style'))return;const s=document.createElement('style');s.id='kh59Style';s.textContent=`
+#kh59Banner{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#fff;padding:18px 0 10px;overflow:hidden}
+.kh59Track{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;padding:0 max(18px,calc((100vw - 1180px)/2 + 18px));scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.kh59Track::-webkit-scrollbar{display:none}
+.kh59Slide{position:relative;flex:0 0 min(84vw,760px);height:190px;border:0;border-radius:22px;scroll-snap-align:center;overflow:hidden;text-align:left;padding:28px 30px;cursor:pointer;color:#4b5563;box-shadow:0 4px 16px rgba(15,23,42,.05);isolation:isolate}
+.kh59Slide:active{transform:scale(.995)}
+.kh59Text{position:relative;z-index:2;width:62%;height:100%;display:flex;flex-direction:column;justify-content:center}
+.kh59Title{font-size:clamp(22px,3.2vw,34px);font-weight:900;line-height:1.1;color:#475467;letter-spacing:-.025em;margin:0 0 10px}
+.kh59Sub{font-size:clamp(16px,2.2vw,24px);line-height:1.3;color:#6b7280}
+.kh59Art{position:absolute;right:5%;top:50%;transform:translateY(-50%);width:31%;aspect-ratio:1;border-radius:28%;display:grid;place-items:center;font-size:clamp(66px,10vw,112px);background:rgba(255,255,255,.36);box-shadow:inset 0 0 0 1px rgba(255,255,255,.38),0 15px 35px rgba(55,88,140,.12)}
+.kh59Art:before{content:'';position:absolute;width:78%;height:22%;border-radius:50%;background:rgba(70,95,145,.10);bottom:-7%;filter:blur(6px);z-index:-1}
+.kh59Dots{display:flex;justify-content:center;gap:6px;padding:10px 0 0}
+.kh59Dot{width:7px;height:7px;border:0;border-radius:50%;background:#d6d9df;padding:0;transition:.2s}.kh59Dot.on{width:20px;border-radius:99px;background:#0f766e}
+@media(max-width:760px){#kh59Banner{padding:14px 0 8px}.kh59Track{gap:10px;padding-left:28px;padding-right:28px}.kh59Slide{flex-basis:84vw;height:154px;border-radius:18px;padding:20px 21px}.kh59Text{width:62%}.kh59Title{font-size:21px;margin-bottom:8px}.kh59Sub{font-size:16px}.kh59Art{right:5%;width:31%;font-size:64px;border-radius:24%}.kh59Dots{padding-top:8px}}
+@media(max-width:390px){.kh59Slide{height:145px;padding:18px}.kh59Title{font-size:19px}.kh59Sub{font-size:14px}.kh59Art{font-size:56px}}
+`;document.head.appendChild(s)}
+function act(k){try{if(k==='valuation'){location.href='/valuation';return}if(k==='sell'){if(typeof openAdd==='function'){openAdd();return}if(typeof go==='function'){go('account');setTimeout(()=>{for(const b of document.querySelectorAll('button'))if(/добавить|объявлен/i.test(b.textContent||'')){b.click();break}},250);return}}if(k==='services'){if(typeof go==='function'){go('catalog');return}}if(k==='realty'){const c=(typeof state!=='undefined'&&Array.isArray(state.categories))?state.categories.find(x=>/недвиж/i.test(x.name_ru||'')):null;if(c&&typeof chooseCat==='function'){chooseCat(c.id);return}const q=document.querySelector('#kh58Search input');if(q){q.value='Недвижимость';q.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));return}}}catch(_){}if(k==='services')location.hash='catalog'}
+function mount(){if(document.getElementById('kh59Banner'))return true;const top=document.querySelector('.top');if(!top)return false;style();const box=document.createElement('section');box.id='kh59Banner';box.setAttribute('aria-label','Популярные разделы');box.innerHTML='<div class="kh59Track" id="kh59Track">'+slides.map((x,i)=>`<button type="button" class="kh59Slide" data-i="${i}" style="background:${x.bg}"><div class="kh59Text"><div class="kh59Title">${x.title}</div><div class="kh59Sub">${x.sub}</div></div><div class="kh59Art" aria-hidden="true">${x.icon}</div></button>`).join('')+'</div><div class="kh59Dots">'+slides.map((_,i)=>`<button type="button" class="kh59Dot ${i===0?'on':''}" data-dot="${i}" aria-label="Баннер ${i+1}"></button>`).join('')+'</div>';
+top.insertAdjacentElement('afterend',box);const track=box.querySelector('#kh59Track'),cards=[...box.querySelectorAll('.kh59Slide')],dots=[...box.querySelectorAll('.kh59Dot')];
+cards.forEach((b,i)=>b.onclick=()=>act(slides[i].key));function go(i,behavior='smooth'){i=(i+cards.length)%cards.length;cards[i].scrollIntoView({behavior,block:'nearest',inline:'center'});dots.forEach((d,n)=>d.classList.toggle('on',n===i));idx=i}dots.forEach((d,i)=>d.onclick=()=>go(i));let idx=0,timer=null,drag=false;
+function nearest(){const mid=track.scrollLeft+track.clientWidth/2;let best=0,dist=1e9;cards.forEach((c,i)=>{const d=Math.abs(c.offsetLeft+c.offsetWidth/2-mid);if(d<dist){dist=d;best=i}});idx=best;dots.forEach((d,n)=>d.classList.toggle('on',n===best))}
+let raf=0;track.addEventListener('scroll',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(nearest)},{passive:true});function start(){stop();timer=setInterval(()=>{if(!drag&&!document.hidden)go(idx+1)},4500)}function stop(){if(timer){clearInterval(timer);timer=null}}track.addEventListener('pointerdown',()=>{drag=true;stop()},{passive:true});track.addEventListener('pointerup',()=>{drag=false;nearest();start()},{passive:true});track.addEventListener('touchend',()=>{drag=false;nearest();start()},{passive:true});document.addEventListener('visibilitychange',()=>document.hidden?stop():start());start();return true}
+let n=0,t=setInterval(()=>{if(mount()||++n>50)clearInterval(t)},120);new MutationObserver(()=>{if(location.pathname==='/'&&!document.getElementById('kh59Banner'))mount()}).observe(document.documentElement,{childList:true,subtree:true});setTimeout(mount,50);setTimeout(mount,800);
+})();
