@@ -2,9 +2,10 @@ name: Facebook Reel audio render
 
 on:
   workflow_dispatch:
-  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
     paths:
-      - '.github/workflows/facebook-reel-audio-render.yml'
+      - '.github/reel-trigger/**'
 
 permissions:
   contents: read
@@ -25,8 +26,9 @@ jobs:
       - name: Download source video
         run: |
           curl --fail --location --retry 3 \
-            'https://videos.pexels.com/video-files/29019677/12547443_1080_1920_30fps.mp4' \
+            'https://eppyjmtowtkxcwwhvwzp.supabase.co/storage/v1/object/public/facebook-reels/tmp/ali-nino-ebffd45b-2f60-42d1-9a0a-0358eedfe71a.mp4' \
             --output source.mp4
+          ffprobe -v error -show_entries stream=codec_type,codec_name,width,height -show_entries format=duration,size -of json source.mp4
 
       - name: Generate original background music
         run: |
@@ -70,11 +72,13 @@ jobs:
             -shortest -movflags +faststart reel-with-music.mp4
           ffprobe -v error -show_entries stream=codec_type,codec_name,width,height -show_entries format=duration,size -of json reel-with-music.mp4
 
-      - name: Validate audio stream
+      - name: Validate Reel media
         run: |
           test "$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_type -of csv=p=0 reel-with-music.mp4)" = "audio"
+          test "$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of csv=p=0 reel-with-music.mp4)" = "aac"
+          test "$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 reel-with-music.mp4)" = "1080x1920"
 
-      - name: Upload to temporary public Supabase object
+      - name: Upload rendered Reel to Supabase
         run: |
           KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwcHlqbXRvd3RreGN3d2h2d3pwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyNDM0NzEsImV4cCI6MjEwMjgxOTQ3MX0.FBxRhLMZgObwy5cofdKs4k0nsDxr-LhUqu3R30uwIfk'
           curl --fail --show-error --request POST \
@@ -83,4 +87,4 @@ jobs:
             -H 'Content-Type: video/mp4' \
             -H 'x-upsert: false' \
             --data-binary @reel-with-music.mp4 \
-            'https://eppyjmtowtkxcwwhvwzp.supabase.co/storage/v1/object/facebook-reels/tmp/ali-nino-ebffd45b-2f60-42d1-9a0a-0358eedfe71a.mp4'
+            'https://eppyjmtowtkxcwwhvwzp.supabase.co/storage/v1/object/facebook-reels/tmp/ali-nino-music-v2-20260925.mp4'
