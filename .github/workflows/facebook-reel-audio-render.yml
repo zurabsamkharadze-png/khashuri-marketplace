@@ -2,6 +2,8 @@ name: Facebook Reel audio render
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
