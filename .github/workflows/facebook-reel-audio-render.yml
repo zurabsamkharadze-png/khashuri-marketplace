@@ -1,0 +1,86 @@
+name: Facebook Reel audio render
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/facebook-reel-audio-render.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Ensure FFmpeg
+        run: |
+          if ! command -v ffmpeg >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y ffmpeg
+          fi
+          ffmpeg -version | head -n1
+
+      - name: Download source video
+        run: |
+          curl --fail --location --retry 3 \
+            'https://videos.pexels.com/video-files/29019677/12547443_1080_1920_30fps.mp4' \
+            --output source.mp4
+
+      - name: Generate original background music
+        run: |
+          python3 - <<'PY'
+          import math, struct, wave
+          sr=48000
+          duration=27.0
+          bpm=94.0
+          beat=60.0/bpm
+          chords=[(220.00,261.63,329.63),(174.61,220.00,261.63),(261.63,329.63,392.00),(196.00,246.94,293.66)]
+          melody=[329.63,392.00,440.00,392.00,329.63,293.66,261.63,293.66]
+          total=int(sr*duration)
+          with wave.open('music.wav','wb') as w:
+              w.setnchannels(2); w.setsampwidth(2); w.setframerate(sr)
+              buf=bytearray()
+              for i in range(total):
+                  t=i/sr
+                  chord=chords[int(t/(4*beat))%len(chords)]
+                  pad=sum(math.sin(2*math.pi*(f/2)*t) for f in chord)/3*0.15
+                  step=beat/2
+                  nt=t-(int(t/step)*step)
+                  note=melody[int(t/step)%len(melody)]
+                  pluck=math.sin(2*math.pi*note*nt)*math.exp(-5*nt)*0.11
+                  bt=t-(int(t/beat)*beat)
+                  kick=math.sin(2*math.pi*55*bt)*math.exp(-11*bt)*0.07
+                  master=min(1.0,t/0.8)*min(1.0,(duration-t)/1.2)
+                  v=max(-0.9,min(0.9,(pad+pluck+kick)*master))
+                  pan=0.06*math.sin(2*math.pi*0.08*t)
+                  l=int(v*(1-pan)*32767); r=int(v*(1+pan)*32767)
+                  buf.extend(struct.pack('<hh',l,r))
+                  if len(buf)>=262144:
+                      w.writeframesraw(buf); buf.clear()
+              if buf: w.writeframesraw(buf)
+          PY
+
+      - name: Add music to Reel
+        run: |
+          ffmpeg -hide_banner -loglevel warning -y \
+            -i source.mp4 -i music.wav \
+            -map 0:v:0 -map 1:a:0 -c:v copy -c:a aac -b:a 160k -ar 48000 \
+            -shortest -movflags +faststart reel-with-music.mp4
+          ffprobe -v error -show_entries stream=codec_type,codec_name,width,height -show_entries format=duration,size -of json reel-with-music.mp4
+
+      - name: Validate audio stream
+        run: |
+          test "$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_type -of csv=p=0 reel-with-music.mp4)" = "audio"
+
+      - name: Upload to temporary public Supabase object
+        run: |
+          KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwcHlqbXRvd3RreGN3d2h2d3pwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyNDM0NzEsImV4cCI6MjEwMjgxOTQ3MX0.FBxRhLMZgObwy5cofdKs4k0nsDxr-LhUqu3R30uwIfk'
+          curl --fail --show-error --request POST \
+            -H "apikey: $KEY" \
+            -H "Authorization: Bearer $KEY" \
+            -H 'Content-Type: video/mp4' \
+            -H 'x-upsert: false' \
+            --data-binary @reel-with-music.mp4 \
+            'https://eppyjmtowtkxcwwhvwzp.supabase.co/storage/v1/object/facebook-reels/tmp/ali-nino-ebffd45b-2f60-42d1-9a0a-0358eedfe71a.mp4'
