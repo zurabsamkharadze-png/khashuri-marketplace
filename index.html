@@ -148,6 +148,13 @@
   Object.assign(tr.ka,{
     guide:'შემოწმება',guideHead:'აპლიკაციის შემოწმება 5 წუთში',guideIntro:'გადადით განყოფილებებზე თანმიმდევრულად. თუ ყველაფერი მუშაობს, მონიშნეთ შესაბამისი პუნქტი. არ შეიყვანოთ მცხოვრებლების რეალური მონაცემები.',guideGo:'განყოფილების გახსნა',guideMark:'მუშაობს',guideUnmark:'ნიშნის მოხსნა',guideProgress:'შემოწმებულია',guideFromSeven:'7 განყოფილებიდან',guideStart:'შემოწმების დაწყება',guideTry:'სატესტო მაგალითების ნახვა',guideFake:'მხოლოდ გამოგონილი მაგალითები',guideResetHint:'სატესტო ჩანაწერების წაშლა შესაძლებელია „პარამეტრები“ → „გასუფთავება“.',guideSampleAdded:'სატესტო მაგალითები დამატებულია ამ მოწყობილობაზე',guideSampleAlready:'სატესტო მაგალითები უკვე არსებობს',guideSteps:'რა უნდა შეამოწმოთ',guideContinue:'შემოწმების გაგრძელება',guideClearChecks:'აღნიშვნების გასუფთავება',guideNoRealData:'ეს ჯერ არ არის საერთო სისტემა: სხვა მცხოვრებლები ჩანაწერებს ვერ დაინახავენ. რეალური მომხმარებლები ჯერ არ დაარეგისტრიროთ.',guideStepHome:'მთავარი',guideHintHome:'შეამოწმეთ მთავარი გვერდის ბალანსი და ბინების რაოდენობა.',guideStepApartments:'60 ბინა',guideHintApartments:'შეამოწმეთ ძებნა, სადარბაზოები და სართულები.',guideStepFinances:'შენატანები და ხარჯები',guideHintFinances:'უნდა ჩანდეს მხოლოდ სატესტო თანხები.',guideStepRepairs:'სარემონტო განაცხადები',guideHintRepairs:'გახსენით სატესტო განაცხადი.',guideStepPolls:'გამოკითხვები',guideHintPolls:'გახსენით სატესტო კენჭისყრა.',guideStepRoles:'თავმჯდომარე / მცხოვრები',guideHintRoles:'ზედა ნაწილში შეცვალეთ როლი — ეს ჯერ მხოლოდ დემოა.',guideStepLanguages:'ქართული / რუსული',guideHintLanguages:'ზედა ნაწილში შეცვალეთ ენა KA / RU.',guideCheckRole:'როლის შეცვლა',guideCheckLang:'ენის შეცვლა',guideSampleHint:'ერთი ღილაკით გამოჩნდება სატესტო შენატანი, რემონტი, კენჭისყრა და განცხადება. რეალური მონაცემები არ გამოიყენება.',guideSampleFlag:'ტესტი',guideEverything:'შესანიშნავია! მონიშნულია შვიდივე პუნქტი. ეს მხოლოდ ინტერფეისის შემოწმებაა და არა დაცული საიტის სრულ მზადყოფნის დასტური.'
   });
+
+  Object.assign(tr.ru,{
+    monthlyTitle:'Месячный отчёт по 60 квартирам',monthlyPeriod:'Месяц отчёта',monthlyDue:'Начислено за месяц',monthlyCollected:'Получено взносов',monthlyOutstanding:'Не оплачено',monthlyPaidCount:'Оплатили полностью',monthlyPartialCount:'Оплатили частично',monthlyUnpaidCount:'Пока не оплатили',monthlyDemoNotice:'Тестовая сводка, не используйте для настоящей бухгалтерии. Взнос применяется ко всем 60 квартирам одинаково; исторические ставки и перенос переплат ещё не реализованы.'
+  });
+  Object.assign(tr.ka,{
+    monthlyTitle:'60 ბინის ყოველთვიური ანგარიში',monthlyPeriod:'საანგარიშო თვე',monthlyDue:'თვის დარიცხვა',monthlyCollected:'მიღებული შენატანები',monthlyOutstanding:'გადაუხდელი თანხა',monthlyPaidCount:'სრულად გადახდილი',monthlyPartialCount:'ნაწილობრივ გადახდილი',monthlyUnpaidCount:'ჯერ არ გადაუხდიათ',monthlyDemoNotice:'მხოლოდ სატესტო ანგარიშია. არ გამოიყენოთ რეალურ აღრიცხვაში. ერთი და იგივე შენატანი გამოიყენება 60-ვე ბინაზე; ძველი ტარიფები და ზედმეტად გადახდილის გადატანა ჯერ არ არის დამატებული.'
+  });
   const TEST_STEPS=[
     {key:'home',tab:'home',label:'guideStepHome',hint:'guideHintHome'},
     {key:'apartments',tab:'apartments',label:'guideStepApartments',hint:'guideHintApartments'},
@@ -162,6 +169,7 @@
   try {db=JSON.parse(localStorage.getItem(KEY)); if(!db||!Array.isArray(db.units)||db.units.length!==60) db=seed();} catch {db=seed();}
   if(!Array.isArray(db.applications))db.applications=[];
   if(!db.testProgress||typeof db.testProgress!=='object'||Array.isArray(db.testProgress))db.testProgress={};
+  if(!/^[0-9]{4}-(0[1-9]|1[0-2])$/.test(db.reportMonth||''))db.reportMonth=(new Date().getFullYear())+'-'+String(new Date().getMonth()+1).padStart(2,'0');
   const el=document.getElementById('app');
   let selectedUnit=null;
   let moreOpen=false;
@@ -169,8 +177,8 @@
   const t=k=>tr[db.lang]?.[k]??k;
   const e=x=>String(x??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const cash=n=>new Intl.NumberFormat(db.lang==='ka'?'ka-GE':'ru-RU',{maximumFractionDigits:2}).format(Number(n)||0)+' ₾';
-  const now=()=>new Date().toISOString().slice(0,10);
-  const todayMonth=()=>new Date().toISOString().slice(0,7);
+  const now=()=>{const d=new Date(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());};
+  const todayMonth=()=>now().slice(0,7);
   const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
   const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(db));}catch{notify('Browser storage unavailable');}};
   const notify=msg=>{const x=document.getElementById('toast');x.textContent=msg;x.style.display='block';clearTimeout(window.toastId);window.toastId=setTimeout(()=>x.style.display='none',2800);};
@@ -179,8 +187,8 @@
   const empty=()=>`<div class="empty"><span>◎</span>${e(t('none'))}</div>`;
   const box=(heading,inner,extra='')=>`<section class="card"><div class="card-head"><h2>${e(heading)}</h2>${extra}</div>${inner}</section>`;
   const metric=(symbol,label,value)=>`<div class="card metric"><span class="symbol">${symbol}</span><span class="label">${e(label)}</span><strong>${e(value)}</strong></div>`;
-  const currentMonthPayments=flat=>db.txs.filter(x=>x.type==='income'&&Number(x.flat)===Number(flat)&&(
-    (x.purpose==='fee'&&x.period===todayMonth())||(!x.purpose&&x.date.startsWith(todayMonth()))
+  const currentMonthPayments=(flat,period=todayMonth())=>db.txs.filter(x=>x.type==='income'&&Number(x.flat)===Number(flat)&&(
+    (x.purpose==='fee'&&x.period===period)||(!x.purpose&&x.date.startsWith(period))
   )).reduce((n,x)=>n+Number(x.amount),0);
   const unitStatus=(q)=>{
     if (!db.fee) return {key:'noFeeStatus',cls:'neutral'};
@@ -258,11 +266,33 @@
     const shopForm=admin()?`<form id="shop-form" class="form section-gap"><div class="field"><label>${e(t('shopName'))}</label><input required name="name" maxlength="80" autocomplete="off" /></div><div class="field" style="align-self:end"><button class="btn green" type="submit">+ ${e(t('addShop'))}</button></div></form>${db.shops.map(q=>`<button class="btn danger small" style="margin:9px 7px 0 0" data-remove-shop="${e(q.id)}">× ${e(q.name)}</button>`).join('')}`:'';
     return `${scheme()}<div class="section-gap">${box(t('apartments'),table,`<span class="badge">${listed.length}/60</span>`)}</div><div class="section-gap">${box(t('commercial'),`<p class="help">${e(t('shopsInfo'))}</p><div class="items">${shops}</div>${shopForm}`,`<span class="badge">${db.shops.length}</span>`)}</div>`;
   };
+
+  const monthlyReport=()=>{
+    const period=/^[0-9]{4}-(0[1-9]|1[0-2])$/.test(db.reportMonth||'')?db.reportMonth:todayMonth();
+    const fee=Number(db.fee)||0;
+    const data=db.units.map(u=>({number:u.number,paid:currentMonthPayments(u.number,period)}));
+    const totalPaid=data.reduce((n,u)=>n+u.paid,0);
+    const outstanding=data.reduce((n,u)=>n+Math.max(0,fee-u.paid),0);
+    const paidCount=fee>0?data.filter(u=>u.paid>=fee).length:0;
+    const partialCount=fee>0?data.filter(u=>u.paid>0&&u.paid<fee).length:0;
+    const emptyCount=fee>0?data.filter(u=>u.paid===0).length:0;
+    const rows=data.map(u=>{
+      const remaining=Math.max(0,fee-u.paid);
+      const status=!fee?t('noFeeStatus'):u.paid>=fee?t('paidStatus'):u.paid>0?t('partialStatus'):t('unpaidStatus');
+      return '<tr><td>№ '+u.number+'</td><td>'+e(cash(fee))+'</td><td>'+e(cash(u.paid))+'</td><td>'+e(cash(remaining))+'</td><td>'+e(status)+'</td></tr>';
+    }).join('');
+    const picker='<div class="field"><label>'+e(t('monthlyPeriod'))+'</label><input type="month" id="report-month" class="filter" value="'+e(period)+'"></div>';
+    const cards='<div class="grid four section-gap">'+metric('⌂',t('monthlyDue'),cash(fee*60))+metric('↗',t('monthlyCollected'),cash(totalPaid))+metric('₾',t('monthlyOutstanding'),cash(outstanding))+metric('✓',t('monthlyPaidCount'),paidCount+' / 60')+'</div>';
+    const counts='<p class="small-help">'+e(t('monthlyPartialCount'))+': '+partialCount+' · '+e(t('monthlyUnpaidCount'))+': '+emptyCount+'</p>';
+    const table='<div class="table-scroll"><table class="table"><thead><tr><th>'+e(t('flat'))+'</th><th>'+e(t('myFee'))+'</th><th>'+e(t('myPaid'))+'</th><th>'+e(t('remaining'))+'</th><th>'+e(t('state'))+'</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+    const note='<div class="notice">⚠ '+e(t('monthlyDemoNotice'))+'</div>';
+    return '<div class="section-gap">'+box(t('monthlyTitle'),picker+cards+counts+note+table,'<button class="btn secondary small" data-export-month>↓ CSV</button>')+'</div>';
+  };
   const finances=()=>{
     const s=sums();const own=admin()?db.txs:db.txs.filter(x=>String(x.flat)===String(db.flat)||(!x.flat&&x.type==='expense'));
     const txRows=own.slice().reverse().map(q=>`<tr><td>${e(q.date)}</td><td>${e(q.description)}</td><td>${e(q.type==='income'?t('incomeType'):t('expenseType'))}</td><td>${q.flat?'№ '+q.flat:'—'}</td><td class="${q.type==='income'?'text-green':'text-red'}"><strong>${cash(q.amount)}</strong></td></tr>`).join('')||`<tr><td colspan="5">${e(t('none'))}</td></tr>`;
     const form=admin()?`<form id="tx-form" class="form"><div class="field"><label>${e(t('type'))}</label><select name="type"><option value="income">${e(t('incomeType'))}</option><option value="expense">${e(t('expenseType'))}</option></select></div><div class="field"><label>${e(t('amount'))}</label><input required min="0.01" step="0.01" type="number" name="amount" /></div><div class="field"><label>${e(t('description'))}</label><input required name="description" maxlength="120" /></div><div class="field"><label>${e(t('associatedFlat'))}</label><input name="flat" type="number" min="1" max="60" /></div><div class="field"><label>${e(t('paymentPurpose'))}</label><select name="purpose"><option value="fee">${e(t('feePayment'))}</option><option value="other">${e(t('otherPayment'))}</option></select></div><div class="field"><label>${e(t('feePeriod'))}</label><input name="period" type="month" value="${todayMonth()}" /></div><div class="field all"><button class="btn" type="submit">+ ${e(t('add'))}</button></div></form>`:`<div class="items">${reportItem({title:t('ownFlat'),sub:t('myHistory'),right:'№ '+db.flat})}${reportItem({title:t('myFee'),sub:t('monthFee'),right:db.fee?cash(db.fee):t('notSet')})}${reportItem({title:t('myPaid'),sub:todayMonth(),right:cash(currentMonthPayments(db.flat))})}</div>`;
-    return `<div class="grid four" style="margin-bottom:16px">${metric('₾',t('balance'),cash(s.income-s.expense))}${metric('↗',t('income'),cash(s.income))}${metric('↘',t('expense'),cash(s.expense))}${metric('◉',t('monthFee'),db.fee?cash(db.fee):t('notSet'))}</div><div class="notice">${e(t('ledgerNotice'))}</div><div class="grid two">${box(admin()?t('txNew'):t('myHistory'),form)}${box(t('overview'),`<div class="items">${reportItem({title:t('income'),right:cash(s.income),class:'text-green'})}${reportItem({title:t('expense'),right:cash(s.expense),class:'text-red'})}${reportItem({title:t('balance'),right:cash(s.income-s.expense)})}</div>`)}</div><div class="section-gap">${box(t('tx'),`<div class="table-scroll"><table class="table"><thead><tr><th>${e(t('date'))}</th><th>${e(t('description'))}</th><th>${e(t('type'))}</th><th>${e(t('flat'))}</th><th>${e(t('amount'))}</th></tr></thead><tbody>${txRows}</tbody></table></div>`,admin()?`<button class="btn secondary small" data-export-csv>↓ ${e(t('report'))}</button>`:'')}</div>`;
+    return `<div class="grid four" style="margin-bottom:16px">${metric('₾',t('balance'),cash(s.income-s.expense))}${metric('↗',t('income'),cash(s.income))}${metric('↘',t('expense'),cash(s.expense))}${metric('◉',t('monthFee'),db.fee?cash(db.fee):t('notSet'))}</div><div class="notice">${e(t('ledgerNotice'))}</div><div class="grid two">${box(admin()?t('txNew'):t('myHistory'),form)}${box(t('overview'),`<div class="items">${reportItem({title:t('income'),right:cash(s.income),class:'text-green'})}${reportItem({title:t('expense'),right:cash(s.expense),class:'text-red'})}${reportItem({title:t('balance'),right:cash(s.income-s.expense)})}</div>`)}</div>${admin()?monthlyReport():''}<div class="section-gap">${box(t('tx'),`<div class="table-scroll"><table class="table"><thead><tr><th>${e(t('date'))}</th><th>${e(t('description'))}</th><th>${e(t('type'))}</th><th>${e(t('flat'))}</th><th>${e(t('amount'))}</th></tr></thead><tbody>${txRows}</tbody></table></div>`,admin()?`<button class="btn secondary small" data-export-csv>↓ ${e(t('report'))}</button>`:'')}</div>`;
   };
   const repairs=()=>{
     const tickets=db.tickets.slice().reverse().map(q=>`<div class="item"><div><strong>⚒ ${e(q.title)}</strong><small>${e(q.text)} · № ${q.flat} · ${e(q.date)}</small></div><div style="display:grid;gap:7px;justify-items:end"><span class="pill ${e(q.status)}">${e(t(q.status))}</span>${admin()?`<select class="filter" style="width:125px;font-size:11px;padding:6px" data-ticket="${e(q.id)}"><option value="open" ${q.status==='open'?'selected':''}>${e(t('open'))}</option><option value="progress" ${q.status==='progress'?'selected':''}>${e(t('progress'))}</option><option value="done" ${q.status==='done'?'selected':''}>${e(t('done'))}</option></select>`:''}</div></div>`).join('')||empty();
@@ -305,6 +335,17 @@
   }
   function download(filename,mime,contents){const blob=new Blob([contents],{type:mime}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);}
   function csv(){const rows=[['date','type','description','flat','amount','purpose','period'],...db.txs.map(q=>[q.date,q.type,q.description,q.flat||'',q.amount,q.purpose||'',q.period||''])];download('rustaveli16-cashbook.csv','text/csv;charset=utf-8','\ufeff'+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n'));}
+
+  function monthlyCsv(){
+    const month=db.reportMonth,fee=Number(db.fee)||0;
+    const rows=[['apartment','month','charge_gel','paid_gel','balance_gel','status'],...db.units.map(u=>{
+      const paid=currentMonthPayments(u.number,month);
+      const status=fee<=0?'not_configured':paid>=fee?'paid':paid>0?'partial':'unpaid';
+      return [u.number,month,fee,paid,Math.max(0,fee-paid),status];
+    })];
+    const csvText='\uFEFF'+rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n');
+    download('rustaveli16-monthly-'+month+'.csv','text/csv;charset=utf-8',csvText);
+  }
   const formValues=form=>Object.fromEntries(new FormData(form).entries());
   document.addEventListener('submit',ev=>{
     if(!ev.target.matches('form[id$="-form"]'))return;ev.preventDefault();const f=ev.target,d=formValues(f);
@@ -327,6 +368,7 @@
   });
   document.addEventListener('change',ev=>{
     const x=ev.target;
+    if(x.id==='report-month'&&/^[0-9]{4}-(0[1-9]|1[0-2])$/.test(x.value)){db.reportMonth=x.value;persist();render();return;}
     if(x.dataset.unit&&admin()){const rec=db.units.find(q=>q.number===Number(x.dataset.unit));if(rec&&['floor','entrance'].includes(x.dataset.edit)){rec[x.dataset.edit]=Number(x.value);selectedUnit=rec.number;if(rec.entrance)db.entranceView=rec.entrance;persist();render();if(x.closest('.unit-details'))document.querySelector('.unit-details')?.scrollIntoView({block:'nearest'});}}
     if(x.dataset.ticket&&admin()){const rec=db.tickets.find(q=>q.id===x.dataset.ticket);if(rec&&['open','progress','done'].includes(x.value)){rec.status=x.value;persist();render();}}
     if(x.id==='demo-flat'){db.flat=Number(x.value);persist();render();}
@@ -336,7 +378,7 @@
     db.search=ev.target.value;const cursor=ev.target.selectionStart;render();const el=document.getElementById('search');el?.focus();el?.setSelectionRange(cursor,cursor);
   });
   document.addEventListener('click',ev=>{
-    const x=ev.target.closest('[data-nav],[data-role],[data-lang],[data-vote],[data-remove-shop],[data-export-csv],[data-reset],[data-backup],[data-plan-unit],[data-entrance],[data-close-unit],[data-goto-finances],[data-more],[data-more-close],[data-review],[data-check],[data-clear-checks],[data-sample]');if(!x)return;
+    const x=ev.target.closest('[data-nav],[data-role],[data-lang],[data-vote],[data-remove-shop],[data-export-csv],[data-export-month],[data-reset],[data-backup],[data-plan-unit],[data-entrance],[data-close-unit],[data-goto-finances],[data-more],[data-more-close],[data-review],[data-check],[data-clear-checks],[data-sample]');if(!x)return;
     if(x.hasAttribute('data-sample')){loadSample();return;}
     if(x.hasAttribute('data-check')){if(TEST_STEPS.some(q=>q.key===x.dataset.check)){db.testProgress[x.dataset.check]=!db.testProgress[x.dataset.check];persist();render();}return;}
     if(x.hasAttribute('data-clear-checks')){db.testProgress={};persist();render();return;}
@@ -358,6 +400,7 @@
     if(x.dataset.role){db.role=x.dataset.role;db.tab=x.hasAttribute('data-registration')?'registration':'home';selectedUnit=null;moreOpen=false;persist();render();return;}
     if(x.dataset.lang){db.lang=x.dataset.lang;persist();render();return;}
     if(x.hasAttribute('data-export-csv')){if(admin())csv();return;}
+    if(x.hasAttribute('data-export-month')){if(admin())monthlyCsv();return;}
     if(x.hasAttribute('data-backup')){if(admin())download('rustaveli16-demo-backup.json','application/json',JSON.stringify(db,null,2));return;}
     if(x.hasAttribute('data-remove-shop')){if(!admin())return notify(t('adminOnly'));db.shops=db.shops.filter(q=>q.id!==x.dataset.removeShop);persist();render();notify(t('deleted'));return;}
     if(x.hasAttribute('data-vote')){if(admin())return notify(t('adminOnly'));const poll=db.polls.find(q=>q.id===x.dataset.vote);if(!poll)return;if(poll.voters.includes(db.flat))return notify(t('already'));if(!['yes','no'].includes(x.dataset.choice))return;poll[x.dataset.choice]++;poll.voters.push(db.flat);persist();render();notify(t('cast'));return;}
