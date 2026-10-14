@@ -151,6 +151,56 @@ service cloud.firestore {
         request.resource.data.updatedAt == request.time;
       allow delete: if false;
     }
+
+    // Monthly uniform charge in GEL tetri, for all 60 apartments.
+    // Immutable after creation: historical fees cannot silently be rewritten.
+    match /months/{month} {
+      allow get, list: if signed() &&
+        (chairman() || exists(/databases/$(database)/documents/members/$(request.auth.uid)));
+      allow create: if chairman() &&
+        month.matches('^20[0-9]{2}-(0[1-9]|1[0-2])
+  }
+}) &&
+        request.resource.data.keys().hasAll(['month','amountTetri','createdAt','createdBy']) &&
+        request.resource.data.keys().hasOnly(['month','amountTetri','createdAt','createdBy']) &&
+        request.resource.data.month == month &&
+        request.resource.data.amountTetri is int &&
+        request.resource.data.amountTetri >= 0 &&
+        request.resource.data.amountTetri <= 10000000 &&
+        request.resource.data.createdBy == request.auth.uid &&
+        request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
+    }
+
+    // Audit-friendly append-only cash receipts. No payment processing or bank connection.
+    // Ordinary residents must query only their approved apartment, never a full collection.
+    match /payments/{paymentId} {
+      allow get, list: if signed() &&
+        (chairman() ||
+          (exists(/databases/$(database)/documents/members/$(request.auth.uid)) &&
+          resource.data.apartment ==
+            get(/databases/$(database)/documents/members/$(request.auth.uid)).data.apartment));
+      allow create: if chairman() &&
+        request.resource.data.keys().hasAll([
+          'apartment','month','amountTetri','note','createdBy','createdAt'
+        ]) &&
+        request.resource.data.keys().hasOnly([
+          'apartment','month','amountTetri','note','createdBy','createdAt'
+        ]) &&
+        validFlat(request.resource.data.apartment) &&
+        request.resource.data.month is string &&
+        request.resource.data.month.matches('^20[0-9]{2}-(0[1-9]|1[0-2])
+  }
+}) &&
+        request.resource.data.amountTetri is int &&
+        request.resource.data.amountTetri > 0 &&
+        request.resource.data.amountTetri <= 100000000 &&
+        request.resource.data.note is string &&
+        request.resource.data.note.size() <= 250 &&
+        request.resource.data.createdBy == request.auth.uid &&
+        request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
+    }
     match /{document=**} { allow read,write: if false; }
   }
 }
