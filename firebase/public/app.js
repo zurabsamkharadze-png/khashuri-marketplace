@@ -22,7 +22,7 @@ ka:{
   noFinance:'კენჭისყრა დაემატება შემდეგ ეტაპზე.',
   finance:'ფინანსები',month:'თვე',monthlyFee:'თვიური შენატანი',setMonthlyFee:'შენატანის დადგენა',feeConfirm:'დავაფიქსიროთ ამ თვის შენატანი? შემდეგ ცვლილება შეუძლებელია.',feeMissing:'ამ თვის შენატანი ჯერ არ არის მითითებული.',
   paid:'შემოსულია',due:'დარიცხულია',debt:'დავალიანება',credit:'ზედმეტობა',noPayments:'ჩანაწერები არ არის',recordPayment:'ხელით გადახდის დამატება',paymentNote:'შენიშვნა',amountGel:'თანხა (₾)',allUnits:'60 ბინის ანგარიში',downloadReport:'CSV ანგარიშის გადმოწერა',
-  immutableLedger:'ეს არის ხელით აღრიცხვა და არა ონლაინ გადახდა. ჩაწერილი ოპერაციები არ იშლება; შეცდომის შემთხვევაში საჭირო იქნება შემასწორებელი ჩანაწერის მექანიზმი.',
+  immutableLedger:'ეს არის ხელით აღრიცხვა და არა ონლაინ გადახდა. ჩაწერილი ოპერაციები არ იშლება; შეცდომის შემთხვევაში საჭირო იქნება შემასწორებელი ჩანაწერის მექანიზმი. წინა თვეების ნაშთები არ გადადის ავტომატურად.',accessExpired:'ბინაზე წინა წვდომა გაუქმებულია. შეგიძლიათ ახალი განაცხადი გააგზავნოთ.',
   news:'განცხადებები',newNews:'ახალი განცხადება',headline:'სათაური',content:'ტექსტი',publish:'გამოქვეყნება',
   repairs:'სარემონტო განაცხადები',newRepair:'პრობლემის შეტყობინება',repairDetails:'პრობლემის აღწერა',sendRepair:'განაცხადის გაგზავნა',
   repairStatus:'მდგომარეობა',open:'ახალი',progress:'მიმდინარეობს',done:'დასრულებულია',setProgress:'მუშაობაში გადაყვანა',setDone:'დასრულება',
@@ -38,7 +38,7 @@ ru:{
   noFinance:'Голосования добавим после проверки защищённой регистрации.',
   finance:'Финансы',month:'Месяц',monthlyFee:'Ежемесячный взнос',setMonthlyFee:'Установить взнос',feeConfirm:'Зафиксировать взнос на этот месяц? После сохранения его нельзя изменить.',feeMissing:'Взнос за этот месяц пока не установлен.',
   paid:'Поступило',due:'Начислено',debt:'Задолженность',credit:'Переплата',noPayments:'Записей пока нет',recordPayment:'Записать оплату вручную',paymentNote:'Примечание',amountGel:'Сумма (₾)',allUnits:'Отчёт по 60 квартирам',downloadReport:'Скачать CSV',
-  immutableLedger:'Это ручной учёт, а не приём онлайн-платежей. Записанные поступления нельзя удалять; для исправления ошибок позже понадобится механизм корректирующих операций.',
+  immutableLedger:'Это ручной учёт, а не приём онлайн-платежей. Записи нельзя удалять; для исправления ошибок позже понадобится механизм корректирующих операций. Переплаты и долги прошлых месяцев пока не переносятся автоматически.',accessExpired:'Ранее одобренный доступ к квартире больше не действует. Можно подать новую заявку.',
   news:'Объявления',newNews:'Новое объявление',headline:'Заголовок',content:'Текст объявления',publish:'Опубликовать',
   repairs:'Заявки на ремонт',newRepair:'Сообщить о проблеме',repairDetails:'Описание проблемы',sendRepair:'Отправить заявку',
   repairStatus:'Статус',open:'Новая',progress:'В работе',done:'Завершена',setProgress:'В работу',setDone:'Завершить',
@@ -170,7 +170,7 @@ function renderFinance(){
   const paymentForm='<form id="payment-form" class="grid">'+
     sel(t('apartment'),'apartment',Array.from({length:60},(_,i)=>i+1),1)+
     '<label>'+esc(t('amountGel'))+'<input type="number" name="amount" step="0.01" min="0.01" max="1000000" required></label>'+
-    '<div class="wide">'+fld(t('paymentNote'),'note','text','','maxlength="250"')+'</div>'+
+    '<div class="wide"><label>'+esc(t('paymentNote'))+'<input name="note" type="text" maxlength="250"></label></div>'+
     '<div class="wide"><button type="submit" class="btn green">'+esc(t('recordPayment'))+'</button></div></form>';
   const data=Array.from({length:60},(_,i)=>i+1).map(n=>{const paid=totalsFor(n),due=fee??0;return '<tr><td>№ '+n+'</td><td>'+money(due)+'</td><td>'+money(paid)+'</td><td>'+money(Math.max(0,due-paid))+'</td><td>'+money(Math.max(0,paid-due))+'</td></tr>';}).join('');
   const report='<div class="table-wrap"><table><thead><tr>'+[t('apartment'),t('due'),t('paid'),t('debt'),t('credit')].map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+data+'</tbody></table></div><div class="actions">'+btn('↓ '+t('downloadReport'),'download-finance')+'</div>';
@@ -189,7 +189,10 @@ function renderResident(){
       renderFinance()+card(t('news'),listAnnouncements())+
       card(t('newRepair'),form)+card(t('repairs'),listRepairs(false));
   }
-  const note=application?'<div class="notice '+(application.status==='rejected'?'warning':'')+'">'+status(application.status)+' '+esc(application.status==='pending'?t('waiting'):t('rejectedMsg'))+'</div>':'';
+  const revoked=application?.status==='approved'&&!membership;
+  const note=application?'<div class="notice '+(application.status==='rejected'||revoked?'warning':'')+'">'+
+    (revoked?'':status(application.status)+' ')+
+    esc(revoked?t('accessExpired'):application.status==='pending'?t('waiting'):t('rejectedMsg'))+'</div>':'';
   if(application?.status==='pending')return card(t('application'),note);
   const form='<form id="application-form" class="grid">'+sel(t('entrance'),'entrance',[1,2,3],1)+sel(t('floor'),'floor',[2,3,4,5,6,7,8],2)+
     sel(t('apartment'),'apartment',Array.from({length:60},(_,i)=>i+1),1)+
