@@ -94,8 +94,8 @@
 (() => {
   'use strict';
   const KEY = 'chveni-korpusi-rustaveli16-demo-v1';
-  const icons = {guide:'☑',home:'⌂',apartments:'▦',finances:'₾',repairs:'⚒',polls:'☷',news:'◉',settings:'⚙',registration:'♙',applications:'☷'};
-  const sections = ['home','guide','apartments','finances','repairs','polls','news','registration','applications','settings'];
+  const icons = {guide:'☑',home:'⌂',apartments:'▦',finances:'₾',repairs:'⚒',polls:'☷',news:'◉',settings:'⚙',roster:'♙',registration:'♙',applications:'☷'};
+  const sections = ['home','guide','apartments','roster','finances','repairs','polls','news','registration','applications','settings'];
   const tr = {
     ru: {
       building:'Наш корпус', address:'Хашури · Руставели 16', demo:'ДЕМОВЕРСИЯ. Данные хранятся только на этом устройстве.',
@@ -162,6 +162,13 @@
   Object.assign(tr.ka,{
     importDemo:'სატესტო ასლის აღდგენა',importConfirm:'ჩავანაცვლოთ ამ მოწყობილობის სატესტო მონაცემები ფაილის მონაცემებით? ჩანაცვლებამდე ჩამოიტვირთება სარეზერვო ასლი.',importSuccess:'სატესტო მონაცემები აღდგენილია',importInvalid:'სატესტო ასლის ფაილი არასწორია',importTooLarge:'ფაილი ძალიან დიდია',importNotice:'შეიტანეთ მხოლოდ სატესტო ინფორმაცია. JSON ფაილი დაშიფრული არ არის; მასში არ შეინახოთ მცხოვრებლების რეალური მონაცემები.'
   });
+
+  Object.assign(tr.ru,{
+    roster:'База жильцов',rosterFull:'Реестр жильцов (демо)',rosterSecurity:'ВНИМАНИЕ: вход председателя сейчас не защищён. Хранение только в браузере. Не вводите реальные ФИО и телефоны соседей.',rosterCount:'Записей жильцов',rosterUnits:'Квартир с записями',rosterEmpty:'Пока нет тестовых жильцов',rosterFirst:'Имя',rosterLast:'Фамилия',rosterPhone:'Телефон',rosterEntrance:'Подъезд',rosterFloor:'Этаж',rosterFlat:'Квартира',rosterSearch:'Поиск по имени, фамилии, квартире или телефону',rosterAllEntrances:'Все подъезды',rosterAdd:'Добавить тестовую запись',rosterEdit:'Изменить',rosterSave:'Сохранить запись',rosterDelete:'Удалить',rosterCancel:'Отмена',rosterExport:'Экспорт CSV (только тестовые записи)',rosterMismatch:'Эта квартира привязана к другому подъезду или этажу. Проверьте схему квартир.',rosterInvalid:'Проверьте имя, фамилию, номер квартиры и формат телефона.',rosterDeleted:'Тестовая запись удалена',rosterDeleteConfirm:'Удалить эту тестовую запись?',rosterNoAuth:'Реестр доступен только в демонстрационном режиме председателя. Реальную защиту доступа ещё предстоит настроить.',rosterDemoTip:'Для просмотра функций используй вымышленные имена и несуществующие телефоны.',rosterSample:'Добавить вымышленные примеры',rosterSampleAdded:'Тестовые жильцы добавлены'
+  });
+  Object.assign(tr.ka,{
+    roster:'მცხოვრებთა ბაზა',rosterFull:'მცხოვრებთა რეესტრი (დემო)',rosterSecurity:'ყურადღება: თავმჯდომარის წვდომა ჯერ დაცული არ არის. ინფორმაცია ინახება მხოლოდ ბრაუზერში. არ შეიყვანოთ მეზობლების რეალური სახელები და ტელეფონები.',rosterCount:'მცხოვრებთა ჩანაწერები',rosterUnits:'ბინები ჩანაწერებით',rosterEmpty:'სატესტო მცხოვრებლები ჯერ არ არიან',rosterFirst:'სახელი',rosterLast:'გვარი',rosterPhone:'ტელეფონი',rosterEntrance:'სადარბაზო',rosterFloor:'სართული',rosterFlat:'ბინა',rosterSearch:'ძებნა სახელით, გვარით, ბინით ან ტელეფონით',rosterAllEntrances:'ყველა სადარბაზო',rosterAdd:'სატესტო ჩანაწერის დამატება',rosterEdit:'შეცვლა',rosterSave:'ჩანაწერის შენახვა',rosterDelete:'წაშლა',rosterCancel:'გაუქმება',rosterExport:'CSV ექსპორტი (მხოლოდ ტესტი)',rosterMismatch:'ბინა სხვა სადარბაზოს ან სართულს ეკუთვნის. გადაამოწმეთ ბინების სქემა.',rosterInvalid:'შეამოწმეთ სახელი, გვარი, ბინა და ტელეფონის ფორმატი.',rosterDeleted:'სატესტო ჩანაწერი წაიშალა',rosterDeleteConfirm:'წავშალოთ ეს სატესტო ჩანაწერი?',rosterNoAuth:'რეესტრი ხელმისაწვდომია მხოლოდ თავმჯდომარის სადემონსტრაციო რეჟიმში. ნამდვილი დაცვა ჯერ არ არის გამართული.',rosterDemoTip:'გამოიყენეთ გამოგონილი სახელები და არარსებული ნომრები.',rosterSample:'გამოგონილი მაგალითების დამატება',rosterSampleAdded:'სატესტო მცხოვრებლები დაემატა'
+  });
   const TEST_STEPS=[
     {key:'home',tab:'home',label:'guideStepHome',hint:'guideHintHome'},
     {key:'apartments',tab:'apartments',label:'guideStepApartments',hint:'guideHintApartments'},
@@ -171,14 +178,18 @@
     {key:'roles',tab:'home',label:'guideStepRoles',hint:'guideHintRoles'},
     {key:'languages',tab:'home',label:'guideStepLanguages',hint:'guideHintLanguages'}
   ];
-  const seed = () => ({lang:'ka',role:'admin',tab:'home',flat:24,fee:0,entranceView:1,units:Array.from({length:60},(_,i)=>({number:i+1,entrance:0,floor:0})),shops:[],txs:[],tickets:[],polls:[],posts:[],applications:[],search:''});
+  const seed = () => ({lang:'ka',role:'admin',tab:'home',flat:24,fee:0,entranceView:1,units:Array.from({length:60},(_,i)=>({number:i+1,entrance:0,floor:0})),shops:[],txs:[],tickets:[],polls:[],posts:[],applications:[],residents:[],rosterSearch:'',rosterEntrance:0,search:''});
   let db;
   try {db=JSON.parse(localStorage.getItem(KEY)); if(!db||!Array.isArray(db.units)||db.units.length!==60) db=seed();} catch {db=seed();}
   if(!Array.isArray(db.applications))db.applications=[];
+  if(!Array.isArray(db.residents))db.residents=[];
+  if(typeof db.rosterSearch!=='string')db.rosterSearch='';
+  if(![0,1,2,3].includes(Number(db.rosterEntrance)))db.rosterEntrance=0;
   if(!db.testProgress||typeof db.testProgress!=='object'||Array.isArray(db.testProgress))db.testProgress={};
   if(!/^[0-9]{4}-(0[1-9]|1[0-2])$/.test(db.reportMonth||''))db.reportMonth=(new Date().getFullYear())+'-'+String(new Date().getMonth()+1).padStart(2,'0');
   const el=document.getElementById('app');
   let selectedUnit=null;
+  let editingResident=null;
   let moreOpen=false;
   const admin=()=>db.role==='admin';
   const t=k=>tr[db.lang]?.[k]??k;
@@ -218,6 +229,11 @@
     if(!db.tickets.length)db.tickets.push({id:uid(),flat:1,title:'[TEST] Staircase lamp',text:'[TEST] Check light on floor 2',status:'open',date:now()});
     if(!db.polls.length)db.polls.push({id:uid(),question:'[TEST] Paint the entrance?',yes:0,no:0,voters:[],date:now()});
     if(!db.posts.length)db.posts.push({id:uid(),title:'[TEST] Resident meeting',text:'[TEST] Example announcement. No actual event is scheduled.',date:now()});
+    if(!db.residents.length){
+      db.residents.push({id:uid(),first:'სატესტო',last:'მცხოვრები A',entrance:1,floor:2,flat:1,phone:'000000000'});
+      db.residents.push({id:uid(),first:'სატესტო',last:'მცხოვრები B',entrance:1,floor:2,flat:1,phone:'000000001'});
+      db.residents.push({id:uid(),first:'სატესტო',last:'მცხოვრები C',entrance:2,floor:2,flat:21,phone:'000000002'});
+    }
     db.sampleInstalled=true;db.tab='home';persist();render();notify(t('guideSampleAdded'));
   };
   const floors=()=>`<div class="building">${[8,7,6,5,4,3,2,1].map(f=>`<div class="floor ${f===1?'commercial':''}"><b>${f} · ${e(t('floor'))}</b><small>${f===1?'🏪 '+e(t('commercialFloor')):'⌂ '+e(t('residential'))}</small></div>`).join('')}</div>`;
@@ -326,6 +342,33 @@
     const form=prior?`<div class="empty">◎ ${e(t('applicationExisting'))}</div>`:`<p class="help">${e(t('registrationHelp'))}</p><form id="registration-form" class="form"><div class="field all"><label>${e(t('demoName'))}</label><input name="name" placeholder="${e(t('demoNamePlaceholder'))}" maxlength="50" required autocomplete="off"/></div><div class="field"><label>${e(t('entrance'))}</label><select name="entrance"><option value="1">№1</option><option value="2">№2</option><option value="3">№3</option></select></div><div class="field"><label>${e(t('flat'))}</label><select name="flat">${db.units.map(q=>`<option value="${q.number}">№ ${q.number}</option>`).join('')}</select></div><div class="field all"><label>${e(t('residentType'))}</label><select name="type"><option value="owner">${e(t('owner'))}</option><option value="resident">${e(t('tenant'))}</option></select></div><div class="field all"><p class="small-help">📱 ${e(t('phoneLater'))}</p></div><div class="field all"><label class="check-label"><input type="checkbox" name="demoOnly" value="yes" required/> ${e(t('testNotice'))}</label></div><div class="field all"><button class="btn green" type="submit">${e(t('submitApplication'))} →</button></div></form>`;
     return head+`<div class="grid two">${box(t('registrationTitle'),form)}${box(t('myApplication'),prev||'<p class="help">'+e(t('localWarning'))+'</p><div class="empty">'+e(t('none'))+'</div>')}</div>`;
   };
+
+  const roster=()=>{
+    if(!admin())return box(t('roster'),'<div class="notice danger-notice">'+e(t('rosterNoAuth'))+'</div>');
+    const all=db.residents;
+    const filter=String(db.rosterSearch||'').trim().toLocaleLowerCase();
+    const ent=Number(db.rosterEntrance)||0;
+    const listed=all.filter(q=>(!ent||q.entrance===ent)&&(!filter||[q.first,q.last,q.phone,q.flat].some(v=>String(v??'').toLocaleLowerCase().includes(filter)))).sort((a,b)=>a.flat-b.flat||a.last.localeCompare(b.last));
+    const edit=all.find(q=>q.id===editingResident)||null;
+    const selectOpts=(range,selected)=>range.map(n=>'<option value="'+n+'"'+(n===selected?' selected':'')+'>'+n+'</option>').join('');
+    const form='<form id="roster-form" class="form">'+
+      '<div class="field"><label>'+e(t('rosterFirst'))+'</label><input name="first" required maxlength="55" autocomplete="off" placeholder="სატესტო" value="'+e(edit?.first||'')+'"></div>'+
+      '<div class="field"><label>'+e(t('rosterLast'))+'</label><input name="last" required maxlength="55" autocomplete="off" placeholder="მცხოვრები" value="'+e(edit?.last||'')+'"></div>'+
+      '<div class="field"><label>'+e(t('rosterEntrance'))+'</label><select name="entrance">'+selectOpts([1,2,3],edit?.entrance||1)+'</select></div>'+
+      '<div class="field"><label>'+e(t('rosterFloor'))+'</label><select name="floor">'+selectOpts([2,3,4,5,6,7,8],edit?.floor||2)+'</select></div>'+
+      '<div class="field"><label>'+e(t('rosterFlat'))+'</label><select name="flat">'+selectOpts(Array.from({length:60},(_,i)=>i+1),edit?.flat||1)+'</select></div>'+
+      '<div class="field"><label>'+e(t('rosterPhone'))+'</label><input name="phone" type="tel" required inputmode="tel" maxlength="25" autocomplete="off" placeholder="000000000" value="'+e(edit?.phone||'')+'"></div>'+
+      '<div class="field all"><button type="submit" class="btn green">'+e(t('rosterSave'))+'</button> '+(edit?'<button type="button" class="btn secondary" data-roster-cancel>'+e(t('rosterCancel'))+'</button>':'')+'</div></form>';
+    const filters='<div class="pill-row" style="margin-bottom:12px;align-items:end"><div class="field" style="flex:2;min-width:170px"><label>'+e(t('rosterSearch'))+'</label><input class="filter" id="roster-search" value="'+e(db.rosterSearch||'')+'" placeholder="'+e(t('rosterSearch'))+'"></div><div class="field" style="flex:1;min-width:130px"><label>'+e(t('rosterEntrance'))+'</label><select id="roster-filter-entrance" class="filter"><option value="0">'+e(t('rosterAllEntrances'))+'</option>'+[1,2,3].map(n=>'<option value="'+n+'"'+(n===ent?' selected':'')+'>'+e(t('rosterEntrance'))+' '+n+'</option>').join('')+'</select></div></div>';
+    const rows=listed.map(q=>'<tr><td><strong>'+e(q.first)+'</strong></td><td>'+e(q.last)+'</td><td>'+q.entrance+'</td><td>'+q.floor+'</td><td>№ '+q.flat+'</td><td>'+e(q.phone)+'</td><td><div class="pill-row"><button class="btn secondary small" data-roster-edit="'+e(q.id)+'">✎ '+e(t('rosterEdit'))+'</button><button class="btn danger small" data-roster-delete="'+e(q.id)+'">× '+e(t('rosterDelete'))+'</button></div></td></tr>').join('');
+    const table='<div class="table-scroll"><table class="table"><thead><tr><th>'+e(t('rosterFirst'))+'</th><th>'+e(t('rosterLast'))+'</th><th>'+e(t('rosterEntrance'))+'</th><th>'+e(t('rosterFloor'))+'</th><th>'+e(t('rosterFlat'))+'</th><th>'+e(t('rosterPhone'))+'</th><th></th></tr></thead><tbody>'+(rows||'<tr><td colspan="7">'+e(t('rosterEmpty'))+'</td></tr>')+'</tbody></table></div>';
+    const countUnits=new Set(all.map(q=>q.flat)).size;
+    const stats='<div class="grid two"><div class="card metric"><span class="label">'+e(t('rosterCount'))+'</span><strong>'+all.length+'</strong></div><div class="card metric"><span class="label">'+e(t('rosterUnits'))+'</span><strong>'+countUnits+' / 60</strong></div></div>';
+    return '<div class="notice danger-notice">🔒 '+e(t('rosterSecurity'))+'</div>'+stats+
+      '<div class="grid two section-gap">'+box(edit?t('rosterEdit'):t('rosterAdd'),'<p class="help">'+e(t('rosterDemoTip'))+'</p>'+form)+
+      box(t('rosterFull'),'<p class="help">'+e(t('rosterDemoTip'))+'</p><button class="btn secondary" data-roster-sample>◉ '+e(t('rosterSample'))+'</button>')+'</div>'+
+      '<div class="section-gap">'+box(t('rosterFull'),filters+table,'<button class="btn secondary small" data-roster-csv>↓ CSV</button>')+'</div>';
+  };
   const applications=()=>{
     if(!admin())return registration();
     const waiting=db.applications.filter(q=>q.status==='pending').length;
@@ -335,10 +378,10 @@
   const settings=()=>!admin()?box(t('settings'),`<div class="notice">${e(t('adminOnly'))}</div>`):`<div class="grid two">${box(t('setFee'),`<p class="help">${e(t('feeNotice'))}</p><form id="settings-form" class="form"><div class="field"><label>${e(t('amount'))}</label><input type="number" step="0.01" min="0" max="100000" name="fee" value="${e(db.fee)}" required /></div><div class="field" style="align-self:end"><button class="btn green" type="submit">${e(t('save'))}</button></div></form><div class="pill-row section-gap"><button class="btn secondary small" data-backup>↓ ${e(t('exportBackup'))}</button><label class="btn secondary small" style="cursor:pointer">↑ ${e(t('importDemo'))}<input id="import-demo" type="file" accept="application/json,.json" style="position:absolute;width:1px;height:1px;opacity:0;left:-9999px" /></label><button class="btn danger small" data-reset>${e(t('reset'))}</button></div>`)}${box(t('floorMap'),floors())}</div>`;
   function render(){
     document.documentElement.lang=db.lang;
-    const nav=sections.filter(k=>admin()?k!=='registration':k!=='applications').map(k=>`<button class="nav-btn ${db.tab===k?'active':''}" data-nav="${k}"><span class="i">${icons[k]}</span>${e(t(k))}</button>`).join('');
-    const mobile=['home','apartments','finances','repairs'].map(k=>`<button data-nav="${k}" class="${db.tab===k?'active':''}"><span class="i">${icons[k]}</span>${e(t(k))}</button>`).join('')+`<button data-more class="${moreOpen||['guide','polls','news','settings','registration','applications'].includes(db.tab)?'active':''}"><span class="i">☷</span>${e(t('more'))}</button>`;
-    const tabs={home,guide,apartments,finances,repairs,polls,news,settings,registration,applications};
-    el.innerHTML=`<div class="app"><aside class="side"><div class="brand"><div class="logo">⌂</div><div><strong>ჩვენი კორპუსი</strong><small>რუსთაველის 16 · ხაშური</small></div></div><nav class="nav">${nav}</nav><div class="side-foot">🔒 ${e(t('security'))}</div></aside><main class="main"><header class="top"><div><span class="eyebrow">${e(t('address'))}</span><div class="top-name">${e(t('building'))}</div></div><div class="switches"><button class="switch ${admin()?'selected':''}" data-role="admin">${e(t('admin'))}</button><button class="switch ${!admin()?'selected':''}" data-role="resident">${e(t('resident'))}</button><button class="switch" data-lang="${db.lang==='ka'?'ru':'ka'}">${db.lang==='ka'?'🇷🇺 RU':'🇬🇪 KA'}</button></div></header><div class="wrap"><div class="page-heading"><div><span class="eyebrow">${e(admin()?t('overview'):t('residentHome'))}</span><h1>${e(t(db.tab))}</h1><p>${e(t('house'))}</p></div><span class="badge">● ${e(t(db.role))}</span></div><div class="notice">⚠ ${e(t('demo'))}</div>${tabs[db.tab]?.()||home()}<div class="footer-note">${e(t('security'))}</div></div></main><nav class="bottom">${mobile}</nav>${moreOpen?`<div class="more-backdrop" data-more-close></div><div class="more-sheet"><b>${e(t('more'))}</b>${['guide','polls','news','settings',admin()?'applications':'registration'].map(k=>`<button data-nav="${k}" class="${db.tab===k?'active':''}"><span>${icons[k]}</span>${e(t(k))}</button>`).join('')}</div>`:''}</div>`;
+    const nav=sections.filter(k=>admin()?k!=='registration':!['applications','roster'].includes(k)).map(k=>`<button class="nav-btn ${db.tab===k?'active':''}" data-nav="${k}"><span class="i">${icons[k]}</span>${e(t(k))}</button>`).join('');
+    const mobile=['home','apartments','finances','repairs'].map(k=>`<button data-nav="${k}" class="${db.tab===k?'active':''}"><span class="i">${icons[k]}</span>${e(t(k))}</button>`).join('')+`<button data-more class="${moreOpen||['guide','polls','news','settings','registration','applications','roster'].includes(db.tab)?'active':''}"><span class="i">☷</span>${e(t('more'))}</button>`;
+    const tabs={home,guide,apartments,roster,finances,repairs,polls,news,settings,registration,applications};
+    el.innerHTML=`<div class="app"><aside class="side"><div class="brand"><div class="logo">⌂</div><div><strong>ჩვენი კორპუსი</strong><small>რუსთაველის 16 · ხაშური</small></div></div><nav class="nav">${nav}</nav><div class="side-foot">🔒 ${e(t('security'))}</div></aside><main class="main"><header class="top"><div><span class="eyebrow">${e(t('address'))}</span><div class="top-name">${e(t('building'))}</div></div><div class="switches"><button class="switch ${admin()?'selected':''}" data-role="admin">${e(t('admin'))}</button><button class="switch ${!admin()?'selected':''}" data-role="resident">${e(t('resident'))}</button><button class="switch" data-lang="${db.lang==='ka'?'ru':'ka'}">${db.lang==='ka'?'🇷🇺 RU':'🇬🇪 KA'}</button></div></header><div class="wrap"><div class="page-heading"><div><span class="eyebrow">${e(admin()?t('overview'):t('residentHome'))}</span><h1>${e(t(db.tab))}</h1><p>${e(t('house'))}</p></div><span class="badge">● ${e(t(db.role))}</span></div><div class="notice">⚠ ${e(t('demo'))}</div>${tabs[db.tab]?.()||home()}<div class="footer-note">${e(t('security'))}</div></div></main><nav class="bottom">${mobile}</nav>${moreOpen?`<div class="more-backdrop" data-more-close></div><div class="more-sheet"><b>${e(t('more'))}</b>${['guide','polls','news','settings',admin()?'roster':'registration',admin()?'applications':'home'].map(k=>`<button data-nav="${k}" class="${db.tab===k?'active':''}"><span>${icons[k]}</span>${e(t(k))}</button>`).join('')}</div>`:''}</div>`;
   }
   function download(filename,mime,contents){const blob=new Blob([contents],{type:mime}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);}
   function csv(){const rows=[['date','type','description','flat','amount','purpose','period'],...db.txs.map(q=>[q.date,q.type,q.description,q.flat||'',q.amount,q.purpose||'',q.period||''])];download('rustaveli16-cashbook.csv','text/csv;charset=utf-8','\ufeff'+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n'));}
@@ -348,10 +391,11 @@
     if(!p||typeof p!=='object'||Array.isArray(p)||!Array.isArray(p.units)||p.units.length!==60)return false;
     if(!Number.isFinite(Number(p.fee))||Number(p.fee)<0||Number(p.fee)>100000)return false;
     if(!['ka','ru'].includes(p.lang)||!['admin','resident'].includes(p.role))return false;
-    if(!['home','guide','apartments','finances','repairs','polls','news','settings','registration','applications'].includes(p.tab))return false;
+    if(!['home','guide','apartments','roster','finances','repairs','polls','news','settings','registration','applications'].includes(p.tab))return false;
     if(!Number.isInteger(Number(p.flat))||Number(p.flat)<1||Number(p.flat)>60)return false;
     const numbers=p.units.map(u=>u?.number);
     if(new Set(numbers).size!==60||p.units.some(u=>!u||!Number.isInteger(u.number)||u.number<1||u.number>60||![0,1,2,3].includes(Number(u.entrance))||![0,2,3,4,5,6,7,8].includes(Number(u.floor))))return false;
+    if(p.residents!==undefined&&(!Array.isArray(p.residents)||p.residents.length>500||p.residents.some(q=>!q||typeof q.id!=='string'||q.id.length>90||typeof q.first!=='string'||q.first.length>55||typeof q.last!=='string'||q.last.length>55||typeof q.phone!=='string'||q.phone.length>25||![1,2,3].includes(q.entrance)||![2,3,4,5,6,7,8].includes(q.floor)||!Number.isInteger(q.flat)||q.flat<1||q.flat>60)))return false;
     for(const k of ['shops','txs','tickets','polls','posts','applications']){
       if(!Array.isArray(p[k])||p[k].length>3000)return false;
     }
@@ -376,6 +420,20 @@
   const formValues=form=>Object.fromEntries(new FormData(form).entries());
   document.addEventListener('submit',ev=>{
     if(!ev.target.matches('form[id$="-form"]'))return;ev.preventDefault();const f=ev.target,d=formValues(f);
+    if(f.id==='roster-form'){
+      if(!admin())return notify(t('adminOnly'));
+      const first=String(d.first||'').trim(),last=String(d.last||'').trim(),phone=String(d.phone||'').trim();
+      const entrance=Number(d.entrance),floor=Number(d.floor),flat=Number(d.flat);
+      if(first.length<2||first.length>55||last.length<2||last.length>55||!/^\+?[0-9()\s-]{7,25}$/.test(phone)||![1,2,3].includes(entrance)||!Number.isInteger(floor)||floor<2||floor>8||!Number.isInteger(flat)||flat<1||flat>60)return notify(t('rosterInvalid'));
+      const unit=db.units.find(q=>q.number===flat);
+      if(!unit||(unit.entrance&&unit.entrance!==entrance)||(unit.floor&&unit.floor!==floor))return notify(t('rosterMismatch'));
+      if(!editingResident&&db.residents.length>=500)return notify(t('rosterInvalid'));
+      const existing=db.residents.find(q=>q.id===editingResident);
+      if(existing)Object.assign(existing,{first,last,phone,entrance,floor,flat});
+      else db.residents.push({id:uid(),first,last,phone,entrance,floor,flat});
+      unit.entrance=entrance;unit.floor=floor;editingResident=null;
+      persist();render();notify(t('saved'));return;
+    }
     if(f.id==='shop-form'){if(!admin())return notify(t('adminOnly'));if(!d.name.trim())return notify(t('invalid'));db.shops.push({id:uid(),name:d.name.trim()});}
     else if(f.id==='tx-form'){if(!admin())return notify(t('adminOnly'));const amount=Number(d.amount),flat=d.flat?Number(d.flat):null;const type=d.type==='expense'?'expense':'income',purpose=type==='income'&&d.purpose==='fee'?'fee':'other';if(!Number.isFinite(amount)||amount<=0||!d.description.trim()||(flat!==null&&(!Number.isInteger(flat)||flat<1||flat>60))||(purpose==='fee'&&(!flat||!/^\d{4}-(0[1-9]|1[0-2])$/.test(d.period))))return notify(t('invalid'));db.txs.push({id:uid(),type,amount,description:d.description.trim(),flat,purpose,period:purpose==='fee'?d.period:null,date:now()});}
     else if(f.id==='ticket-form'){const flat=Number(d.flat);if(!Number.isInteger(flat)||flat<1||flat>60||!d.title.trim()||!d.text.trim())return notify(t('invalid'));db.tickets.push({id:uid(),flat,title:d.title.trim(),text:d.text.trim(),status:'open',date:now()});}
@@ -405,27 +463,43 @@
         if(!validateDemoBackup(candidate)){notify(t('importInvalid'));return;}
         if(!confirm(t('importConfirm')))return;
         download('rustaveli16-demo-before-import.json','application/json',JSON.stringify(db,null,2));
+        candidate.residents=Array.isArray(candidate.residents)?candidate.residents:[];
         candidate.testProgress=candidate.testProgress&&typeof candidate.testProgress==='object'&&!Array.isArray(candidate.testProgress)?candidate.testProgress:{};
         candidate.reportMonth=/^[0-9]{4}-(0[1-9]|1[0-2])$/.test(candidate.reportMonth||'')?candidate.reportMonth:todayMonth();
         db=candidate;selectedUnit=null;moreOpen=false;persist();render();notify(t('importSuccess'));
       }).catch(()=>notify(t('importInvalid')));
       return;
     }
+    if(x.id==='roster-filter-entrance'){db.rosterEntrance=Number(x.value)||0;persist();render();return;}
     if(x.id==='report-month'&&/^[0-9]{4}-(0[1-9]|1[0-2])$/.test(x.value)){db.reportMonth=x.value;persist();render();return;}
     if(x.dataset.unit&&admin()){const rec=db.units.find(q=>q.number===Number(x.dataset.unit));if(rec&&['floor','entrance'].includes(x.dataset.edit)){rec[x.dataset.edit]=Number(x.value);selectedUnit=rec.number;if(rec.entrance)db.entranceView=rec.entrance;persist();render();if(x.closest('.unit-details'))document.querySelector('.unit-details')?.scrollIntoView({block:'nearest'});}}
     if(x.dataset.ticket&&admin()){const rec=db.tickets.find(q=>q.id===x.dataset.ticket);if(rec&&['open','progress','done'].includes(x.value)){rec.status=x.value;persist();render();}}
     if(x.id==='demo-flat'){db.flat=Number(x.value);persist();render();}
   });
   document.addEventListener('input',ev=>{
+    if(ev.target.id==='roster-search'){
+      db.rosterSearch=ev.target.value.slice(0,100);const pos=ev.target.selectionStart;persist();render();const field=document.getElementById('roster-search');field?.focus();field?.setSelectionRange(pos,pos);return;
+    }
     if(ev.target.id!=='search')return;
     db.search=ev.target.value;const cursor=ev.target.selectionStart;render();const el=document.getElementById('search');el?.focus();el?.setSelectionRange(cursor,cursor);
   });
   document.addEventListener('click',ev=>{
-    const x=ev.target.closest('[data-nav],[data-role],[data-lang],[data-vote],[data-remove-shop],[data-export-csv],[data-export-month],[data-reset],[data-backup],[data-plan-unit],[data-entrance],[data-close-unit],[data-goto-finances],[data-more],[data-more-close],[data-review],[data-check],[data-clear-checks],[data-sample]');if(!x)return;
+    const x=ev.target.closest('[data-nav],[data-role],[data-lang],[data-vote],[data-remove-shop],[data-export-csv],[data-export-month],[data-reset],[data-backup],[data-plan-unit],[data-entrance],[data-close-unit],[data-goto-finances],[data-more],[data-more-close],[data-review],[data-check],[data-clear-checks],[data-sample],[data-roster-edit],[data-roster-delete],[data-roster-cancel],[data-roster-sample],[data-roster-csv]');if(!x)return;
     if(x.hasAttribute('data-sample')){loadSample();return;}
+    if(x.hasAttribute('data-roster-sample')){
+      if(!admin())return notify(t('adminOnly'));
+      const entries=[{flat:1,entrance:1,floor:2,first:'სატესტო',last:'მცხოვრები A',phone:'000000000'},{flat:1,entrance:1,floor:2,first:'სატესტო',last:'მცხოვრები B',phone:'000000001'},{flat:21,entrance:2,floor:2,first:'სატესტო',last:'მცხოვრები C',phone:'000000002'}];
+      for(const q of entries){if(db.residents.some(r=>r.first===q.first&&r.last===q.last&&r.flat===q.flat))continue;const u=db.units.find(t=>t.number===q.flat);if(u&&(u.entrance&&u.entrance!==q.entrance||u.floor&&u.floor!==q.floor))continue;if(u){u.entrance=q.entrance;u.floor=q.floor;}db.residents.push({...q,id:uid()});}
+      persist();render();notify(t('rosterSampleAdded'));return;
+    }
+    if(x.hasAttribute('data-roster-edit')){if(!admin())return notify(t('adminOnly'));if(!db.residents.some(q=>q.id===x.dataset.rosterEdit))return;editingResident=x.dataset.rosterEdit;render();window.scrollTo(0,0);return;}
+    if(x.hasAttribute('data-roster-cancel')){editingResident=null;render();return;}
+    if(x.hasAttribute('data-roster-delete')){if(!admin())return notify(t('adminOnly'));if(!confirm(t('rosterDeleteConfirm')))return;db.residents=db.residents.filter(q=>q.id!==x.dataset.rosterDelete);editingResident=null;persist();render();notify(t('rosterDeleted'));return;}
+    if(x.hasAttribute('data-roster-csv')){if(!admin())return notify(t('adminOnly'));const val=v=>{let txt=String(v??'');if(/^[=+@-]/.test(txt))txt="'"+txt;return '"'+txt.replace(/"/g,'""')+'"';};const lines=[['first_name','last_name','entrance','floor','apartment','phone'],...db.residents.map(q=>[q.first,q.last,q.entrance,q.floor,q.flat,q.phone])];download('rustaveli16-TEST-residents.csv','text/csv;charset=utf-8','\ufeff'+lines.map(r=>r.map(val).join(';')).join('\r\n'));return;}
+
     if(x.hasAttribute('data-check')){if(TEST_STEPS.some(q=>q.key===x.dataset.check)){db.testProgress[x.dataset.check]=!db.testProgress[x.dataset.check];persist();render();}return;}
     if(x.hasAttribute('data-clear-checks')){db.testProgress={};persist();render();return;}
-    if(x.dataset.nav){db.tab=x.dataset.nav;db.search='';moreOpen=false;persist();render();window.scrollTo(0,0);return;}
+    if(x.dataset.nav){db.tab=x.dataset.nav;db.search='';editingResident=null;moreOpen=false;persist();render();window.scrollTo(0,0);return;}
     if(x.hasAttribute('data-more')){moreOpen=!moreOpen;render();return;}
     if(x.hasAttribute('data-more-close')){moreOpen=false;render();return;}
     if(x.hasAttribute('data-entrance')){const n=Number(x.dataset.entrance);if([1,2,3].includes(n)){db.entranceView=n;selectedUnit=null;persist();render();}return;}
@@ -440,7 +514,7 @@
       item.status=x.dataset.reviewStatus;
       persist();render();notify(t(item.status==='approved'?'requestApproved':'requestRejected'));return;
     }
-    if(x.dataset.role){db.role=x.dataset.role;db.tab=x.hasAttribute('data-registration')?'registration':'home';selectedUnit=null;moreOpen=false;persist();render();return;}
+    if(x.dataset.role){db.role=x.dataset.role;db.tab=x.hasAttribute('data-registration')?'registration':'home';editingResident=null;selectedUnit=null;moreOpen=false;persist();render();return;}
     if(x.dataset.lang){db.lang=x.dataset.lang;persist();render();return;}
     if(x.hasAttribute('data-export-csv')){if(admin())csv();return;}
     if(x.hasAttribute('data-export-month')){if(admin())monthlyCsv();return;}
