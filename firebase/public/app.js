@@ -1,14 +1,14 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword,
   signOut, sendEmailVerification, sendPasswordResetEmail, updateProfile, reload, getIdToken } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-import { getFirestore, collection, doc, getDoc, getDocs, setDoc, query, where, runTransaction,
+import { getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, query, where, runTransaction,
   updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 import { firebaseConfig } from "./config.js";
 
 const el=document.getElementById('app'),toast=document.getElementById('toast');
 let lang=localStorage.getItem('corp-language')==='ru'?'ru':'ka', screen='login', user=null,
     profile=null, isChair=false, application=null, membership=null, requests=[],members=[],units=[],
-    profileCache=new Map(),working=false,editingUnit=1;
+    profileCache=new Map(),working=false,editingUnit=1,announcements=[],repairs=[];
 const dict={
 ka:{
   pending:'მოლოდინში',approved:'დადასტურებულია',rejected:'უარყოფილია',owner:'მესაკუთრე',resident:'მაცხოვრებელი',
@@ -17,7 +17,11 @@ ka:{
   login:'შესვლა',signup:'რეგისტრაცია',email:'ელფოსტა',password:'პაროლი',first:'სახელი',last:'გვარი',phone:'ტელეფონი',forgot:'პაროლი დაგავიწყდათ?',sendReset:'აღდგენის ბმულის გაგზავნა',resetSent:'თუ ასეთი ანგარიში არსებობს, ელფოსტაზე მიიღებთ აღდგენის ბმულს.',back:'უკან',passwordHint:'გამოიყენეთ არანაკლებ 12 სიმბოლოიანი პაროლი.',
   register:'ანგარიშის შექმნა',sendVerify:'დადასტურების წერილის გაგზავნა',verifyInfo:'დაადასტურეთ ელფოსტის მისამართი. შემდეგ დააჭირეთ „განახლებას“.',verifySent:'დადასტურების წერილი გაიგზავნა. შეამოწმეთ ელფოსტა.',refresh:'განახლება',logout:'გასვლა',account:'ჩემი პროფილი',
   application:'ბინაზე წვდომის განაცხადი',entrance:'სადარბაზო',floor:'სართული',apartment:'ბინა',relation:'მობინადრის ტიპი',apply:'განაცხადის გაგზავნა',waiting:'თქვენი განაცხადი თავმჯდომარის გადაწყვეტილებას ელოდება.',rejectedMsg:'განაცხადი უარყოფილია. შეგიძლიათ გააგზავნოთ ახალი.',approvedMsg:'თქვენი ბინა დამტკიცებულია.',reapply:'ახალი განაცხადი',pendingRequests:'დასადასტურებელი განაცხადები',chair:'თავმჯდომარე',approve:'დადასტურება',reject:'უარყოფა',confirmApprove:'დავადასტუროთ ეს განაცხადი?',confirmReject:'უარვყოთ განაცხადი?',directory:'მცხოვრებთა ბაზა',noRecords:'ჩანაწერები არ არის',search:'ძებნა სახელით, გვარით, ბინით ან ტელეფონით',private:'მცხოვრებთა ტელეფონები ხელმისაწვდომია მხოლოდ თავმჯდომარისთვის.',unitMap:'ბინების სქემა',unitSave:'შენახვა',unknown:'დაუდგენელია',alreadyAssigned:'ეს ბინა სხვა სადარბაზოში ან სართულზეა. შეამოწმეთ სქემა.',confirmUnit:'შევცვალოთ ბინის მდებარეობა?',saved:'შენახულია',failed:'ოპერაცია ვერ შესრულდა',
-  noFinance:'ფინანსები, სარემონტო განაცხადები და კენჭისყრა დაემატება შემდეგ ეტაპზე.'
+  noFinance:'ფინანსები და კენჭისყრა დაემატება შემდეგ ეტაპზე.',
+  news:'განცხადებები',newNews:'ახალი განცხადება',headline:'სათაური',content:'ტექსტი',publish:'გამოქვეყნება',
+  repairs:'სარემონტო განაცხადები',newRepair:'პრობლემის შეტყობინება',repairDetails:'პრობლემის აღწერა',sendRepair:'განაცხადის გაგზავნა',
+  repairStatus:'მდგომარეობა',open:'ახალი',progress:'მიმდინარეობს',done:'დასრულებულია',setProgress:'მუშაობაში გადაყვანა',setDone:'დასრულება',
+  privateData:'ინფორმაცია ხელმისაწვდომია მხოლოდ უფლებამოსილი პირებისთვის.',tooLong:'შეამოწმეთ ტექსტის სიგრძე და შევსებული ველები.'
 },
 ru:{
   pending:'Ожидает',approved:'Одобрена',rejected:'Отклонена',owner:'Собственник',resident:'Житель',
@@ -26,7 +30,11 @@ ru:{
   login:'Войти',signup:'Регистрация',email:'Электронная почта',password:'Пароль',first:'Имя',last:'Фамилия',phone:'Телефон',forgot:'Забыли пароль?',sendReset:'Отправить ссылку для восстановления',resetSent:'Если аккаунт существует, ссылка для восстановления отправлена на почту.',back:'Назад',passwordHint:'Используй пароль длиной не менее 12 символов.',
   register:'Создать аккаунт',sendVerify:'Отправить письмо с подтверждением',verifyInfo:'Подтверди адрес электронной почты, затем нажми «Обновить».',verifySent:'Письмо с подтверждением отправлено. Проверь почту.',refresh:'Обновить',logout:'Выйти',account:'Мой профиль',
   application:'Заявка на доступ к квартире',entrance:'Подъезд',floor:'Этаж',apartment:'Квартира',relation:'Статус жильца',apply:'Отправить заявку',waiting:'Заявка ожидает решения председателя.',rejectedMsg:'Заявка отклонена. Можно подать новую.',approvedMsg:'Твоя квартира подтверждена.',reapply:'Новая заявка',pendingRequests:'Заявки на подтверждение',chair:'Председатель',approve:'Одобрить',reject:'Отклонить',confirmApprove:'Одобрить эту заявку?',confirmReject:'Отклонить заявку?',directory:'База жильцов',noRecords:'Пока нет записей',search:'Поиск по имени, фамилии, квартире или телефону',private:'Телефоны жильцов доступны только председателю.',unitMap:'Схема квартир',unitSave:'Сохранить',unknown:'Не назначено',alreadyAssigned:'Квартира закреплена за другим подъездом или этажом. Проверь схему.',confirmUnit:'Изменить расположение квартиры?',saved:'Сохранено',failed:'Операция не выполнена',
-  noFinance:'Финансы, ремонт и голосования добавим после проверки защищённой регистрации.'
+  noFinance:'Финансы и голосования добавим после проверки защищённой регистрации.',
+  news:'Объявления',newNews:'Новое объявление',headline:'Заголовок',content:'Текст объявления',publish:'Опубликовать',
+  repairs:'Заявки на ремонт',newRepair:'Сообщить о проблеме',repairDetails:'Описание проблемы',sendRepair:'Отправить заявку',
+  repairStatus:'Статус',open:'Новая',progress:'В работе',done:'Завершена',setProgress:'В работу',setDone:'Завершить',
+  privateData:'Информация доступна только уполномоченным пользователям.',tooLong:'Проверьте длину текста и заполненные поля.'
 }};
 const t=x=>dict[lang][x]||x;
 const esc=x=>String(x??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[ch]));
@@ -51,6 +59,19 @@ async function refresh(){
     isChair=(await getDoc(doc(db,'roles',user.uid))).data()?.chairman===true;
     application=(await getDoc(doc(db,'applications',user.uid))).data()||null;
     membership=(await getDoc(doc(db,'members',user.uid))).data()||null;
+    // Read private building content only for approved members and the chairman.
+    announcements=[];repairs=[];
+    if(isChair||membership){
+      const [newsSnap,repairSnap]=await Promise.all([
+        getDocs(collection(db,'announcements')),
+        isChair?getDocs(collection(db,'repairs')):
+          getDocs(query(collection(db,'repairs'),where('authorUid','==',user.uid)))
+      ]);
+      announcements=newsSnap.docs.map(x=>({id:x.id,...x.data()}))
+        .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+      repairs=repairSnap.docs.map(x=>({id:x.id,...x.data()}))
+        .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+    }
     if(isChair) {
       const [reqs,mem,loc]=await Promise.all([
         getDocs(query(collection(db,'applications'),where('status','==','pending'))),
@@ -89,8 +110,35 @@ function renderAuth(){
     '<div class="wide">'+fld(t('password'),'password','password','','minlength="12" autocomplete="'+(signup?'new-password':'current-password')+'"')+'</div><div class="wide"><p class="muted">'+esc(t('passwordHint'))+'</p><button type="submit" class="btn green">'+esc(t(signup?'register':'login'))+'</button></div></form>'+
     (!signup?'<div class="actions">'+btn(t('forgot'),'reset')+'</div>':''));
 }
+function listAnnouncements(){
+  if(!announcements.length)return '<p class="muted">'+esc(t('noRecords'))+'</p>';
+  return announcements.slice(0,30).map(n=>
+    '<div class="mini"><strong>'+esc(n.title)+'</strong><p>'+esc(n.body)+'</p></div>'
+  ).join('');
+}
+function listRepairs(canManage){
+  if(!repairs.length)return '<p class="muted">'+esc(t('noRecords'))+'</p>';
+  return repairs.slice(0,80).map(r=>
+    '<div class="mini"><div class="row"><div><strong>'+esc(r.title)+'</strong><p class="muted">№ '+
+      esc(r.apartment)+' · '+esc(t(r.status))+'</p><p>'+esc(r.details)+'</p></div>'+
+      (canManage?'<div class="actions">'+
+        (r.status==='open'?btn(t('setProgress'),'repair-progress:'+r.id,'light'):'')+
+        (r.status!=='done'?btn(t('setDone'),'repair-done:'+r.id,'green'):'')+
+        '</div>':'')+'</div></div>'
+  ).join('');
+}
 function renderResident(){
-  if(membership)return card(t('application'),'<div class="notice">'+esc(t('approvedMsg'))+'</div><p>№ '+esc(membership.apartment)+' · '+esc(t('entrance'))+' '+esc(membership.entrance)+' · '+esc(t('floor'))+' '+esc(membership.floor)+'</p>');
+  if(membership){
+    const form='<form id="repair-form" class="stack">'+
+       fld(t('headline'),'title','text','','minlength="4" maxlength="140"')+
+       '<label>'+esc(t('repairDetails'))+'<textarea name="details" minlength="4" maxlength="1500" required></textarea></label>'+
+       '<button type="submit" class="btn green">'+esc(t('sendRepair'))+'</button></form>';
+    return card(t('application'),'<div class="notice">'+esc(t('approvedMsg'))+'</div><p>№ '+
+      esc(membership.apartment)+' · '+esc(t('entrance'))+' '+esc(membership.entrance)+' · '+
+      esc(t('floor'))+' '+esc(membership.floor)+'</p>')+
+      card(t('news'),listAnnouncements())+
+      card(t('newRepair'),form)+card(t('repairs'),listRepairs(false));
+  }
   const note=application?'<div class="notice '+(application.status==='rejected'?'warning':'')+'">'+status(application.status)+' '+esc(application.status==='pending'?t('waiting'):t('rejectedMsg'))+'</div>':'';
   if(application?.status==='pending')return card(t('application'),note);
   const form='<form id="application-form" class="grid">'+sel(t('entrance'),'entrance',[1,2,3],1)+sel(t('floor'),'floor',[2,3,4,5,6,7,8],2)+
@@ -104,12 +152,19 @@ function renderChair(){
   const rows=members.map(m=>{const p=profileCache.get(m.uid)||{};const search=[p.first,p.last,p.phone,m.apartment,m.entrance,m.floor].join(' ').toLowerCase();return '<tr data-search="'+esc(search)+'"><td>'+esc(p.first)+'</td><td>'+esc(p.last)+'</td><td>'+esc(m.entrance)+'</td><td>'+esc(m.floor)+'</td><td>№ '+esc(m.apartment)+'</td><td>'+esc(p.phone)+'</td></tr>';}).join('');
   const unit=units.find(u=>u.apartment===editingUnit);
   const layout='<form id="layout-form" class="grid">'+sel(t('apartment'),'apartment',Array.from({length:60},(_,i)=>i+1),editingUnit)+sel(t('entrance'),'entrance',[1,2,3],unit?.entrance||1)+sel(t('floor'),'floor',[2,3,4,5,6,7,8],unit?.floor||2)+'<div><button class="btn green" type="submit">'+esc(t('unitSave'))+'</button></div></form>';
-  return card(t('pendingRequests')+' ('+requests.length+')',pending)+card(t('directory')+' ('+members.length+')','<p class="muted">'+esc(t('private'))+'</p><label>'+esc(t('search'))+'<input id="search" autocomplete="off" placeholder="'+esc(t('search'))+'"></label>'+
+  const newsForm='<form id="news-form" class="stack">'+
+    fld(t('headline'),'title','text','','minlength="3" maxlength="130"')+
+    '<label>'+esc(t('content'))+'<textarea name="body" minlength="3" maxlength="2500" required></textarea></label>'+
+    '<button type="submit" class="btn green">'+esc(t('publish'))+'</button></form>';
+  return card(t('pendingRequests')+' ('+requests.length+')',pending)+
+    card(t('newNews'),newsForm)+card(t('news'),listAnnouncements())+
+    card(t('repairs')+' ('+repairs.length+')',listRepairs(true))+
+    card(t('directory')+' ('+members.length+')','<p class="muted">'+esc(t('private'))+'</p><label>'+esc(t('search'))+'<input id="search" autocomplete="off" placeholder="'+esc(t('search'))+'"></label>'+
     '<div class="table-wrap"><table><thead><tr>'+[t('first'),t('last'),t('entrance'),t('floor'),t('apartment'),t('phone')].map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+rows+'</tbody></table></div>')+
     card(t('unitMap'),layout)+'<div class="notice">'+esc(t('noFinance'))+'</div>';
 }
 async function submit(ev){
-  const f=ev.target;if(!['auth-form','reset-form','application-form','layout-form'].includes(f.id))return;
+  const f=ev.target;if(!['auth-form','reset-form','application-form','layout-form','repair-form','news-form'].includes(f.id))return;
   ev.preventDefault();if(working)return;working=true;
   const d=Object.fromEntries(new FormData(f).entries());
   const actionButton=f.querySelector('button[type="submit"]');if(actionButton)actionButton.disabled=true;
@@ -135,6 +190,23 @@ async function submit(ev){
         relation:d.relation,status:'pending',createdAt:serverTimestamp()};
       await setDoc(doc(db,'applications',user.uid),applicant);
       await refresh();
+    }else if(f.id==='repair-form'){
+      if(!canWrite()||!membership||isChair)throw Error(t('failed'));
+      const title=String(d.title||'').trim(),details=String(d.details||'').trim();
+      if(title.length<4||title.length>140||details.length<4||details.length>1500)throw Error(t('tooLong'));
+      await addDoc(collection(db,'repairs'),{
+        authorUid:user.uid,apartment:membership.apartment,title,details,
+        status:'open',createdAt:serverTimestamp(),updatedAt:serverTimestamp()
+      });
+      await refresh();
+    }else if(f.id==='news-form'){
+      if(!isChair)throw Error(t('failed'));
+      const title=String(d.title||'').trim(),body=String(d.body||'').trim();
+      if(title.length<3||title.length>130||body.length<3||body.length>2500)throw Error(t('tooLong'));
+      await addDoc(collection(db,'announcements'),{
+        title,body,authorUid:user.uid,createdAt:serverTimestamp()
+      });
+      await refresh();
     }else if(f.id==='layout-form'){
       if(!isChair)throw Error(t('failed'));
       if(!confirm(t('confirmUnit')))return;
@@ -152,6 +224,19 @@ async function handleAction(ev){
   if(a==='refresh'){await refresh();return;}
   if(a==='logout'){await signOut(auth);return;}
   if(a==='verify'){try{await sendEmailVerification(user);toastMsg(t('verifySent'));}catch(e){toastMsg(e.message,true);}return;}
+  if(a.startsWith('repair-progress:')||a.startsWith('repair-done:')){
+    if(!isChair||!user)return;
+    const next=a.startsWith('repair-progress:')?'progress':'done';
+    const id=a.slice(next==='progress'?16:12);
+    if(!repairs.some(q=>q.id===id))return;
+    working=true;b.disabled=true;
+    try{
+      await updateDoc(doc(db,'repairs',id),{status:next,updatedAt:serverTimestamp()});
+      await refresh();
+    }catch(err){toastMsg(err.message||t('failed'),true);}
+    finally{working=false;b.disabled=false;}
+    return;
+  }
   if(a.startsWith('approve:')||a.startsWith('reject:')){
     if(!isChair||!user)return;
     const approved=a.startsWith('approve:'),id=a.slice(approved?8:7);
