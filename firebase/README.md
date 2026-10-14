@@ -14,7 +14,8 @@
 
 - `public/index.html`, `style.css`, `app.js`: Georgian/Russian mobile-first site.
 - `public/config.js`: INTENTIONALLY null. Add only Firebase's **public Web app config** once the user's Google/Firebase project is connected.
-- `firestore.rules`: strict security rules enforced server-side; prevents unauthorized profile or phone reads.
+- `firestore.rules`: strict security rules enforced server-side; prevents unauthorized profile or phone reads, restricts announcements and repair tickets.
+- `package.json` / `tests/rules.test.mjs`: offline Firebase Emulator security regression tests; these still need to be executed with Firebase Emulator before production.
 - `firebase.json`: deploy the static site by **Firebase Hosting**, and Firestore rules. No Cloud Functions.
 
 ## Setup after official Firebase connection
@@ -35,14 +36,22 @@
 - Chairman-only application list and atomic approval transaction; a successful decision records the apartment mapping and membership.
 - Chairman-only private directory with first/last name, entrance, floor, apartment, phone, and search.
 - Chairman can assign or update entrance/floor for apartments 1–60. Check carefully before using real records.
+- Chairman-only announcements for approved residents (not public on an unsecured preview).
+- Resident repairs with description and chairman-only status updates; residents see only their own repair history.
 - Georgian default and Russian toggle; responsive UI.
 
 ## Not yet implemented for production
 
-Real financial ledger, repair reports, formal voting, backup/restore, membership revocation, profile edits and audit logs. Those functions in the old static demo must not be confused with production features. Firebase Security Rules need live integration tests before production use. The prototype uses simple client transactions without Cloud Functions; chairperson decisions can be updated only under chairman security rules.
+Real financial ledger, formal voting, backup/restore, membership revocation, profile edits and audit logs. Those functions in the old static demo must not be confused with production features. Firebase Security Rules need emulator tests and live integration tests before production use. The prototype uses simple client transactions without Cloud Functions; chairperson decisions can be updated only under chairman security rules.
 
 ## Known constraints
 
 - Firestore does not provide official continuous point-in-time backup on Spark. Avoid claiming protected disaster recovery until a lawful manual encrypted backup process is built.
 - No billing information is required for Spark, and no payments or provider service upgrades have been performed by this repository change.
 - Firebase Web app config contains public identifiers, while Firebase Security Rules protect the data. NEVER put private keys in frontend code.
+
+## Security tests before real data
+
+Run locally only after the Firebase tools and test packages are available: `cd firebase && npm install && npm run test:rules`. These tests use Firebase Emulator and the **demo** project identifier; no real cloud project or billing is required. An emulator binary and Java runtime are required, and initial setup may need internet access.
+
+Covered scenarios: logged-out private reads denied; no resident privilege escalation; verification required before apartment applications; announcements accessible only to approved members; repairs created only by approved residents for their apartment, with status editable only by chairman; unit mapping editable only by chairman. **Test file creation does not mean the tests have run.**
