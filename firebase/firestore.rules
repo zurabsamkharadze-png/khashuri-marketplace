@@ -1,0 +1,103 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signed() { return request.auth != null; }
+    function chairman() {
+      return signed() &&
+        exists(/databases/$(database)/documents/roles/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/roles/$(request.auth.uid)).data.chairman == true;
+    }
+    function validFlat(n) { return n is int && n >= 1 && n <= 60; }
+    function validEntrance(n) { return n is int && n >= 1 && n <= 3; }
+    function validFloor(n) { return n is int && n >= 2 && n <= 8; }
+    function validName(n) { return n is string && n.size() >= 2 && n.size() <= 70; }
+    function validPhone(n) {
+      return n is string && n.matches('^[+]?[0-9 ()-]{7,25}$');
+    }
+    function validApplication(d,uid) {
+      return d.keys().hasOnly(['uid','apartment','entrance','floor','relation','status','createdAt']) &&
+        d.keys().hasAll(['uid','apartment','entrance','floor','relation','status','createdAt']) &&
+        d.uid == uid && d.status == 'pending' &&
+        validFlat(d.apartment) && validEntrance(d.entrance) && validFloor(d.floor) &&
+        d.relation in ['owner','resident'] &&
+        d.createdAt == request.time;
+    }
+    match /roles/{uid} {
+      allow get: if signed() && request.auth.uid == uid;
+      allow list,create,update,delete: if false;
+    }
+    match /profiles/{uid} {
+      allow get: if signed() &&
+        (request.auth.uid == uid ||
+          (chairman() && (
+            exists(/databases/$(database)/documents/applications/$(uid)) ||
+            exists(/databases/$(database)/documents/members/$(uid))
+          )));
+      allow create: if signed() && request.auth.uid == uid &&
+        request.resource.data.keys().hasOnly(['first','last','phone','createdAt']) &&
+        request.resource.data.keys().hasAll(['first','last','phone','createdAt']) &&
+        validName(request.resource.data.first) &&
+        validName(request.resource.data.last) &&
+        validPhone(request.resource.data.phone) &&
+        request.resource.data.createdAt == request.time;
+      allow list,update,delete: if false;
+    }
+    match /units/{unitId} {
+      allow read: if signed();
+      allow create,update: if chairman() &&
+        request.resource.data.keys().hasOnly(['apartment','entrance','floor']) &&
+        request.resource.data.keys().hasAll(['apartment','entrance','floor']) &&
+        validFlat(request.resource.data.apartment) &&
+        string(request.resource.data.apartment) == unitId &&
+        validEntrance(request.resource.data.entrance) &&
+        validFloor(request.resource.data.floor);
+      allow delete: if false;
+    }
+    match /applications/{uid} {
+      allow get: if signed() && (request.auth.uid == uid || chairman());
+      allow list: if chairman();
+      allow create: if signed() && request.auth.uid == uid &&
+        request.auth.token.email_verified == true &&
+        !exists(/databases/$(database)/documents/members/$(uid)) &&
+        validApplication(request.resource.data,uid);
+      allow update: if signed() &&
+        (
+          (chairman() && resource.data.status == 'pending' &&
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['status','reviewedBy','reviewedAt']) &&
+            request.resource.data.status in ['approved','rejected'] &&
+            request.resource.data.reviewedBy == request.auth.uid &&
+            request.resource.data.reviewedAt == request.time)
+          ||
+          (request.auth.uid == uid &&
+            request.auth.token.email_verified == true &&
+            resource.data.status in ['rejected','approved'] &&
+            !exists(/databases/$(database)/documents/members/$(uid)) &&
+            validApplication(request.resource.data,uid))
+        );
+      allow delete: if false;
+    }
+    match /members/{uid} {
+      allow get: if signed() && (request.auth.uid == uid || chairman());
+      allow list: if chairman();
+      allow create: if chairman() &&
+        request.resource.data.keys().hasOnly(['uid','apartment','entrance','floor','relation','approvedAt']) &&
+        request.resource.data.keys().hasAll(['uid','apartment','entrance','floor','relation','approvedAt']) &&
+        request.resource.data.uid == uid &&
+        validFlat(request.resource.data.apartment) &&
+        validEntrance(request.resource.data.entrance) &&
+        validFloor(request.resource.data.floor) &&
+        request.resource.data.relation in ['owner','resident'] &&
+        request.resource.data.approvedAt == request.time &&
+        getAfter(/databases/$(database)/documents/applications/$(uid)).data.status == 'approved' &&
+        getAfter(/databases/$(database)/documents/applications/$(uid)).data.apartment ==
+          request.resource.data.apartment &&
+        getAfter(/databases/$(database)/documents/units/$(string(request.resource.data.apartment))).data.entrance ==
+          request.resource.data.entrance &&
+        getAfter(/databases/$(database)/documents/units/$(string(request.resource.data.apartment))).data.floor ==
+          request.resource.data.floor;
+      allow update,delete: if false;
+    }
+    match /{document=**} { allow read,write: if false; }
+  }
+}
