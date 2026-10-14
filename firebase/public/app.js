@@ -250,7 +250,7 @@ function renderChair(){
     card(t('unitMap'),layout)+'<div class="notice">'+esc(t('noFinance'))+'</div>';
 }
 async function submit(ev){
-  const f=ev.target;if(!['auth-form','reset-form','application-form','layout-form','repair-form','news-form','fee-form','payment-form'].includes(f.id))return;
+  const f=ev.target;if(!['auth-form','reset-form','application-form','layout-form','repair-form','news-form','fee-form','payment-form','correction-form'].includes(f.id))return;
   ev.preventDefault();if(working)return;working=true;
   const d=Object.fromEntries(new FormData(f).entries());
   const actionButton=f.querySelector('button[type="submit"]');if(actionButton)actionButton.disabled=true;
@@ -313,6 +313,25 @@ async function submit(ev){
         apartment,month:ledgerMonth,amountTetri,note,createdBy:user.uid,createdAt:serverTimestamp()
       });
       await refresh();
+    }else if(f.id==='correction-form'){
+      if(!isChair||!canWrite()||!correctingPaymentId)throw Error(t('failed'));
+      const payment=receipts.find(x=>x.id===correctingPaymentId&&x.month===ledgerMonth);
+      const reason=String(d.reason||'').trim();
+      if(!payment||corrections.some(c=>c.paymentId===payment.id)||reason.length<5||reason.length>250)throw Error(t('tooLong'));
+      if(!confirm(t('confirmCorrection')+' № '+payment.apartment+' · '+money(payment.amountTetri)))return;
+      const originalRef=doc(db,'payments',payment.id),correctionRef=doc(db,'corrections',payment.id);
+      await runTransaction(db,async tx=>{
+        const original=await tx.get(originalRef);
+        const existing=await tx.get(correctionRef);
+        if(!original.exists()||existing.exists())throw Error(t('failed'));
+        const entry=original.data();
+        if(entry.month!==ledgerMonth||entry.apartment!==payment.apartment)throw Error(t('failed'));
+        tx.set(correctionRef,{
+          paymentId:payment.id,month:entry.month,apartment:entry.apartment,
+          amountTetri:-entry.amountTetri,reason,createdBy:user.uid,createdAt:serverTimestamp()
+        });
+      });
+      correctingPaymentId=null;toastMsg(t('correctionSaved'));await refresh();
     }else if(f.id==='layout-form'){
       if(!isChair)throw Error(t('failed'));
       if(!confirm(t('confirmUnit')))return;
@@ -332,13 +351,22 @@ async function handleAction(ev){
     if(!isChair)return;
     if(!confirm(t('private')+' '+t('downloadReport')+'?'))return;
     const safe=v=>{let str=String(v??'');if(/^[=+@-]/.test(str))str="'"+str;return '"'+str.replace(/"/g,'""')+'"';};
-    const rows=[['apartment','month','due_gel','paid_gel','balance_gel'],
-      ...Array.from({length:60},(_,i)=>{const n=i+1,fee=ledgerRate?.amountTetri||0,paid=totalsFor(n);return [n,ledgerMonth,(fee/100).toFixed(2),(paid/100).toFixed(2),((fee-paid)/100).toFixed(2)];})];
+    const rows=[['apartment','month','opening_gel','current_due_gel','net_paid_gel','closing_balance_gel'],
+      ...Array.from({length:60},(_,i)=>{const n=i+1,b=balanceFor(n);
+        return [n,ledgerMonth,(b.opening/100).toFixed(2),(b.dueCurrent/100).toFixed(2),
+          (b.paidCurrent/100).toFixed(2),(b.closing/100).toFixed(2)];})];
     const csv='\ufeff'+rows.map(row=>row.map(safe).join(';')).join('\r\n');
     const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
     const a=document.createElement('a');a.href=url;a.download='korpusi-finance-'+ledgerMonth+'.csv';
     document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3500);
     return;
+  }
+  if(a==='correct-cancel'){correctingPaymentId=null;render();return;}
+  if(a.startsWith('correct:')){
+    if(!isChair)return;
+    const id=a.slice(8);
+    if(!receipts.some(x=>x.id===id&&x.month===ledgerMonth)||corrections.some(x=>x.paymentId===id))return;
+    correctingPaymentId=id;render();return;
   }
   if(a==='logout'){await signOut(auth);return;}
   if(a==='verify'){try{await sendEmailVerification(user);toastMsg(t('verifySent'));}catch(e){toastMsg(e.message,true);}return;}
