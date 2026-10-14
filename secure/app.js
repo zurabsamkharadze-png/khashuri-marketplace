@@ -11,20 +11,20 @@ const supabase = enabled ? createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, 
 let lang = localStorage.getItem('corp-lang') === 'ru' ? 'ru' : 'ka';
 let authTab = 'signin', user = null, role = 'resident', profile = null;
 let requests = [], members = [], units = [], profiles = [], ownRequests = [], ownMembers = [], view = 'home';
-let loadVersion = 0;
+let loadVersion = 0, editingId = null;
 const dictionary = {
 ka:{
   notReady:'სერვერი ჯერ არ არის დაკავშირებული',notReadyDesc:'ეს არის დაცული აპლიკაციის მომზადებული ვერსია. 60 ოჯახის რეალური რეგისტრაცია არ ჩაირთვება ახალი, დამოუკიდებელი და უფასო მონაცემთა ბაზის გამართვამდე.',
   guestIntro:'მცხოვრებთა დაცული რეგისტრაცია',signin:'შესვლა',signup:'რეგისტრაცია',email:'ელფოსტა',password:'პაროლი',first:'სახელი',last:'გვარი',phone:'ტელეფონის ნომერი',send:'გაგზავნა',wait:'მიმდინარეობს…',emailSent:'გადაამოწმეთ ელფოსტა და დაადასტურეთ ანგარიში, შემდეგ შედით.',account:'ჩემი ანგარიში',logout:'გასვლა',
   request:'განაცხადი',registerApt:'ბინაზე წვდომის მოთხოვნა',entrance:'სადარბაზო',floor:'სართული',flat:'ბინა',owner:'მესაკუთრე',resident:'მცხოვრები',submitRequest:'განაცხადის გაგზავნა',pending:'მოლოდინში',approved:'დამტკიცებულია',rejected:'უარყოფილია',retry:'ხელახალი განაცხადის გაგზავნა',yourRequest:'ჩემი განაცხადი',noRequest:'განაცხადი ჯერ არ არის გაგზავნილი',waiting:'თქვენი განაცხადი თავმჯდომარის დადასტურებას ელოდება.',rejectedMsg:'წინა განაცხადი უარყოფილია. შეგიძლიათ გაგზავნოთ ახალი.',approvedMsg:'თქვენ გაქვთ დამტკიცებული წვდომა მითითებულ ბინაზე.',building:'ხაშური, რუსთაველის 16 · 60 ბინა · 3 სადარბაზო',
-  chairman:'თავმჯდომარე',pendingRequests:'მომლოდინე განაცხადები',directory:'მცხოვრებთა ბაზა',records:'მცხოვრებთა ჩანაწერები',approve:'დამტკიცება',reject:'უარყოფა',confirmApprove:'დავამტკიცოთ განაცხადი?',confirmReject:'უარვყოთ განაცხადი?',search:'ძებნა სახელით, გვარით, ტელეფონით ან ბინით',none:'ჩანაწერები არ არის',relation:'კავშირი',status:'სტატუსი',date:'თარიღი',refresh:'განახლება',
+  chairman:'თავმჯდომარე',pendingRequests:'მომლოდინე განაცხადები',directory:'მცხოვრებთა ბაზა',records:'მცხოვრებთა ჩანაწერები',approve:'დამტკიცება',reject:'უარყოფა',confirmApprove:'დავამტკიცოთ განაცხადი?',confirmReject:'უარვყოთ განაცხადი?',edit:'შეცვლა',cancel:'გაუქმება',save:'შენახვა',search:'ძებნა სახელით, გვარით, ტელეფონით ან ბინით',none:'ჩანაწერები არ არის',relation:'კავშირი',status:'სტატუსი',date:'თარიღი',refresh:'განახლება',
   secure:'წვდომა მოწმდება სერვერზე. რიგითი მცხოვრებელი სხვის ტელეფონს ვერ ნახავს.',privacy:'მეზობლების მონაცემები დაამატეთ მხოლოდ მას შემდეგ, რაც დაცული სერვერი ამოქმედდება და მათი თანხმობა იქნება მიღებული.',fail:'ოპერაცია ვერ შესრულდა',session:'სესია დასრულდა. შედით თავიდან.',noRole:'თავმჯდომარის როლი ენიჭება მხოლოდ ხელით, უფლებამოსილი ადმინისტრატორის მიერ.',noFee:'ფინანსები და კენჭისყრები დაემატება შემდეგ ეტაპზე.',passwordHelp:'გამოიყენეთ უნიკალური, მინიმუმ 12-სიმბოლოიანი პაროლი.'
 },
 ru:{
   notReady:'Сервер пока не подключён',notReadyDesc:'Это подготовленная защищённая версия приложения. Реальная регистрация 60 семей не включится, пока не будет настроена новая отдельная бесплатная база данных.',
   guestIntro:'Защищённая регистрация жильцов',signin:'Вход',signup:'Регистрация',email:'Электронная почта',password:'Пароль',first:'Имя',last:'Фамилия',phone:'Номер телефона',send:'Отправить',wait:'Подождите…',emailSent:'Проверьте почту и подтвердите аккаунт, затем войдите.',account:'Мой аккаунт',logout:'Выйти',
   request:'Заявка',registerApt:'Запрос доступа к квартире',entrance:'Подъезд',floor:'Этаж',flat:'Квартира',owner:'Собственник',resident:'Житель',submitRequest:'Отправить заявку',pending:'Ожидает',approved:'Одобрена',rejected:'Отклонена',retry:'Подать новую заявку',yourRequest:'Моя заявка',noRequest:'Заявка ещё не подана',waiting:'Твоя заявка ожидает проверки председателем.',rejectedMsg:'Предыдущая заявка отклонена. Можно отправить новую.',approvedMsg:'Твой доступ к квартире подтверждён.',building:'Хашури, Руставели 16 · 60 квартир · 3 подъезда',
-  chairman:'Председатель',pendingRequests:'Заявки на подтверждение',directory:'База жильцов',records:'Записи жильцов',approve:'Одобрить',reject:'Отклонить',confirmApprove:'Подтвердить заявку?',confirmReject:'Отклонить заявку?',search:'Поиск по имени, фамилии, телефону или квартире',none:'Записей пока нет',relation:'Статус жильца',status:'Статус',date:'Дата',refresh:'Обновить',
+  chairman:'Председатель',pendingRequests:'Заявки на подтверждение',directory:'База жильцов',records:'Записи жильцов',approve:'Одобрить',reject:'Отклонить',confirmApprove:'Подтвердить заявку?',confirmReject:'Отклонить заявку?',edit:'Изменить',cancel:'Отмена',save:'Сохранить',search:'Поиск по имени, фамилии, телефону или квартире',none:'Записей пока нет',relation:'Статус жильца',status:'Статус',date:'Дата',refresh:'Обновить',
   secure:'Права доступа проверяются на сервере. Жители не могут видеть чужие телефоны.',privacy:'Вносите реальные сведения соседей только после запуска защищённой базы и получения их согласия.',fail:'Не удалось выполнить действие',session:'Сессия завершилась. Войди снова.',noRole:'Роль председателя назначается только вручную уполномоченным администратором.',noFee:'Финансы и голосования будут добавлены на следующем этапе.',passwordHelp:'Используйте уникальный пароль длиной не менее 12 символов.'
 }};
 const t=k=>dictionary[lang][k]||k;
@@ -116,12 +116,18 @@ function renderChair(){
     const p=profileMap.get(m.user_id)||{};
     const u=units.find(u=>u.apartment===m.apartment)||{};
     const id=(p.first_name+' '+p.last_name+' '+p.phone+' '+m.apartment).toLowerCase();
-    return '<tr data-filter="'+esc(id)+'"><td>'+esc(p.first_name)+'</td><td>'+esc(p.last_name)+'</td><td>'+esc(u.entrance??'—')+'</td><td>'+esc(u.floor??'—')+'</td><td>№ '+m.apartment+'</td><td>'+esc(p.phone)+'</td></tr>';
+    return '<tr data-filter="'+esc(id)+'"><td>'+esc(p.first_name)+'</td><td>'+esc(p.last_name)+'</td><td>'+esc(u.entrance??'—')+'</td><td>'+esc(u.floor??'—')+'</td><td>№ '+m.apartment+'</td><td>'+esc(p.phone)+'</td><td>'+button('✎ '+esc(t('edit')),'edit:'+esc(m.user_id),'light')+'</td></tr>';
   }).join('');
+  const selected=profiles.find(p=>p.id===editingId);
+  const editForm=selected?'<div class="card"><h2>'+esc(t('edit'))+': '+esc(selected.first_name)+' '+esc(selected.last_name)+'</h2><form id="edit-form" class="grid">'+
+     '<div>'+input(t('first'),'first_name','text','', 'value="'+esc(selected.first_name)+'" minlength="2" maxlength="70"')+'</div>'+
+     '<div>'+input(t('last'),'last_name','text','', 'value="'+esc(selected.last_name)+'" minlength="2" maxlength="70"')+'</div>'+
+     '<div class="wide">'+input(t('phone'),'phone','tel','', 'value="'+esc(selected.phone)+'" minlength="7" maxlength="25"')+'</div>'+
+     '<div class="wide actions"><button class="btn green" type="submit">'+esc(t('save'))+'</button>'+button(esc(t('cancel')),'cancelEdit','light')+'</div></form></div>':'';
   return '<div class="card"><h2>'+esc(t('pendingRequests'))+' ('+requests.length+')</h2>'+reqHtml+'</div>'+
-    '<div class="card"><div class="row"><h2>'+esc(t('directory'))+' ('+members.length+')</h2></div><p class="muted">'+esc(t('privacy'))+'</p>'+
+    editForm+'<div class="card"><div class="row"><h2>'+esc(t('directory'))+' ('+members.length+')</h2></div><p class="muted">'+esc(t('privacy'))+'</p>'+
     '<label>'+esc(t('search'))+'<input id="search" autocomplete="off" placeholder="'+esc(t('search'))+'"></label>'+
-    '<div class="table-wrap"><table><thead><tr><th>'+esc(t('first'))+'</th><th>'+esc(t('last'))+'</th><th>'+esc(t('entrance'))+'</th><th>'+esc(t('floor'))+'</th><th>'+esc(t('flat'))+'</th><th>'+esc(t('phone'))+'</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+    '<div class="table-wrap"><table><thead><tr><th>'+esc(t('first'))+'</th><th>'+esc(t('last'))+'</th><th>'+esc(t('entrance'))+'</th><th>'+esc(t('floor'))+'</th><th>'+esc(t('flat'))+'</th><th>'+esc(t('phone'))+'</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
 }
 function renderMember(){
   el.innerHTML=html.top(t('account'),t('building'))+
@@ -132,7 +138,7 @@ function renderMember(){
 }
 async function dispatchForm(ev){
   if(!enabled)return;
-  const form=ev.target;if(!['auth-form','request-form'].includes(form.id))return;
+  const form=ev.target;if(!['auth-form','request-form','edit-form'].includes(form.id))return;
   ev.preventDefault();
   const data=Object.fromEntries(new FormData(form).entries());
   const btn=form.querySelector('button[type="submit"]');if(btn)btn.disabled=true;
@@ -158,6 +164,16 @@ async function dispatchForm(ev){
         if(error)throw error;
         await refresh();
       }
+    }else if(form.id==='edit-form'){
+      if(role!=='chairman'||!editingId)throw new Error(t('fail'));
+      const {error}=await supabase.rpc('corp_edit_resident',{
+        p_user_id:editingId,p_first_name:String(data.first_name||'').trim(),
+        p_last_name:String(data.last_name||'').trim(),
+        p_phone:String(data.phone||'').trim()
+      });
+      if(error)throw error;
+      editingId=null;
+      await refresh();
     }else if(form.id==='request-form'){
       if(!user)throw new Error(t('session'));
       const request={applicant_id:user.id,entrance:Number(data.entrance),floor:Number(data.floor),
@@ -174,6 +190,8 @@ async function dispatchClick(ev){
   const action=button.dataset.action;
   if(action==='tab-signin'||action==='tab-signup'){authTab=action.substring(4);renderGuest();return;}
   if(action==='refresh'){await refresh();return;}
+  if(action==='cancelEdit'){editingId=null;renderMember();return;}
+  if(action.startsWith('edit:')){if(role!=='chairman')return;editingId=action.slice(5);renderMember();window.scrollTo(0,0);return;}
   if(action==='logout'){const {error}=await supabase.auth.signOut();if(error)show(error.message,true);await refresh();return;}
   if(action.startsWith('approve:')||action.startsWith('reject:')){
     if(role!=='chairman')return;
