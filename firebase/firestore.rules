@@ -201,6 +201,39 @@ service cloud.firestore {
         request.resource.data.createdAt == request.time;
       allow update, delete: if false;
     }
+
+    // Immutable, full-value cancellation of an original receipt.
+    // The correction ID MUST equal the original payment ID, so at most one
+    // reversal can be created. Replacement payment is a new positive receipt.
+    match /corrections/{paymentId} {
+      allow get, list: if signed() &&
+        (chairman() || (
+          exists(/databases/$(database)/documents/members/$(request.auth.uid)) &&
+          resource.data.apartment ==
+            get(/databases/$(database)/documents/members/$(request.auth.uid)).data.apartment
+        ));
+      allow create: if chairman() &&
+        exists(/databases/$(database)/documents/payments/$(paymentId)) &&
+        request.resource.data.keys().hasAll([
+          'paymentId','month','apartment','amountTetri','reason','createdBy','createdAt'
+        ]) &&
+        request.resource.data.keys().hasOnly([
+          'paymentId','month','apartment','amountTetri','reason','createdBy','createdAt'
+        ]) &&
+        request.resource.data.paymentId == paymentId &&
+        request.resource.data.month ==
+          get(/databases/$(database)/documents/payments/$(paymentId)).data.month &&
+        request.resource.data.apartment ==
+          get(/databases/$(database)/documents/payments/$(paymentId)).data.apartment &&
+        request.resource.data.amountTetri ==
+          -get(/databases/$(database)/documents/payments/$(paymentId)).data.amountTetri &&
+        request.resource.data.reason is string &&
+        request.resource.data.reason.size() >= 5 &&
+        request.resource.data.reason.size() <= 250 &&
+        request.resource.data.createdBy == request.auth.uid &&
+        request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
+    }
     match /{document=**} { allow read,write: if false; }
   }
 }
