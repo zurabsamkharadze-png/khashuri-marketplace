@@ -1,0 +1,205 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from './config.js';
+
+const el = document.getElementById('app');
+const toastEl = document.getElementById('toast');
+const enabled = /^https:\/\/[a-z0-9.-]+\.supabase\.co\/?$/.test(SUPABASE_URL) && /^(eyJ|sb_publishable_)/.test(SUPABASE_PUBLISHABLE_KEY);
+const supabase = enabled ? createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  auth: { autoRefreshToken:true, persistSession:true, detectSessionInUrl:true }
+}) : null;
+
+let lang = localStorage.getItem('corp-lang') === 'ru' ? 'ru' : 'ka';
+let authTab = 'signin', user = null, role = 'resident', profile = null;
+let requests = [], members = [], units = [], profiles = [], ownRequests = [], ownMembers = [], view = 'home';
+let loadVersion = 0;
+const dictionary = {
+ka:{
+  notReady:'სერვერი ჯერ არ არის დაკავშირებული',notReadyDesc:'ეს არის დაცული აპლიკაციის მომზადებული ვერსია. 60 ოჯახის რეალური რეგისტრაცია არ ჩაირთვება ახალი, დამოუკიდებელი და უფასო მონაცემთა ბაზის გამართვამდე.',
+  guestIntro:'მცხოვრებთა დაცული რეგისტრაცია',signin:'შესვლა',signup:'რეგისტრაცია',email:'ელფოსტა',password:'პაროლი',first:'სახელი',last:'გვარი',phone:'ტელეფონის ნომერი',send:'გაგზავნა',wait:'მიმდინარეობს…',emailSent:'გადაამოწმეთ ელფოსტა და დაადასტურეთ ანგარიში, შემდეგ შედით.',account:'ჩემი ანგარიში',logout:'გასვლა',
+  request:'განაცხადი',registerApt:'ბინაზე წვდომის მოთხოვნა',entrance:'სადარბაზო',floor:'სართული',flat:'ბინა',owner:'მესაკუთრე',resident:'მცხოვრები',submitRequest:'განაცხადის გაგზავნა',pending:'მოლოდინში',approved:'დამტკიცებულია',rejected:'უარყოფილია',retry:'ხელახალი განაცხადის გაგზავნა',yourRequest:'ჩემი განაცხადი',noRequest:'განაცხადი ჯერ არ არის გაგზავნილი',waiting:'თქვენი განაცხადი თავმჯდომარის დადასტურებას ელოდება.',rejectedMsg:'წინა განაცხადი უარყოფილია. შეგიძლიათ გაგზავნოთ ახალი.',approvedMsg:'თქვენ გაქვთ დამტკიცებული წვდომა მითითებულ ბინაზე.',building:'ხაშური, რუსთაველის 16 · 60 ბინა · 3 სადარბაზო',
+  chairman:'თავმჯდომარე',pendingRequests:'მომლოდინე განაცხადები',directory:'მცხოვრებთა ბაზა',records:'მცხოვრებთა ჩანაწერები',approve:'დამტკიცება',reject:'უარყოფა',confirmApprove:'დავამტკიცოთ განაცხადი?',confirmReject:'უარვყოთ განაცხადი?',search:'ძებნა სახელით, გვარით, ტელეფონით ან ბინით',none:'ჩანაწერები არ არის',relation:'კავშირი',status:'სტატუსი',date:'თარიღი',refresh:'განახლება',
+  secure:'წვდომა მოწმდება სერვერზე. რიგითი მცხოვრებელი სხვის ტელეფონს ვერ ნახავს.',privacy:'მეზობლების მონაცემები დაამატეთ მხოლოდ მას შემდეგ, რაც დაცული სერვერი ამოქმედდება და მათი თანხმობა იქნება მიღებული.',fail:'ოპერაცია ვერ შესრულდა',session:'სესია დასრულდა. შედით თავიდან.',noRole:'თავმჯდომარის როლი ენიჭება მხოლოდ ხელით, უფლებამოსილი ადმინისტრატორის მიერ.',noFee:'ფინანსები და კენჭისყრები დაემატება შემდეგ ეტაპზე.',passwordHelp:'გამოიყენეთ უნიკალური, მინიმუმ 12-სიმბოლოიანი პაროლი.'
+},
+ru:{
+  notReady:'Сервер пока не подключён',notReadyDesc:'Это подготовленная защищённая версия приложения. Реальная регистрация 60 семей не включится, пока не будет настроена новая отдельная бесплатная база данных.',
+  guestIntro:'Защищённая регистрация жильцов',signin:'Вход',signup:'Регистрация',email:'Электронная почта',password:'Пароль',first:'Имя',last:'Фамилия',phone:'Номер телефона',send:'Отправить',wait:'Подождите…',emailSent:'Проверьте почту и подтвердите аккаунт, затем войдите.',account:'Мой аккаунт',logout:'Выйти',
+  request:'Заявка',registerApt:'Запрос доступа к квартире',entrance:'Подъезд',floor:'Этаж',flat:'Квартира',owner:'Собственник',resident:'Житель',submitRequest:'Отправить заявку',pending:'Ожидает',approved:'Одобрена',rejected:'Отклонена',retry:'Подать новую заявку',yourRequest:'Моя заявка',noRequest:'Заявка ещё не подана',waiting:'Твоя заявка ожидает проверки председателем.',rejectedMsg:'Предыдущая заявка отклонена. Можно отправить новую.',approvedMsg:'Твой доступ к квартире подтверждён.',building:'Хашури, Руставели 16 · 60 квартир · 3 подъезда',
+  chairman:'Председатель',pendingRequests:'Заявки на подтверждение',directory:'База жильцов',records:'Записи жильцов',approve:'Одобрить',reject:'Отклонить',confirmApprove:'Подтвердить заявку?',confirmReject:'Отклонить заявку?',search:'Поиск по имени, фамилии, телефону или квартире',none:'Записей пока нет',relation:'Статус жильца',status:'Статус',date:'Дата',refresh:'Обновить',
+  secure:'Права доступа проверяются на сервере. Жители не могут видеть чужие телефоны.',privacy:'Вносите реальные сведения соседей только после запуска защищённой базы и получения их согласия.',fail:'Не удалось выполнить действие',session:'Сессия завершилась. Войди снова.',noRole:'Роль председателя назначается только вручную уполномоченным администратором.',noFee:'Финансы и голосования будут добавлены на следующем этапе.',passwordHelp:'Используйте уникальный пароль длиной не менее 12 символов.'
+}};
+const t=k=>dictionary[lang][k]||k;
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+const show=(msg,isError=false)=>{toastEl.textContent=msg;toastEl.style.background=isError?'#9a3440':'#16374d';toastEl.style.display='block';setTimeout(()=>toastEl.style.display='none',4500);};
+const safeDate=d=>d?new Date(d).toLocaleDateString(lang==='ka'?'ka-GE':'ru-RU'):'—';
+const statusBadge=s=>'<span class="status '+esc(s)+'">'+esc(t(s))+'</span>';
+const button=(text,action,extra='')=>'<button type="button" class="btn '+extra+'" data-action="'+action+'">'+text+'</button>';
+const input=(label,name,type='text',placeholder='',extra='')=>'<label>'+esc(label)+'<input name="'+name+'" type="'+type+'" '+(placeholder?'placeholder="'+esc(placeholder)+'"':'')+' '+extra+' required></label>';
+const html = {
+  top(title,description=''){return '<div class="card"><h1>'+esc(title)+'</h1><p class="muted">'+esc(description)+'</p></div>';},
+  status(){return '<div class="notice">'+esc(t('secure'))+'</div>';}
+};
+
+async function refresh() {
+  if(!enabled){el.innerHTML=html.top(t('notReady'),t('notReadyDesc'));return;}
+  const version=++loadVersion;
+  el.innerHTML='<div class="card">'+esc(t('wait'))+'</div>';
+  try{
+    const {data,error}=await supabase.auth.getUser();
+    if(error&&!(/Auth session missing/i.test(error.message)))throw error;
+    if(version!==loadVersion)return;
+    user=data?.user||null;
+    role='resident';profile=null;requests=[];members=[];units=[];profiles=[];ownRequests=[];ownMembers=[];
+    if(!user){renderGuest();return;}
+    const [myProfile,myRole,unitResp,myRequests,myMemberships]=await Promise.all([
+      supabase.from('corp_profiles').select('id,first_name,last_name,phone').eq('id',user.id).single(),
+      supabase.from('corp_roles').select('role').eq('user_id',user.id).single(),
+      supabase.from('corp_units').select('apartment,entrance,floor').order('apartment'),
+      supabase.from('corp_requests').select('id,applicant_id,apartment,entrance,floor,relation,status,review_note,created_at').eq('applicant_id',user.id).order('created_at',{ascending:false}),
+      supabase.from('corp_members').select('apartment,relation,approved_at').eq('user_id',user.id)
+    ]);
+    for (const response of [myProfile,myRole,unitResp,myRequests,myMemberships])if(response.error)throw response.error;
+    if(version!==loadVersion)return;
+    profile=myProfile.data;role=myRole.data.role;
+    units=unitResp.data||[];ownRequests=myRequests.data||[];ownMembers=myMemberships.data||[];
+    if(role==='chairman'){
+      const [allRequests,allMembers,allProfiles]=await Promise.all([
+        supabase.from('corp_requests').select('id,applicant_id,apartment,entrance,floor,relation,status,review_note,created_at').eq('status','pending').order('created_at'),
+        supabase.from('corp_members').select('user_id,apartment,relation,approved_at').order('apartment'),
+        supabase.from('corp_profiles').select('id,first_name,last_name,phone').order('last_name')
+      ]);
+      for(const response of [allRequests,allMembers,allProfiles])if(response.error)throw response.error;
+      if(version!==loadVersion)return;
+      requests=allRequests.data||[];members=allMembers.data||[];profiles=allProfiles.data||[];
+    }
+    renderMember();
+  }catch(err){if(version===loadVersion){el.innerHTML='<div class="card notice error">'+esc(t('fail'))+': '+esc(err.message||String(err))+'</div>'+button(t('refresh'),'refresh','light');}}
+}
+
+function renderGuest(){
+  const signup=authTab==='signup';
+  el.innerHTML=html.top(t('guestIntro'),t('building'))+
+   '<div class="card"><div class="actions">'+
+   button(t('signin'),'tab-signin',signup?'light':'green')+
+   button(t('signup'),'tab-signup',signup?'green':'light')+'</div>'+
+   '<form id="auth-form" class="grid">'+
+   (signup?input(t('first'),'first_name','text','', 'autocomplete="given-name" minlength="2" maxlength="70"')+
+            input(t('last'),'last_name','text','', 'autocomplete="family-name" minlength="2" maxlength="70"')+
+            '<div class="wide">'+input(t('phone'),'phone','tel','+995 5XX XXX XXX', 'autocomplete="tel" minlength="7" maxlength="25"')+'</div>':'')+
+   '<div class="wide">'+input(t('email'),'email','email','', 'autocomplete="email"')+'</div>'+
+   '<div class="wide">'+input(t('password'),'password','password','', 'autocomplete="'+(signup?'new-password':'current-password')+'" minlength="12"')+'</div>'+
+   '<div class="wide"><p class="muted">'+esc(t('passwordHelp'))+'</p><button class="btn green" type="submit">'+esc(t(signup?'signup':'signin'))+'</button></div></form></div>';
+}
+const fieldOptions=(items)=>items.map(x=>'<option value="'+x+'">'+x+'</option>').join('');
+function renderRequest(){
+  const cur=ownRequests[0];
+  if(ownMembers.length)return '<div class="notice">'+esc(t('approvedMsg'))+'</div>'+ownMembers.map(m=>'<div class="mini">№ '+m.apartment+' '+esc(t(m.relation))+'</div>').join('');
+  const status=cur?'<div class="notice '+(cur.status==='rejected'?'warning':'')+'">'+statusBadge(cur.status)+' '+esc(cur.status==='rejected'?t('rejectedMsg'):t('waiting'))+'</div>':'';
+  if(cur?.status==='pending')return status;
+  if(cur?.status==='approved')return status+'<p>'+esc(t('approvedMsg'))+'</p>';
+  const options=units.map(x=>'<option value="'+x.apartment+'">'+x.apartment+'</option>').join('');
+  const form='<form id="request-form" class="grid"><label>'+esc(t('entrance'))+'<select name="entrance" required>'+fieldOptions([1,2,3])+'</select></label>'+
+    '<label>'+esc(t('floor'))+'<select name="floor" required>'+fieldOptions([2,3,4,5,6,7,8])+'</select></label>'+
+    '<label>'+esc(t('flat'))+'<select name="apartment" required>'+options+'</select></label>'+
+    '<label>'+esc(t('relation'))+'<select name="relation"><option value="owner">'+esc(t('owner'))+'</option><option value="resident">'+esc(t('resident'))+'</option></select></label>'+
+    '<div class="wide"><button type="submit" class="btn green">'+esc(t('submitRequest'))+'</button></div></form>';
+  return status+form;
+}
+function renderChair(){
+  const profileMap=new Map(profiles.map(p=>[p.id,p]));
+  const reqHtml=requests.map(r=>{
+    const p=profileMap.get(r.applicant_id)||{};
+    return '<div class="mini"><div class="row"><div><strong>'+esc(p.first_name)+' '+esc(p.last_name)+'</strong><p class="muted">'+esc(p.phone)+' · '+esc(t('entrance'))+' '+r.entrance+' · '+esc(t('floor'))+' '+r.floor+' · № '+r.apartment+' · '+esc(t(r.relation))+'</p></div>'+
+      '<div class="actions">'+button('✓ '+esc(t('approve')),'approve:'+esc(r.id),'green')+
+      button('× '+esc(t('reject')),'reject:'+esc(r.id),'danger')+'</div></div></div>';
+  }).join('')||'<p class="muted">'+esc(t('none'))+'</p>';
+  const rows=members.map(m=>{
+    const p=profileMap.get(m.user_id)||{};
+    const u=units.find(u=>u.apartment===m.apartment)||{};
+    const id=(p.first_name+' '+p.last_name+' '+p.phone+' '+m.apartment).toLowerCase();
+    return '<tr data-filter="'+esc(id)+'"><td>'+esc(p.first_name)+'</td><td>'+esc(p.last_name)+'</td><td>'+esc(u.entrance??'—')+'</td><td>'+esc(u.floor??'—')+'</td><td>№ '+m.apartment+'</td><td>'+esc(p.phone)+'</td></tr>';
+  }).join('');
+  return '<div class="card"><h2>'+esc(t('pendingRequests'))+' ('+requests.length+')</h2>'+reqHtml+'</div>'+
+    '<div class="card"><div class="row"><h2>'+esc(t('directory'))+' ('+members.length+')</h2></div><p class="muted">'+esc(t('privacy'))+'</p>'+
+    '<label>'+esc(t('search'))+'<input id="search" autocomplete="off" placeholder="'+esc(t('search'))+'"></label>'+
+    '<div class="table-wrap"><table><thead><tr><th>'+esc(t('first'))+'</th><th>'+esc(t('last'))+'</th><th>'+esc(t('entrance'))+'</th><th>'+esc(t('floor'))+'</th><th>'+esc(t('flat'))+'</th><th>'+esc(t('phone'))+'</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+}
+function renderMember(){
+  el.innerHTML=html.top(t('account'),t('building'))+
+    '<div class="card row"><div><strong>'+esc(profile.first_name)+' '+esc(profile.last_name)+'</strong><p class="muted">'+esc(user.email)+' · '+esc(profile.phone)+'</p><span class="status">'+esc(t(role))+'</span></div>'+
+    '<div class="actions">'+button('↻ '+esc(t('refresh')),'refresh','light')+button(esc(t('logout')),'logout','light')+'</div></div>'+
+    (role==='chairman'?renderChair():'<div class="card"><h2>'+esc(t('registerApt'))+'</h2>'+renderRequest()+'</div>')+
+    html.status();
+}
+async function dispatchForm(ev){
+  if(!enabled)return;
+  const form=ev.target;if(!['auth-form','request-form'].includes(form.id))return;
+  ev.preventDefault();
+  const data=Object.fromEntries(new FormData(form).entries());
+  const btn=form.querySelector('button[type="submit"]');if(btn)btn.disabled=true;
+  try{
+    if(form.id==='auth-form'){
+      if(authTab==='signup'){
+        if(String(data.password||'').length<12)throw new Error(t('passwordHelp'));
+        const {data:result,error}=await supabase.auth.signUp({
+          email:String(data.email||'').trim().toLowerCase(),
+          password:String(data.password),
+          options:{ emailRedirectTo:location.origin+location.pathname, data:{
+             first_name:String(data.first_name||'').trim(),
+             last_name:String(data.last_name||'').trim(),
+             phone:String(data.phone||'').trim()
+          }}
+        });
+        if(error)throw error;
+        show(t('emailSent'));
+        if(result.session){await refresh();return;}
+        authTab='signin';renderGuest();
+      } else {
+        const {error}=await supabase.auth.signInWithPassword({email:data.email,password:data.password});
+        if(error)throw error;
+        await refresh();
+      }
+    }else if(form.id==='request-form'){
+      if(!user)throw new Error(t('session'));
+      const request={applicant_id:user.id,entrance:Number(data.entrance),floor:Number(data.floor),
+        apartment:Number(data.apartment),relation:data.relation};
+      const {error}=await supabase.from('corp_requests').insert(request);
+      if(error)throw error;
+      await refresh();
+    }
+  }catch(err){show((err.message||String(err)),true);if(btn)btn.disabled=false;}
+}
+
+async function dispatchClick(ev){
+  const button=ev.target.closest('button[data-action]');if(!button)return;
+  const action=button.dataset.action;
+  if(action==='tab-signin'||action==='tab-signup'){authTab=action.substring(4);renderGuest();return;}
+  if(action==='refresh'){await refresh();return;}
+  if(action==='logout'){const {error}=await supabase.auth.signOut();if(error)show(error.message,true);await refresh();return;}
+  if(action.startsWith('approve:')||action.startsWith('reject:')){
+    if(role!=='chairman')return;
+    const approve=action.startsWith('approve:');
+    if(!confirm(t(approve?'confirmApprove':'confirmReject')))return;
+    button.disabled=true;
+    const requestId=action.slice(approve?8:7);
+    const {error}=await supabase.rpc('corp_review_request',{p_request_id:requestId,p_approve:approve,p_note:''});
+    if(error){show(error.message,true);button.disabled=false;return;}
+    await refresh();
+  }
+}
+document.addEventListener('submit',dispatchForm);
+document.addEventListener('click',dispatchClick);
+document.addEventListener('input',ev=>{
+  if(ev.target.id!=='search')return;
+  const q=String(ev.target.value||'').toLowerCase().trim();
+  document.querySelectorAll('tr[data-filter]').forEach(row=>{row.hidden=!row.dataset.filter.includes(q);});
+});
+document.getElementById('language').addEventListener('click',()=>{
+  lang=lang==='ka'?'ru':'ka';localStorage.setItem('corp-lang',lang);
+  document.documentElement.lang=lang;
+  document.getElementById('language').textContent=lang==='ka'?'🇷🇺 RU':'🇬🇪 KA';
+  if(!enabled)refresh();else if(!user)renderGuest();else renderMember();
+});
+if(supabase) {
+  supabase.auth.onAuthStateChange((_event,_session)=>{setTimeout(refresh,0);});
+}
+await refresh();
