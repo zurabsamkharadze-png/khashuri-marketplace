@@ -163,3 +163,46 @@ test('residents must not see other apartment receipts even if amount and month m
   await assertFails(getDoc(doc(fs(resId),'payments','another-flat')));
   await assertSucceeds(getDoc(doc(fs(chairId),'payments','another-flat')));
 });
+
+test('only chairman can reverse an existing receipt, exactly once and fully',async()=>{
+  const original=await assertSucceeds(addDoc(collection(fs(chairId),'payments'),{
+    apartment:1,month:'2026-10',amountTetri:1350,note:'Entered incorrectly',
+    createdBy:chairId,createdAt:serverTimestamp()
+  }));
+  const correction={
+    paymentId:original.id,month:'2026-10',apartment:1,amountTetri:-1350,
+    reason:'Wrong amount entered',createdBy:chairId,createdAt:serverTimestamp()
+  };
+  await assertFails(setDoc(doc(fs(resId),'corrections',original.id),{
+    ...correction,createdBy:resId
+  }));
+  await assertFails(setDoc(doc(fs(chairId),'corrections',original.id),{
+    ...correction,amountTetri:-1250
+  }));
+  await assertSucceeds(setDoc(doc(fs(chairId),'corrections',original.id),correction));
+  await assertFails(setDoc(doc(fs(chairId),'corrections',original.id),correction));
+  await assertFails(updateDoc(doc(fs(chairId),'corrections',original.id),{
+    reason:'I changed my mind'
+  }));
+  await assertSucceeds(getDoc(doc(fs(resId),'corrections',original.id)));
+  await assertFails(getDoc(doc(fs(otherId),'corrections',original.id)));
+  await assertSucceeds(getDocs(query(
+    collection(fs(resId),'corrections'),where('apartment','==',1)
+  )));
+  await assertFails(getDocs(collection(fs(resId),'corrections')));
+});
+
+test('no reversal of another amount, apartment or nonexistent receipt',async()=>{
+  await assertFails(setDoc(doc(fs(chairId),'corrections','phantom-payment'),{
+    paymentId:'phantom-payment',month:'2026-10',apartment:1,amountTetri:-1300,
+    reason:'No original exists',createdBy:chairId,createdAt:serverTimestamp()
+  }));
+  const payment=await assertSucceeds(addDoc(collection(fs(chairId),'payments'),{
+    apartment:1,month:'2026-09',amountTetri:1300,note:'',
+    createdBy:chairId,createdAt:serverTimestamp()
+  }));
+  await assertFails(setDoc(doc(fs(chairId),'corrections',payment.id),{
+    paymentId:payment.id,month:'2026-09',apartment:2,amountTetri:-1300,
+    reason:'Cannot change apartment',createdBy:chairId,createdAt:serverTimestamp()
+  }));
+});
