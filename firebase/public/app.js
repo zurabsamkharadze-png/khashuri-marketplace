@@ -8,7 +8,9 @@ import { firebaseConfig } from "./config.js";
 const el=document.getElementById('app'),toast=document.getElementById('toast');
 let lang=localStorage.getItem('corp-language')==='ru'?'ru':'ka', screen='login', user=null,
     profile=null, isChair=false, application=null, membership=null, requests=[],members=[],units=[],
-    profileCache=new Map(),working=false,editingUnit=1,announcements=[],repairs=[];
+    profileCache=new Map(),working=false,editingUnit=1,announcements=[],repairs=[],
+    ledgerMonth=localMonth(),ledgerRate=null,receipts=[];
+function localMonth(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
 const dict={
 ka:{
   pending:'მოლოდინში',approved:'დადასტურებულია',rejected:'უარყოფილია',owner:'მესაკუთრე',resident:'მაცხოვრებელი',
@@ -17,7 +19,10 @@ ka:{
   login:'შესვლა',signup:'რეგისტრაცია',email:'ელფოსტა',password:'პაროლი',first:'სახელი',last:'გვარი',phone:'ტელეფონი',forgot:'პაროლი დაგავიწყდათ?',sendReset:'აღდგენის ბმულის გაგზავნა',resetSent:'თუ ასეთი ანგარიში არსებობს, ელფოსტაზე მიიღებთ აღდგენის ბმულს.',back:'უკან',passwordHint:'გამოიყენეთ არანაკლებ 12 სიმბოლოიანი პაროლი.',
   register:'ანგარიშის შექმნა',sendVerify:'დადასტურების წერილის გაგზავნა',verifyInfo:'დაადასტურეთ ელფოსტის მისამართი. შემდეგ დააჭირეთ „განახლებას“.',verifySent:'დადასტურების წერილი გაიგზავნა. შეამოწმეთ ელფოსტა.',refresh:'განახლება',logout:'გასვლა',account:'ჩემი პროფილი',
   application:'ბინაზე წვდომის განაცხადი',entrance:'სადარბაზო',floor:'სართული',apartment:'ბინა',relation:'მობინადრის ტიპი',apply:'განაცხადის გაგზავნა',waiting:'თქვენი განაცხადი თავმჯდომარის გადაწყვეტილებას ელოდება.',rejectedMsg:'განაცხადი უარყოფილია. შეგიძლიათ გააგზავნოთ ახალი.',approvedMsg:'თქვენი ბინა დამტკიცებულია.',reapply:'ახალი განაცხადი',pendingRequests:'დასადასტურებელი განაცხადები',chair:'თავმჯდომარე',approve:'დადასტურება',reject:'უარყოფა',confirmApprove:'დავადასტუროთ ეს განაცხადი?',confirmReject:'უარვყოთ განაცხადი?',directory:'მცხოვრებთა ბაზა',noRecords:'ჩანაწერები არ არის',search:'ძებნა სახელით, გვარით, ბინით ან ტელეფონით',private:'მცხოვრებთა ტელეფონები ხელმისაწვდომია მხოლოდ თავმჯდომარისთვის.',unitMap:'ბინების სქემა',unitSave:'შენახვა',unknown:'დაუდგენელია',alreadyAssigned:'ეს ბინა სხვა სადარბაზოში ან სართულზეა. შეამოწმეთ სქემა.',confirmUnit:'შევცვალოთ ბინის მდებარეობა?',saved:'შენახულია',failed:'ოპერაცია ვერ შესრულდა',
-  noFinance:'ფინანსები და კენჭისყრა დაემატება შემდეგ ეტაპზე.',
+  noFinance:'კენჭისყრა დაემატება შემდეგ ეტაპზე.',
+  finance:'ფინანსები',month:'თვე',monthlyFee:'თვიური შენატანი',setMonthlyFee:'შენატანის დადგენა',feeConfirm:'დავაფიქსიროთ ამ თვის შენატანი? შემდეგ ცვლილება შეუძლებელია.',feeMissing:'ამ თვის შენატანი ჯერ არ არის მითითებული.',
+  paid:'შემოსულია',due:'დარიცხულია',debt:'დავალიანება',credit:'ზედმეტობა',noPayments:'ჩანაწერები არ არის',recordPayment:'ხელით გადახდის დამატება',paymentNote:'შენიშვნა',amountGel:'თანხა (₾)',allUnits:'60 ბინის ანგარიში',downloadReport:'CSV ანგარიშის გადმოწერა',
+  immutableLedger:'ეს არის ხელით აღრიცხვა და არა ონლაინ გადახდა. ჩაწერილი ოპერაციები არ იშლება; შეცდომის შემთხვევაში საჭირო იქნება შემასწორებელი ჩანაწერის მექანიზმი.',
   news:'განცხადებები',newNews:'ახალი განცხადება',headline:'სათაური',content:'ტექსტი',publish:'გამოქვეყნება',
   repairs:'სარემონტო განაცხადები',newRepair:'პრობლემის შეტყობინება',repairDetails:'პრობლემის აღწერა',sendRepair:'განაცხადის გაგზავნა',
   repairStatus:'მდგომარეობა',open:'ახალი',progress:'მიმდინარეობს',done:'დასრულებულია',setProgress:'მუშაობაში გადაყვანა',setDone:'დასრულება',
@@ -30,7 +35,10 @@ ru:{
   login:'Войти',signup:'Регистрация',email:'Электронная почта',password:'Пароль',first:'Имя',last:'Фамилия',phone:'Телефон',forgot:'Забыли пароль?',sendReset:'Отправить ссылку для восстановления',resetSent:'Если аккаунт существует, ссылка для восстановления отправлена на почту.',back:'Назад',passwordHint:'Используй пароль длиной не менее 12 символов.',
   register:'Создать аккаунт',sendVerify:'Отправить письмо с подтверждением',verifyInfo:'Подтверди адрес электронной почты, затем нажми «Обновить».',verifySent:'Письмо с подтверждением отправлено. Проверь почту.',refresh:'Обновить',logout:'Выйти',account:'Мой профиль',
   application:'Заявка на доступ к квартире',entrance:'Подъезд',floor:'Этаж',apartment:'Квартира',relation:'Статус жильца',apply:'Отправить заявку',waiting:'Заявка ожидает решения председателя.',rejectedMsg:'Заявка отклонена. Можно подать новую.',approvedMsg:'Твоя квартира подтверждена.',reapply:'Новая заявка',pendingRequests:'Заявки на подтверждение',chair:'Председатель',approve:'Одобрить',reject:'Отклонить',confirmApprove:'Одобрить эту заявку?',confirmReject:'Отклонить заявку?',directory:'База жильцов',noRecords:'Пока нет записей',search:'Поиск по имени, фамилии, квартире или телефону',private:'Телефоны жильцов доступны только председателю.',unitMap:'Схема квартир',unitSave:'Сохранить',unknown:'Не назначено',alreadyAssigned:'Квартира закреплена за другим подъездом или этажом. Проверь схему.',confirmUnit:'Изменить расположение квартиры?',saved:'Сохранено',failed:'Операция не выполнена',
-  noFinance:'Финансы и голосования добавим после проверки защищённой регистрации.',
+  noFinance:'Голосования добавим после проверки защищённой регистрации.',
+  finance:'Финансы',month:'Месяц',monthlyFee:'Ежемесячный взнос',setMonthlyFee:'Установить взнос',feeConfirm:'Зафиксировать взнос на этот месяц? После сохранения его нельзя изменить.',feeMissing:'Взнос за этот месяц пока не установлен.',
+  paid:'Поступило',due:'Начислено',debt:'Задолженность',credit:'Переплата',noPayments:'Записей пока нет',recordPayment:'Записать оплату вручную',paymentNote:'Примечание',amountGel:'Сумма (₾)',allUnits:'Отчёт по 60 квартирам',downloadReport:'Скачать CSV',
+  immutableLedger:'Это ручной учёт, а не приём онлайн-платежей. Записанные поступления нельзя удалять; для исправления ошибок позже понадобится механизм корректирующих операций.',
   news:'Объявления',newNews:'Новое объявление',headline:'Заголовок',content:'Текст объявления',publish:'Опубликовать',
   repairs:'Заявки на ремонт',newRepair:'Сообщить о проблеме',repairDetails:'Описание проблемы',sendRepair:'Отправить заявку',
   repairStatus:'Статус',open:'Новая',progress:'В работе',done:'Завершена',setProgress:'В работу',setDone:'Завершить',
@@ -48,6 +56,10 @@ const configured=!!firebaseConfig&&!!firebaseConfig.projectId&&!!firebaseConfig.
 let auth=null,db=null;
 if(configured){const app=initializeApp(firebaseConfig);auth=getAuth(app);db=getFirestore(app);}
 const canWrite=()=>user?.emailVerified===true;
+const monthOk=v=>/^20[0-9]{2}-(0[1-9]|1[0-2])$/.test(String(v));
+const toTetri=v=>{const n=Number(v);return Number.isFinite(n)?Math.round(n*100):NaN};
+const money=v=>(Number(v||0)/100).toLocaleString(lang==='ka'?'ka-GE':'ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' ₾';
+const totalsFor=flat=>receipts.filter(r=>r.month===ledgerMonth&&Number(r.apartment)===flat).reduce((sum,r)=>sum+Number(r.amountTetri||0),0);
 
 async function refresh(){
   if(!user||!db)return render();
@@ -71,6 +83,16 @@ async function refresh(){
         .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
       repairs=repairSnap.docs.map(x=>({id:x.id,...x.data()}))
         .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+    }
+    ledgerRate=null;receipts=[];
+    if(isChair||membership){
+      const [rate,receiptDocs]=await Promise.all([
+        getDoc(doc(db,'months',ledgerMonth)),
+        isChair?getDocs(query(collection(db,'payments'),where('month','==',ledgerMonth))):
+          getDocs(query(collection(db,'payments'),where('apartment','==',membership.apartment)))
+      ]);
+      ledgerRate=rate.data()||null;
+      receipts=receiptDocs.docs.map(x=>({id:x.id,...x.data()})).filter(r=>r.month===ledgerMonth);
     }
     if(isChair) {
       const [reqs,mem,loc]=await Promise.all([
@@ -127,6 +149,34 @@ function listRepairs(canManage){
         '</div>':'')+'</div></div>'
   ).join('');
 }
+function renderFinance(){
+  const fee=ledgerRate?.amountTetri??null;
+  const paid=isChair?receipts.reduce((a,r)=>a+Number(r.amountTetri||0),0):totalsFor(Number(membership?.apartment));
+  const billed=(fee??0)*(isChair?60:1);
+  const metrics='<div class="grid section-gap">'+
+    '<div class="card"><p class="muted">'+esc(t('due'))+'</p><strong>'+money(billed)+'</strong></div>'+
+    '<div class="card"><p class="muted">'+esc(t('paid'))+'</p><strong>'+money(paid)+'</strong></div>'+
+    '<div class="card"><p class="muted">'+esc(t('debt'))+'</p><strong>'+money(Math.max(0,billed-paid))+'</strong></div>'+
+    '<div class="card"><p class="muted">'+esc(t('credit'))+'</p><strong>'+money(Math.max(0,paid-billed))+'</strong></div></div>';
+  const month='<label>'+esc(t('month'))+'<input type="month" id="finance-month" value="'+esc(ledgerMonth)+'" min="2020-01" max="2099-12"></label>';
+  const history=receipts.slice().sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)).slice(0,80)
+    .map(r=>'<div class="mini">№ '+esc(r.apartment)+' · <strong>'+money(r.amountTetri)+'</strong><p class="muted">'+esc(r.note||'')+'</p></div>').join('')||
+    '<p class="muted">'+esc(t('noPayments'))+'</p>';
+  if(!isChair)return card(t('finance'),month+'<p>'+esc(t('monthlyFee'))+': '+(fee===null?esc(t('feeMissing')):money(fee))+'</p>'+metrics+history);
+  const feeForm=fee===null?'<form id="fee-form" class="grid"><label>'+esc(t('amountGel'))+
+    '<input type="number" name="fee" step="0.01" min="0" max="100000" value="0" required></label>'+
+    '<div><button type="submit" class="btn green">'+esc(t('setMonthlyFee'))+'</button></div></form>':
+    '<p><strong>'+esc(t('monthlyFee'))+': '+money(fee)+'</strong></p>';
+  const paymentForm='<form id="payment-form" class="grid">'+
+    sel(t('apartment'),'apartment',Array.from({length:60},(_,i)=>i+1),1)+
+    '<label>'+esc(t('amountGel'))+'<input type="number" name="amount" step="0.01" min="0.01" max="1000000" required></label>'+
+    '<div class="wide">'+fld(t('paymentNote'),'note','text','','maxlength="250"')+'</div>'+
+    '<div class="wide"><button type="submit" class="btn green">'+esc(t('recordPayment'))+'</button></div></form>';
+  const data=Array.from({length:60},(_,i)=>i+1).map(n=>{const paid=totalsFor(n),due=fee??0;return '<tr><td>№ '+n+'</td><td>'+money(due)+'</td><td>'+money(paid)+'</td><td>'+money(Math.max(0,due-paid))+'</td><td>'+money(Math.max(0,paid-due))+'</td></tr>';}).join('');
+  const report='<div class="table-wrap"><table><thead><tr>'+[t('apartment'),t('due'),t('paid'),t('debt'),t('credit')].map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+data+'</tbody></table></div><div class="actions">'+btn('↓ '+t('downloadReport'),'download-finance')+'</div>';
+  return card(t('finance'),month+metrics+'<p class="muted">'+esc(t('immutableLedger'))+'</p>')+
+    card(t('setMonthlyFee'),feeForm)+card(t('recordPayment'),paymentForm)+card(t('allUnits'),report)+card(t('paid'),history);
+}
 function renderResident(){
   if(membership){
     const form='<form id="repair-form" class="stack">'+
@@ -136,7 +186,7 @@ function renderResident(){
     return card(t('application'),'<div class="notice">'+esc(t('approvedMsg'))+'</div><p>№ '+
       esc(membership.apartment)+' · '+esc(t('entrance'))+' '+esc(membership.entrance)+' · '+
       esc(t('floor'))+' '+esc(membership.floor)+'</p>')+
-      card(t('news'),listAnnouncements())+
+      renderFinance()+card(t('news'),listAnnouncements())+
       card(t('newRepair'),form)+card(t('repairs'),listRepairs(false));
   }
   const note=application?'<div class="notice '+(application.status==='rejected'?'warning':'')+'">'+status(application.status)+' '+esc(application.status==='pending'?t('waiting'):t('rejectedMsg'))+'</div>':'';
@@ -158,13 +208,13 @@ function renderChair(){
     '<button type="submit" class="btn green">'+esc(t('publish'))+'</button></form>';
   return card(t('pendingRequests')+' ('+requests.length+')',pending)+
     card(t('newNews'),newsForm)+card(t('news'),listAnnouncements())+
-    card(t('repairs')+' ('+repairs.length+')',listRepairs(true))+
+    card(t('repairs')+' ('+repairs.length+')',listRepairs(true))+renderFinance()+
     card(t('directory')+' ('+members.length+')','<p class="muted">'+esc(t('private'))+'</p><label>'+esc(t('search'))+'<input id="search" autocomplete="off" placeholder="'+esc(t('search'))+'"></label>'+
     '<div class="table-wrap"><table><thead><tr>'+[t('first'),t('last'),t('entrance'),t('floor'),t('apartment'),t('phone')].map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+rows+'</tbody></table></div>')+
     card(t('unitMap'),layout)+'<div class="notice">'+esc(t('noFinance'))+'</div>';
 }
 async function submit(ev){
-  const f=ev.target;if(!['auth-form','reset-form','application-form','layout-form','repair-form','news-form'].includes(f.id))return;
+  const f=ev.target;if(!['auth-form','reset-form','application-form','layout-form','repair-form','news-form','fee-form','payment-form'].includes(f.id))return;
   ev.preventDefault();if(working)return;working=true;
   const d=Object.fromEntries(new FormData(f).entries());
   const actionButton=f.querySelector('button[type="submit"]');if(actionButton)actionButton.disabled=true;
@@ -209,6 +259,24 @@ async function submit(ev){
         title,body,authorUid:user.uid,createdAt:serverTimestamp()
       });
       await refresh();
+    }else if(f.id==='fee-form'){
+      if(!isChair||!canWrite()||!monthOk(ledgerMonth))throw Error(t('failed'));
+      const amountTetri=toTetri(d.fee);
+      if(!Number.isSafeInteger(amountTetri)||amountTetri<0||amountTetri>10000000)throw Error(t('tooLong'));
+      if(!confirm(t('feeConfirm')+' '+ledgerMonth+' · '+money(amountTetri)))return;
+      await setDoc(doc(db,'months',ledgerMonth),{
+        month:ledgerMonth,amountTetri,createdBy:user.uid,createdAt:serverTimestamp()
+      });
+      await refresh();
+    }else if(f.id==='payment-form'){
+      if(!isChair||!canWrite()||!monthOk(ledgerMonth))throw Error(t('failed'));
+      const amountTetri=toTetri(d.amount),apartment=Number(d.apartment),note=String(d.note||'').trim();
+      if(!Number.isSafeInteger(amountTetri)||amountTetri<=0||amountTetri>100000000||
+         !Number.isInteger(apartment)||apartment<1||apartment>60||note.length>250)throw Error(t('tooLong'));
+      await addDoc(collection(db,'payments'),{
+        apartment,month:ledgerMonth,amountTetri,note,createdBy:user.uid,createdAt:serverTimestamp()
+      });
+      await refresh();
     }else if(f.id==='layout-form'){
       if(!isChair)throw Error(t('failed'));
       if(!confirm(t('confirmUnit')))return;
@@ -224,6 +292,18 @@ async function handleAction(ev){
   const a=b.dataset.action;
   if(['login','signup','reset'].includes(a)){screen=a;renderAuth();return;}
   if(a==='refresh'){await refresh();return;}
+  if(a==='download-finance'){
+    if(!isChair)return;
+    if(!confirm(t('private')+' '+t('downloadReport')+'?'))return;
+    const safe=v=>{let str=String(v??'');if(/^[=+@-]/.test(str))str="'"+str;return '"'+str.replace(/"/g,'""')+'"';};
+    const rows=[['apartment','month','due_gel','paid_gel','balance_gel'],
+      ...Array.from({length:60},(_,i)=>{const n=i+1,fee=ledgerRate?.amountTetri||0,paid=totalsFor(n);return [n,ledgerMonth,(fee/100).toFixed(2),(paid/100).toFixed(2),((fee-paid)/100).toFixed(2)];})];
+    const csv='\ufeff'+rows.map(row=>row.map(safe).join(';')).join('\r\n');
+    const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+    const a=document.createElement('a');a.href=url;a.download='korpusi-finance-'+ledgerMonth+'.csv';
+    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3500);
+    return;
+  }
   if(a==='logout'){await signOut(auth);return;}
   if(a==='verify'){try{await sendEmailVerification(user);toastMsg(t('verifySent'));}catch(e){toastMsg(e.message,true);}return;}
   if(a.startsWith('repair-progress:')||a.startsWith('repair-done:')){
@@ -269,5 +349,8 @@ document.getElementById('language').addEventListener('click',()=>{lang=lang==='k
 document.addEventListener('submit',submit);
 document.addEventListener('click',handleAction);
 document.addEventListener('input',ev=>{if(ev.target.id==='search'){const v=ev.target.value.toLowerCase().trim();document.querySelectorAll('tr[data-search]').forEach(row=>{row.hidden=!row.dataset.search.includes(v);});}});
-document.addEventListener('change',ev=>{if(ev.target.name==='apartment'&&ev.target.closest('#layout-form')){editingUnit=Number(ev.target.value);render();}});
+document.addEventListener('change',ev=>{
+  if(ev.target.id==='finance-month'&&monthOk(ev.target.value)){ledgerMonth=ev.target.value;refresh();return;}
+  if(ev.target.name==='apartment'&&ev.target.closest('#layout-form')){editingUnit=Number(ev.target.value);render();}
+});
 if(!configured)render();else onAuthStateChanged(auth,async current=>{user=current;profile=null;isChair=false;application=null;membership=null;requests=[];members=[];units=[];profileCache=new Map();if(current)await refresh();else render();});
