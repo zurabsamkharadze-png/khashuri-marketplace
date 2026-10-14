@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="ka">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#15283f" />
+  <meta name="description" content="ჩვენი კორპუსი — რუსთაველის 16, ხაშური. საცხოვრებელი კორპუსის მართვის დემო აპლიკაცია." />
+  <title>ჩვენი კორპუსი — რუსთაველის 16</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <style>
+:root{--navy:#182d45;--navy2:#233b57;--ink:#26364b;--sub:#728198;--background:#f5f7fa;--line:#e2e8ef;--green:#208974;--mint:#e2f4ed;--gold:#e4ad58;--red:#c65d64}
+*{box-sizing:border-box}body{margin:0;background:var(--background);color:var(--ink);font:14px/1.5 system-ui,-apple-system,"Noto Sans Georgian","Segoe UI",sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #7ab3f8;outline-offset:2px}button:disabled{opacity:.55;cursor:default}
+.app{min-height:100vh;display:grid;grid-template-columns:255px minmax(0,1fr)}.side{background:var(--navy);padding:27px 14px;color:white;display:flex;flex-direction:column;gap:26px;position:sticky;top:0;height:100vh}.brand{display:flex;align-items:center;gap:11px;padding:4px 12px}.logo{display:grid;place-items:center;width:45px;height:45px;border-radius:13px;background:#3c5d77;font-size:24px;border:1px solid #61849f}.brand strong{display:block;font-size:15px;letter-spacing:-.3px}.brand small{display:block;margin-top:2px;color:#9eb3cc;font-size:11px}.nav{display:grid;gap:5px}.nav-btn{width:100%;display:flex;align-items:center;gap:13px;background:none;color:#c8d7e8;border:0;padding:12px 14px;border-radius:10px;text-align:left;font-weight:650}.nav-btn:hover,.nav-btn.active{background:#344b66;color:#fff}.nav-btn .i{font-size:18px;width:22px;text-align:center}.side-foot{margin-top:auto;font-size:11px;line-height:1.6;background:#243d58;border-radius:13px;padding:14px;color:#b1c4d9}.main{min-width:0}.top{background:white;border-bottom:1px solid var(--line);padding:17px 28px;display:flex;gap:12px;justify-content:space-between;align-items:center}.eyebrow{color:#8996a8;font-size:11px;letter-spacing:.7px;text-transform:uppercase;font-weight:800}.top .top-name{font-weight:800;font-size:16px}.switches{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:end}.switch{background:#f3f5f8;border:1px solid #e4eaf0;border-radius:10px;padding:8px 11px;font-size:12px;font-weight:750;color:#42546a}.switch.selected{background:#e4f4ef;border-color:#afe0d0;color:#177e67}.wrap{padding:28px;max-width:1460px;margin:0 auto}.page-heading{display:flex;gap:15px;justify-content:space-between;align-items:center;margin-bottom:20px}.page-heading h1{font-size:27px;margin:3px 0 4px;letter-spacing:-.5px}.page-heading p{margin:0;color:var(--sub)}.badge{font-size:11px;font-weight:800;background:var(--mint);color:var(--green);padding:6px 10px;border-radius:50px;white-space:nowrap}.notice{border:1px solid #f1dec0;background:#fff9ee;color:#87662b;border-radius:11px;padding:12px 15px;margin:0 0 19px;font-size:12px;line-height:1.6}.grid{display:grid;gap:15px}.four{grid-template-columns:repeat(4,minmax(0,1fr))}.two{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}.card{background:#fff;border:1px solid #e7ecf2;border-radius:16px;padding:21px;box-shadow:0 5px 20px #25394b05;min-width:0}.metric{padding:19px;display:grid;gap:10px;min-height:134px}.metric .symbol{display:grid;place-items:center;border-radius:10px;width:37px;height:37px;font-size:19px;background:#f0f5fc}.metric .label{font-size:12px;color:var(--sub);font-weight:700}.metric strong{font-size:24px;letter-spacing:-.8px}.card h2{font-size:17px;letter-spacing:-.25px;margin:0 0 15px}.card p.help{font-size:12px;color:var(--sub);line-height:1.6;margin:-5px 0 16px}.card-head{display:flex;align-items:center;gap:15px;justify-content:space-between;margin-bottom:15px}.card-head h2{margin:0}.hero{background:linear-gradient(105deg,#e5f3ef,#f3f8fa);border:1px solid #d6e8e2;padding:24px;border-radius:17px;display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:17px}.hero h2{font-size:21px;margin:3px 0 5px}.hero p{color:#6c8593;margin:0}.hero-art{font-size:43px}.empty{background:#f7f9fc;border:1px dashed #d3dce6;border-radius:11px;padding:29px;text-align:center;color:#8391a2}.empty span{display:block;font-size:29px}.items{display:grid;gap:9px}.item{border:1px solid #edf0f4;padding:13px 14px;border-radius:11px;display:flex;justify-content:space-between;align-items:center;gap:12px}.item strong{font-size:13px}.item small{color:var(--sub);display:block;margin-top:4px;overflow-wrap:anywhere}.text-green{color:var(--green)}.text-red{color:var(--red)}.money{font-size:14px;font-weight:850;white-space:nowrap}.building{display:grid;gap:6px}.floor{border:1px solid #e6edf4;background:#f4f7fa;border-radius:10px;padding:10px 12px;display:flex;gap:15px;align-items:center}.floor.commercial{background:#fff4e4;border-color:#f5dfba}.floor b{min-width:60px;color:#48617a;font-size:12px}.floor small{color:#6c7d91}.pill-row{display:flex;gap:8px;flex-wrap:wrap}.pill{font-size:11px;font-weight:750;border-radius:100px;padding:5px 9px;background:#eef2f6;color:#77869a}.pill.done{background:var(--mint);color:var(--green)}.pill.progress{background:#fff3dc;color:#a7771e}.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:grid;gap:5px;min-width:0}.field.all{grid-column:1/-1}.field label{color:#6e7c8f;font-size:11px;font-weight:800}.field input,.field select,.field textarea,.filter{width:100%;min-width:0;padding:10px 11px;border-radius:9px;border:1px solid #dce4ec;background:white;color:var(--ink)}.field textarea{resize:vertical;min-height:76px}.btn{border:0;border-radius:10px;padding:10px 14px;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--navy);color:white}.btn.secondary{background:#edf2f7;color:#344960}.btn.green{background:var(--green)}.btn.danger{background:#fff0ee;color:#b55455}.btn.small{font-size:11px;padding:7px 10px}.table-scroll{max-width:100%;overflow:auto;border:1px solid var(--line);border-radius:12px}.table{width:100%;min-width:610px;border-collapse:collapse}.table th{padding:11px 13px;text-align:left;font-size:11px;color:#7889a0;background:#f8fafc}.table td{border-top:1px solid #eef1f5;padding:10px 13px;font-size:12px}.table select{min-width:90px;padding:7px;border:1px solid #dae2ec;border-radius:8px;color:#425269;background:white}.table .status{font-size:10px;border-radius:20px;padding:5px 8px;color:#60758e;background:#f0f3f7;white-space:nowrap}.table .status.ok{background:#e0f3eb;color:#18866a}.poll{border:1px solid var(--line);border-radius:12px;padding:15px;display:grid;gap:11px}.poll h3{margin:0;font-size:14px}.poll .sub{font-size:11px;color:var(--sub)}.meter{height:8px;background:#e8edf3;border-radius:20px;overflow:hidden}.meter span{height:100%;display:block;background:#2b9b81}.poll-buttons{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.section-gap{margin-top:16px}.small-help{font-size:11px;color:#8c98a8;line-height:1.6}.bottom{display:none}.footer-note{font-size:11px;color:#93a0ad;max-width:870px;margin:26px auto 10px;text-align:center;line-height:1.7}#toast{position:fixed;right:20px;bottom:20px;display:none;background:#1f344b;color:#fff;padding:13px 17px;border-radius:12px;z-index:100;box-shadow:0 8px 25px #0002;font-weight:700}
+@media(max-width:1060px){.app{grid-template-columns:212px minmax(0,1fr)}.side{padding:24px 9px}.four{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}.wrap{padding:22px}}
+@media(max-width:720px){.app{display:block}.side{display:none}.top{padding:13px 12px;align-items:start}.top .top-name{font-size:13px}.switches{gap:5px}.switch{font-size:10px;padding:7px 8px}.wrap{padding:15px 12px 92px}.page-heading{align-items:start}.page-heading h1{font-size:23px}.grid{gap:10px}.metric{padding:13px;min-height:116px}.metric strong{font-size:22px}.card{padding:16px}.hero{padding:17px}.hero h2{font-size:18px}.hero-art{font-size:33px}.form{grid-template-columns:1fr}.field.all{grid-column:auto}.bottom{display:flex;position:fixed;bottom:0;left:0;right:0;background:#fff;box-shadow:0 -4px 16px #23374410;border-top:1px solid var(--line);justify-content:flex-start;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;padding:5px 0 calc(6px + env(safe-area-inset-bottom));z-index:50}.bottom button{flex:0 0 68px;min-width:68px;background:transparent;border:0;color:#8795a8;display:grid;justify-items:center;gap:2px;font-size:9px;font-weight:800;padding:4px}.bottom button.active{color:var(--green)}.bottom button .i{font-size:19px}.footer-note{padding:0 5px}}
+
+/* Visual house schema */
+.entrance-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:14px}
+.entrance-tab{border:1px solid #dfe8ef;background:#f6f8fb;color:#435770;border-radius:12px;padding:12px 9px;text-align:center;font-size:12px;font-weight:850;min-width:0}
+.entrance-tab.active{background:#e2f5ee;border-color:#96d9c5;color:#147c66;box-shadow:0 0 0 1px #baded4 inset}
+.entrance-tab small{display:block;font-size:10px;opacity:.7;margin-top:3px}
+.scheme-topline{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#64778e;font-size:11px;padding:1px 2px 12px;flex-wrap:wrap}
+.scheme-topline b{color:#31465b;font-size:12px}
+.scheme-building{display:grid;gap:5px;border:1px solid #e4eaf0;background:#edf2f6;border-radius:13px;padding:6px;box-shadow:inset 0 -5px 0 #dce5ed}
+.scheme-floor{background:#fff;border:1px solid #e8edf3;border-radius:9px;display:grid;grid-template-columns:54px minmax(0,1fr);gap:6px;padding:8px;min-height:65px;align-items:center}
+.scheme-floor.is-shop{background:#fff8ee;border-color:#f2deb9}
+.scheme-floor-num{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;border-right:1px solid #e4ebf2;color:#566982;line-height:1.1}
+.scheme-floor-num b{font-size:22px}.scheme-floor-num span{font-size:9px;margin-top:4px}
+.scheme-floor-units{display:flex;align-items:center;align-content:center;gap:6px;flex-wrap:wrap;min-height:45px}
+.scheme-empty{color:#a0adba;font-size:10px;padding:9px 3px}
+.flat-tile{display:grid;justify-items:center;align-content:center;gap:3px;min-width:64px;padding:7px 8px;min-height:46px;border-radius:9px;border:1px solid #dce3ed;background:#f3f6fa;color:#6b7c90;font-size:11px}
+.flat-tile b{font-size:12px}.flat-tile span{font-size:9px;white-space:nowrap}
+.flat-tile.paid{background:#def4e9;border-color:#a7ddc3;color:#137b5f}
+.flat-tile.partial{background:#fff2da;border-color:#eacb8c;color:#997019}
+.flat-tile.unpaid{background:#fff0f0;border-color:#efc2c7;color:#b25060}
+.flat-tile.selected{outline:2px solid #344d73;outline-offset:1px}
+.shop-label{font-weight:800;color:#b37a24;font-size:12px}.is-shop .scheme-floor-units small{font-size:10px;color:#9d8c72}
+.scheme-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:10px;color:#75859a;margin:13px 0 12px}
+.scheme-legend span{display:inline-flex;gap:5px;align-items:center}.legend-dot{height:9px;width:9px;border-radius:50%;background:#dce4ed}.legend-dot.paid{background:#29a17f}.legend-dot.partial{background:#deb35d}.legend-dot.unpaid{background:#d07a85}
+.unit-details{margin-top:15px;border:1px solid #b9d9cf;background:#f7fcfa;padding:16px;border-radius:13px;scroll-margin-bottom:90px}
+.unit-details-head{display:flex;align-items:start;justify-content:space-between;gap:8px;margin-bottom:13px}
+.unit-details-head h3{font-size:18px;margin:2px 0 0}.unit-edit{margin-bottom:14px}
+.unit-pay{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
+.unit-pay>div{background:#fff;border:1px solid #e0e8eb;border-radius:9px;padding:10px 8px;display:grid;gap:7px;min-width:0}
+.unit-pay small{font-size:10px;color:#79899a}.unit-pay strong{font-size:15px;overflow-wrap:anywhere}
+.waiting-units{margin-top:17px;padding:15px;background:#f8fafc;border:1px solid #e7ecf3;border-radius:12px}
+.waiting-title{display:flex;align-items:center;gap:9px;justify-content:space-between}.waiting-units p{margin:8px 0}
+.waiting-tiles{display:flex;flex-wrap:wrap;gap:7px;max-height:160px;overflow-y:auto;padding:3px}
+.waiting-chip{border:1px solid #dbe4ed;border-radius:9px;background:white;color:#49627b;padding:7px 10px;font-size:11px;font-weight:800}
+.waiting-chip.active{background:#e4f5ed;border-color:#82c7ac;color:#178368}
+.unit-link{background:none;border:0;color:#186f72;font-size:12px;font-weight:800;padding:4px;text-decoration:underline;text-underline-offset:3px}
+.more-backdrop,.more-sheet{display:none}
+@media(max-width:720px){
+ .top{flex-direction:column;align-items:stretch;gap:9px;padding:13px 14px 11px}
+ .top .eyebrow{display:block;white-space:nowrap;letter-spacing:.25px;font-size:10px}
+ .top .top-name{font-size:13px}
+ .switches{justify-content:flex-start;flex-wrap:nowrap;gap:7px}
+ .switch{flex:0 0 auto;font-size:11px;padding:7px 9px}
+ .bottom{justify-content:space-around;overflow-x:hidden}
+ .bottom button{flex:1 1 20%;min-width:0;font-size:9px}
+ .more-backdrop{display:block;position:fixed;inset:0;background:#182b4966;z-index:51}
+ .more-sheet{display:grid;position:fixed;left:12px;right:12px;bottom:calc(66px + env(safe-area-inset-bottom));border:1px solid #dce5ec;background:white;z-index:52;border-radius:16px;padding:15px;gap:7px;box-shadow:0 9px 45px #0e263a33}
+ .more-sheet>b{font-size:13px;padding:0 5px 6px}
+ .more-sheet button{background:#f4f7fb;border:0;color:#344960;font-size:13px;font-weight:800;border-radius:11px;display:flex;align-items:center;gap:12px;padding:13px 12px;text-align:left}
+ .more-sheet button.active{background:#ddf3ea;color:#148a6e}
+ .more-sheet button span{font-size:20px;width:22px;text-align:center}
+ .scheme-floor{grid-template-columns:43px minmax(0,1fr);gap:4px;padding:6px;min-height:62px}
+ .scheme-floor-num b{font-size:19px}
+ .flat-tile{min-width:56px;padding:6px 5px}
+ .flat-tile b{font-size:11px}.flat-tile span{font-size:8px}
+ .unit-pay{gap:5px}.unit-pay>div{padding:8px 5px}.unit-pay strong{font-size:13px}
+ .scheme-legend{gap:8px}
+}
+
+/* Local-only registration preview */
+.danger-notice{border-color:#f0c9ca;background:#fff7f7;color:#9d4449}
+.profile-card{display:flex;align-items:center;gap:12px;min-width:0;flex-wrap:wrap}.profile-card strong{font-size:13px}.profile-card small{display:block;font-size:11px;color:var(--sub);margin-top:3px}.profile-avatar{width:40px;height:40px;border-radius:12px;background:#eef4fa;display:grid;place-items:center;color:#4c708f;font-size:23px;flex:0 0 40px}
+.review-row{display:flex;align-items:center;justify-content:space-between;gap:14px;border:1px solid #e7edf4;border-radius:13px;padding:15px;flex-wrap:wrap}.review-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.stat-strip{background:#e9f6f1;color:#167d6a;border-radius:12px;display:flex;align-items:center;gap:15px;padding:13px 16px;margin-bottom:15px}.stat-strip b{font-size:28px}.stat-strip span{font-weight:800;font-size:12px}.check-label{display:flex;align-items:start;gap:9px;font-size:12px;line-height:1.5;color:#687b91}.check-label input{width:17px;height:17px;flex:0 0 17px;margin-top:0}
+@media(max-width:720px){.review-row{align-items:start}.review-actions{width:100%}.review-actions .pill{margin-right:auto}}
+
+</style>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script>
+(() => {
+  'use strict';
+  const KEY = 'chveni-korpusi-rustaveli16-demo-v1';
+  const icons = {home:'⌂',apartments:'▦',finances:'₾',repairs:'⚒',polls:'☷',news:'◉',settings:'⚙',registration:'♙',applications:'☷'};
+  const sections = ['home','apartments','finances','repairs','polls','news','registration','applications','settings'];
+  const tr = {
+    ru: {
+      building:'Наш корпус', address:'Хашури · Руставели 16', demo:'ДЕМОВЕРСИЯ. Данные хранятся только на этом устройстве.',
+      admin:'Председатель',resident:'Житель', home:'Главная',apartments:'Квартиры',finances:'Финансы',repairs:'Ремонт',polls:'Голосования',news:'Объявления',settings:'Настройки',
+      overview:'Управление корпусом',residentHome:'Личный кабинет жильца',house:'60 квартир · 3 подъезда · 8 этажей',balance:'Общий баланс',income:'Доходы',expense:'Расходы',flatCount:'Квартиры',openTickets:'Активные заявки',recentTx:'Последние операции',recentPosts:'Последние объявления',none:'Записей пока нет',monthFee:'Ежемесячный взнос',notSet:'Не установлен',floorMap:'Схема этажей',residential:'Жилой этаж',commercialFloor:'Коммерческий этаж',shopCount:'Коммерческие помещения',welcome:'Всё о вашем доме в одном месте',
+      entrance:'Подъезд',floor:'Этаж',flat:'Квартира',unassigned:'Не назначено',search:'Поиск по номеру квартиры',registered:'Назначена',pending:'Не распределена',commercial:'Коммерческие помещения (1-й этаж)',shopsInfo:'Количество коммерческих помещений пока неизвестно. Председатель может добавить их по мере уточнения.',shopName:'Название помещения',addShop:'Добавить помещение',add:'Добавить',remove:'Удалить',
+      tx:'Операции по кассе',txNew:'Добавить операцию',type:'Тип операции',amount:'Сумма в лари',description:'Назначение операции',associatedFlat:'Квартира (необязательно)',report:'Скачать CSV',incomeType:'Приход',expenseType:'Расход',date:'Дата',ledgerNotice:'Демонстрационный учёт. Реальные деньги и платежи здесь не обрабатываются.',
+      ticketNew:'Сообщить о проблеме',tickets:'Заявки на ремонт',subject:'Название',details:'Описание',state:'Статус',open:'Новая',progress:'В работе',done:'Готово',
+      pollNew:'Создать опрос',pollQuestion:'Вопрос для жильцов',yes:'Да',no:'Нет',votes:'Голосов',voted:'Ваш голос учтён',pollNotice:'Это демонстрационные опросы. Для юридически значимых решений нужна проверка собственников и соблюдение правил собрания.',
+      postNew:'Новое объявление',posts:'Объявления для жильцов',setFee:'Размер ежемесячного взноса',feeNotice:'Взнос устанавливается после необходимого решения товарищества. По умолчанию он равен нулю.',save:'Сохранить',reset:'Сбросить демоданные',resetConfirm:'Удалить все демоданные с этого устройства?',exportBackup:'Экспорт демоданных (JSON)',
+      ownFlat:'Выбранная квартира для демонстрации',myFee:'Начислено за месяц',myPaid:'Оплачено за месяц',toPay:'Остаток по взносу',myHistory:'История моей квартиры',chooseFlat:'Квартира',
+      schemeIntro:'Выбери подъезд, затем нажми на квартиру. Распределение по этажам пока заполняется вручную.',
+      entranceSelect:'Выбор подъезда', assigned:'Назначено квартир', unassignedCount:'Пока без полного адреса', noFloorUnits:'Квартиры пока не назначены на этот этаж',
+      chooseUnit:'Выбрать квартиру', unitDetail:'Карточка квартиры', unitNotAssigned:'Укажи подъезд и этаж — квартира появится на схеме.',
+      paidStatus:'Оплачено', partialStatus:'Частично', unpaidStatus:'Ожидает взноса', noFeeStatus:'Взнос не задан',
+      feePeriod:'Месяц взноса', paymentPurpose:'Назначение поступления', feePayment:'Ежемесячный взнос', otherPayment:'Другие поступления',
+      paidThisMonth:'Оплачено в этом месяце', remaining:'Осталось к оплате', goFinances:'Перейти в финансы', otherUnits:'Нераспределённые квартиры',
+      unitWarning:'Визуальная схема отображает только те квартиры, которым назначены подъезд и этаж. Нумерацию мы не придумываем.',
+      payLegend:'Статусы платежей видны только председателю. В режиме жителя показывается лишь собственная квартира.',
+      houseScheme:'Интерактивная схема дома', more:'Ещё', summary:'Сводка', commercialCount:'Коммерческие помещения: пока не распределены по подъездам',
+      registration:'Регистрация',applications:'Заявки на доступ',registrationTitle:'Заявка жильца на регистрацию',registrationHelp:'Протестируйте форму на вымышленных данных. Настоящая регистрация и SMS-подтверждение будут доступны после подключения защищённой онлайн-базы.',demoName:'Тестовое имя (не вводите настоящие данные)',demoNamePlaceholder:'Например: Тестовый сосед',residentType:'Кем вы являетесь?',owner:'Собственник',tenant:'Проживающий / арендатор',submitApplication:'Подать тестовую заявку',pendingReview:'Ожидает проверки',approvedReview:'Одобрена',rejectedReview:'Отклонена',requestSent:'Заявка сохранена в демонстрации',requestApproved:'Заявка одобрена в демо',requestRejected:'Заявка отклонена в демо',approve:'Одобрить',reject:'Отклонить',myApplication:'Моя заявка',noApplications:'Пока никто не отправил заявку',applicationReview:'Проверка заявок',userLabel:'Заявитель',phoneLater:'Номер телефона и SMS-код появятся в реальной онлайн-версии.',localWarning:'Заявка доступна только на этом устройстве. На другом телефоне председатель её не увидит.',statusLabel:'Статус заявки',applicationExisting:'Для этого тестового профиля уже создана заявка. Войдите как председатель, чтобы обработать её.',registrationDemo:'Демонстрация регистрации',newApplication:'Новая заявка',testAccess:'Тестовые заявки',testNotice:'Не вводите настоящие имена, телефоны или сведения о собственниках!',moreRegistration:'Регистрация / Заявки',
+      security:'Переключение между председателем и жильцом — только демонстрация. Здесь пока нет регистрации, настоящей защиты ролей или общей базы данных. Не вводите персональные данные жильцов.',saved:'Сохранено на этом устройстве',deleted:'Удалено',adminOnly:'Доступно только председателю',invalid:'Проверьте заполненные поля',already:'Вы уже голосовали',cast:'Голос записан в демоданные',changeStatus:'Изменить статус',language:'Язык',resOnly:'Жилые этажи: 2–8',allFloors:'Всего этажей: 8',unapproved:'Пока не утверждён'
+    },
+    ka: {
+      building:'ჩვენი კორპუსი',address:'ხაშური · რუსთაველის 16',demo:'დემო ვერსია. მონაცემები ინახება მხოლოდ ამ მოწყობილობაზე.',
+      admin:'თავმჯდომარე',resident:'მცხოვრები',home:'მთავარი',apartments:'ბინები',finances:'ფინანსები',repairs:'რემონტი',polls:'გამოკითხვები',news:'განცხადებები',settings:'პარამეტრები',
+      overview:'კორპუსის მართვა',residentHome:'მცხოვრების კაბინეტი',house:'60 ბინა · 3 სადარბაზო · 8 სართული',balance:'საერთო ნაშთი',income:'შემოსავალი',expense:'ხარჯი',flatCount:'ბინები',openTickets:'აქტიური განაცხადები',recentTx:'ბოლო ოპერაციები',recentPosts:'ბოლო განცხადებები',none:'ჩანაწერები ჯერ არ არის',monthFee:'ყოველთვიური შენატანი',notSet:'ჯერ არ არის დადგენილი',floorMap:'სართულების განაწილება',residential:'საცხოვრებელი სართული',commercialFloor:'კომერციული სართული',shopCount:'კომერციული ფართები',welcome:'ყველაფერი თქვენი კორპუსის შესახებ ერთ სივრცეში',
+      entrance:'სადარბაზო',floor:'სართული',flat:'ბინა',unassigned:'მითითებული არ არის',search:'ბინის ნომრის ძებნა',registered:'განაწილებულია',pending:'გასანაწილებელია',commercial:'კომერციული ფართები (I სართული)',shopsInfo:'კომერციული ფართების რაოდენობა ჯერ არ არის ცნობილი. თავმჯდომარეს შეუძლია მათი დამატება.',shopName:'ფართის სახელწოდება',addShop:'ფართის დამატება',add:'დამატება',remove:'წაშლა',
+      tx:'სალაროს ოპერაციები',txNew:'ოპერაციის დამატება',type:'ოპერაციის ტიპი',amount:'თანხა ლარში',description:'ოპერაციის აღწერა',associatedFlat:'ბინა (არასავალდებულო)',report:'CSV ანგარიშის ჩამოტვირთვა',incomeType:'შემოსავალი',expenseType:'ხარჯი',date:'თარიღი',ledgerNotice:'დემონსტრაციული აღრიცხვა. რეალური თანხები და გადახდები აქ არ მუშავდება.',
+      ticketNew:'პრობლემის შეტყობინება',tickets:'სარემონტო განაცხადები',subject:'სათაური',details:'აღწერა',state:'სტატუსი',open:'ახალი',progress:'მუშაობაში',done:'დასრულებული',
+      pollNew:'გამოკითხვის შექმნა',pollQuestion:'შეკითხვა მაცხოვრებლებისთვის',yes:'დიახ',no:'არა',votes:'ხმა',voted:'თქვენი ხმა დაფიქსირდა',pollNotice:'ეს მხოლოდ დემო გამოკითხვებია. იურიდიული გადაწყვეტილებებისთვის საჭიროა მესაკუთრეთა შემოწმება და კრების წესების დაცვა.',
+      postNew:'ახალი განცხადება',posts:'განცხადებები მაცხოვრებლებისთვის',setFee:'ყოველთვიური შენატანის ოდენობა',feeNotice:'შენატანი განისაზღვრება ამხანაგობის შესაბამისი გადაწყვეტილების შემდეგ. საწყისი თანხაა ნული.',save:'შენახვა',reset:'დემო მონაცემების წაშლა',resetConfirm:'წავშალოთ ამ მოწყობილობაზე შენახული დემო მონაცემები?',exportBackup:'დემო მონაცემების ექსპორტი (JSON)',
+      ownFlat:'დემო ბინის არჩევა',myFee:'ამ თვის დარიცხვა',myPaid:'ამ თვის გადახდილი',toPay:'გადასახდელი ნაშთი',myHistory:'ჩემი ბინის ისტორია',chooseFlat:'ბინა',
+      schemeIntro:'აირჩიეთ სადარბაზო და დააჭირეთ ბინას. ბინების განაწილება ივსება ხელით.',
+      entranceSelect:'სადარბაზოს არჩევა', assigned:'განაწილებული ბინები', unassignedCount:'მისამართი ბოლომდე არ არის მითითებული', noFloorUnits:'ამ სართულზე ბინები ჯერ არ არის მითითებული',
+      chooseUnit:'ბინის არჩევა', unitDetail:'ბინის ბარათი', unitNotAssigned:'მიუთითეთ სადარბაზო და სართული — ბინა გამოჩნდება სქემაზე.',
+      paidStatus:'გადახდილია', partialStatus:'ნაწილობრივ', unpaidStatus:'გადასახდელია', noFeeStatus:'შენატანი ჯერ არ არის განსაზღვრული',
+      feePeriod:'შენატანის თვე', paymentPurpose:'შემოსავლის დანიშნულება', feePayment:'ყოველთვიური შენატანი', otherPayment:'სხვა შემოსავალი',
+      paidThisMonth:'ამ თვეში გადახდილია', remaining:'დარჩა გადასახდელი', goFinances:'ფინანსებში გადასვლა', otherUnits:'გაუნაწილებელი ბინები',
+      unitWarning:'სქემაში მხოლოდ ის ბინებია, რომლებსაც სადარბაზო და სართული მიეთითა. ნომრებს თვითნებურად არ ვანაწილებთ.',
+      payLegend:'გადახდის სტატუსებს მხოლოდ თავმჯდომარე ხედავს. მცხოვრები მხოლოდ საკუთარი ბინის მონაცემებს ხედავს.',
+      houseScheme:'კორპუსის ინტერაქტიული სქემა', more:'მეტი', summary:'შეჯამება', commercialCount:'კომერციული ფართები სადარბაზოების მიხედვით ჯერ არ არის განაწილებული',
+      registration:'რეგისტრაცია',applications:'წვდომის მოთხოვნები',registrationTitle:'მცხოვრების სარეგისტრაციო მოთხოვნა',registrationHelp:'შეამოწმეთ ფორმა მხოლოდ გამოგონილი მონაცემებით. რეალური რეგისტრაცია და SMS დადასტურება დაემატება დაცული ონლაინ-ბაზის ჩართვის შემდეგ.',demoName:'სატესტო სახელი (რეალური მონაცემები არ შეიყვანოთ)',demoNamePlaceholder:'მაგ.: სატესტო მეზობელი',residentType:'თქვენი სტატუსი',owner:'მესაკუთრე',tenant:'მაცხოვრებელი / მოიჯარე',submitApplication:'სატესტო განაცხადის გაგზავნა',pendingReview:'ელოდება შემოწმებას',approvedReview:'დადასტურებულია',rejectedReview:'უარყოფილია',requestSent:'განაცხადი შენახულია დემოში',requestApproved:'დემოში განაცხადი დადასტურდა',requestRejected:'დემოში განაცხადი უარყოფილია',approve:'დადასტურება',reject:'უარყოფა',myApplication:'ჩემი განაცხადი',noApplications:'განაცხადები ჯერ არ არის',applicationReview:'განაცხადების შემოწმება',userLabel:'განმცხადებელი',phoneLater:'ტელეფონის ნომერი და SMS კოდი დაემატება რეალურ ონლაინ-ვერსიას.',localWarning:'განაცხადი ჩანს მხოლოდ ამ მოწყობილობაზე. სხვა ტელეფონზე თავმჯდომარე მას ვერ დაინახავს.',statusLabel:'განაცხადის სტატუსი',applicationExisting:'ამ სატესტო მომხმარებლის განაცხადი უკვე შექმნილია. გადაერთეთ თავმჯდომარეზე მის დასამუშავებლად.',registrationDemo:'სატესტო რეგისტრაცია',newApplication:'ახალი მოთხოვნა',testAccess:'სატესტო განაცხადები',testNotice:'არ შეიყვანოთ რეალური სახელები, ტელეფონები ან მესაკუთრეთა მონაცემები!',moreRegistration:'რეგისტრაცია / მოთხოვნები',
+      security:'თავმჯდომარისა და მცხოვრების როლების გადართვა მხოლოდ დემონსტრაციაა. ჯერ არ არის ავტორიზაცია, უფლებების რეალური დაცვა ან საერთო ბაზა. არ შეიყვანოთ პერსონალური მონაცემები.',saved:'შენახულია ამ მოწყობილობაზე',deleted:'წაშლილია',adminOnly:'მხოლოდ თავმჯდომარისთვის',invalid:'შეამოწმეთ ველები',already:'თქვენ უკვე მიეცით ხმა',cast:'ხმა დაფიქსირდა დემოში',changeStatus:'სტატუსის შეცვლა',language:'ენა',resOnly:'საცხოვრებელი სართულები: 2–8',allFloors:'სულ სართულები: 8',unapproved:'ჯერ არ არის დამტკიცებული'
+    }
+  };
+  const seed = () => ({lang:'ka',role:'admin',tab:'home',flat:24,fee:0,entranceView:1,units:Array.from({length:60},(_,i)=>({number:i+1,entrance:0,floor:0})),shops:[],txs:[],tickets:[],polls:[],posts:[],applications:[],search:''});
+  let db;
+  try {db=JSON.parse(localStorage.getItem(KEY)); if(!db||!Array.isArray(db.units)||db.units.length!==60) db=seed();} catch {db=seed();}
+  if(!Array.isArray(db.applications))db.applications=[];
+  const el=document.getElementById('app');
+  let selectedUnit=null;
+  let moreOpen=false;
+  const admin=()=>db.role==='admin';
+  const t=k=>tr[db.lang]?.[k]??k;
+  const e=x=>String(x??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const cash=n=>new Intl.NumberFormat(db.lang==='ka'?'ka-GE':'ru-RU',{maximumFractionDigits:2}).format(Number(n)||0)+' ₾';
+  const now=()=>new Date().toISOString().slice(0,10);
+  const todayMonth=()=>new Date().toISOString().slice(0,7);
+  const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+  const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(db));}catch{notify('Browser storage unavailable');}};
+  const notify=msg=>{const x=document.getElementById('toast');x.textContent=msg;x.style.display='block';clearTimeout(window.toastId);window.toastId=setTimeout(()=>x.style.display='none',2800);};
+  const sums=()=>db.txs.reduce((o,x)=>(o[x.type==='income'?'income':'expense']+=Number(x.amount),o),{income:0,expense:0});
+  const reportItem=x=>`<div class="item"><div><strong>${e(x.title)}</strong><small>${e(x.sub)}</small></div><span class="${x.class||''} money">${e(x.right||'')}</span></div>`;
+  const empty=()=>`<div class="empty"><span>◎</span>${e(t('none'))}</div>`;
+  const box=(heading,inner,extra='')=>`<section class="card"><div class="card-head"><h2>${e(heading)}</h2>${extra}</div>${inner}</section>`;
+  const metric=(symbol,label,value)=>`<div class="card metric"><span class="symbol">${symbol}</span><span class="label">${e(label)}</span><strong>${e(value)}</strong></div>`;
+  const currentMonthPayments=flat=>db.txs.filter(x=>x.type==='income'&&Number(x.flat)===Number(flat)&&(
+    (x.purpose==='fee'&&x.period===todayMonth())||(!x.purpose&&x.date.startsWith(todayMonth()))
+  )).reduce((n,x)=>n+Number(x.amount),0);
+  const unitStatus=(q)=>{
+    if (!db.fee) return {key:'noFeeStatus',cls:'neutral'};
+    const paid=currentMonthPayments(q.number);
+    return paid>=db.fee ? {key:'paidStatus',cls:'paid'} : paid>0 ? {key:'partialStatus',cls:'partial'} : {key:'unpaidStatus',cls:'unpaid'};
+  };
+  const chosenEntrance=()=>[1,2,3].includes(Number(db.entranceView))?Number(db.entranceView):1;
+
+  const floors=()=>`<div class="building">${[8,7,6,5,4,3,2,1].map(f=>`<div class="floor ${f===1?'commercial':''}"><b>${f} · ${e(t('floor'))}</b><small>${f===1?'🏪 '+e(t('commercialFloor')):'⌂ '+e(t('residential'))}</small></div>`).join('')}</div>`;
+  const home=()=>{
+    const s=sums(),n=db.tickets.filter(q=>q.status!=='done').length;
+    const entries=db.txs.slice(-4).reverse().map(q=>reportItem({title:q.description,sub:q.date,right:(q.type==='income'?'+':'−')+cash(q.amount),class:q.type==='income'?'text-green':'text-red'})).join('')||empty();
+    const news=db.posts.slice(-4).reverse().map(q=>reportItem({title:q.title,sub:q.date,right:'📣'})).join('')||empty();
+    let cards=metric('₾',t('balance'),cash(s.income-s.expense))+metric('↗',t('income'),cash(s.income))+metric('⌂',t('flatCount'),'60')+metric('⚒',t('openTickets'),String(n));
+    if(!admin()){
+      const paid=currentMonthPayments(db.flat);cards=metric('⌂',t('ownFlat'),'№ '+db.flat)+metric('₾',t('myFee'),db.fee?cash(db.fee):t('notSet'))+metric('✓',t('myPaid'),cash(paid))+metric('↗',t('toPay'),cash(Math.max(0,db.fee-paid)));
+    }
+    const approved=db.applications.find(q=>q.demoProfile==='demo_local_user'&&q.status==='approved');
+    if(approved&&!admin())db.flat=approved.flat;
+    const control=!admin()?`<div class="field"><label>${e(t('chooseFlat'))}</label>${approved?`<span class="pill done">№ ${approved.flat} · ${e(t('approvedReview'))}</span>`:`<select id="demo-flat">${db.units.map(q=>`<option value="${q.number}" ${db.flat===q.number?'selected':''}>№ ${q.number}</option>`).join('')}</select>`}</div>`:'';
+    return `<div class="hero"><div><div class="eyebrow">${e(t('address'))}</div><h2>${e(admin()?t('overview'):t('residentHome'))}</h2><p>${e(t('welcome'))}</p></div><div class="hero-art">🏢</div></div>${control}<div class="grid four" style="margin:${admin()?'0':'15px 0'} 0 18px">${cards}</div><div class="grid two">${box(t('recentTx'),entries)}${box(t('recentPosts'),news)}</div><div class="grid two section-gap">${box(t('floorMap'),`<p class="help">${e(t('unitWarning'))}</p>${floors()}<div class="section-gap"><button class="btn green" data-nav="apartments">▦ ${e(t('houseScheme'))} →</button></div>`)}${box(t('overview'),`<div class="items">${reportItem({title:t('house'),sub:t('resOnly')})}${reportItem({title:t('monthFee'),sub:db.fee?t('save'):t('unapproved'),right:db.fee?cash(db.fee):t('notSet')})}${reportItem({title:t('shopCount'),sub:t('commercialFloor'),right:String(db.shops.length)})}</div>`)}</div>`;
+  };
+  const entranceOptions=value=>`<option value="0">${e(t('unassigned'))}</option>`+[1,2,3].map(i=>`<option value="${i}" ${i===value?'selected':''}>${i}</option>`).join('');
+  const floorOptions=value=>`<option value="0">${e(t('unassigned'))}</option>`+[2,3,4,5,6,7,8].map(i=>`<option value="${i}" ${i===value?'selected':''}>${i}</option>`).join('');
+  const scheme=()=>{
+    const entrance=chosenEntrance();
+    const assigned=db.units.filter(q=>q.entrance===entrance&&q.floor>=2&&q.floor<=8);
+    const waiting=db.units.filter(q=>!q.entrance||!q.floor);
+    const tabs=[1,2,3].map(num=>{
+      const numAssigned=db.units.filter(q=>q.entrance===num&&q.floor>=2&&q.floor<=8).length;
+      return `<button class="entrance-tab ${num===entrance?'active':''}" data-entrance="${num}" aria-pressed="${num===entrance}">${e(t('entrance'))} ${num}<small>${numAssigned} / 60</small></button>`;
+    }).join('');
+    const rows=[8,7,6,5,4,3,2].map(f=>{
+      const onFloor=assigned.filter(q=>q.floor===f).sort((a,b)=>a.number-b.number);
+      const tiles=onFloor.map(q=>{
+        const visible=admin()||q.number===db.flat;
+        const status=visible?unitStatus(q):{key:'noFeeStatus',cls:'neutral'};
+        return visible?`<button class="flat-tile ${status.cls} ${selectedUnit===q.number?'selected':''}" data-plan-unit="${q.number}" aria-label="${e(t('flat'))} №${q.number}: ${e(t(status.key))}"><b>№ ${q.number}</b><span>${admin()&&db.fee?e(t(status.key)):'⌂'}</span></button>`:
+          `<div class="flat-tile neutral"><b>№ ${q.number}</b><span>⌂</span></div>`;
+      }).join('')||`<div class="scheme-empty">${e(t('noFloorUnits'))}</div>`;
+      return `<div class="scheme-floor"><div class="scheme-floor-num"><b>${f}</b><span>${e(t('floor'))}</span></div><div class="scheme-floor-units">${tiles}</div></div>`;
+    }).join('');
+    const businesses=`<div class="scheme-floor is-shop"><div class="scheme-floor-num"><b>1</b><span>${e(t('floor'))}</span></div><div class="scheme-floor-units"><span class="shop-label">🏪 ${e(t('commercialFloor'))}</span><small>${e(t('commercialCount'))}</small></div></div>`;
+    const selected=db.units.find(q=>q.number===selectedUnit);
+    const detail=selected&&(admin()||selected.number===db.flat)?`<div class="unit-details"><div class="unit-details-head"><div><span class="eyebrow">${e(t('unitDetail'))}</span><h3>${e(t('flat'))} №${selected.number}</h3></div><button class="btn secondary small" data-close-unit aria-label="✕">✕</button></div>
+      ${admin()?`<div class="form unit-edit"><div class="field"><label>${e(t('entrance'))}</label><select data-unit="${selected.number}" data-edit="entrance">${entranceOptions(selected.entrance)}</select></div><div class="field"><label>${e(t('floor'))}</label><select data-unit="${selected.number}" data-edit="floor">${floorOptions(selected.floor)}</select></div></div>`:''}
+      ${(!selected.entrance||!selected.floor)?`<p class="small-help">${e(t('unitNotAssigned'))}</p>`:''}
+      <div class="unit-pay"><div><small>${e(t('monthFee'))}</small><strong>${db.fee?cash(db.fee):e(t('notSet'))}</strong></div><div><small>${e(t('paidThisMonth'))}</small><strong>${cash(currentMonthPayments(selected.number))}</strong></div><div><small>${e(t('remaining'))}</small><strong>${db.fee?cash(Math.max(0,db.fee-currentMonthPayments(selected.number))):'—'}</strong></div></div>
+      ${admin()?`<button class="btn small" data-goto-finances>₾ ${e(t('goFinances'))}</button>`:''}</div>`:'';
+    const waitingPick=admin()?`<div class="waiting-units"><div class="waiting-title"><strong>${e(t('otherUnits'))}</strong><span class="badge">${waiting.length}</span></div><p class="small-help">${e(t('unitNotAssigned'))}</p><div class="waiting-tiles">${waiting.map(q=>`<button class="waiting-chip ${selectedUnit===q.number?'active':''}" data-plan-unit="${q.number}">№ ${q.number}</button>`).join('')||`<span class="pill done">✓ ${e(t('registered'))}</span>`}</div></div>`:'';
+    return `${box(t('houseScheme'),`<p class="help">${e(t('schemeIntro'))}</p><div class="entrance-tabs" role="group" aria-label="${e(t('entranceSelect'))}">${tabs}</div><div class="scheme-topline"><b>${assigned.length} ${e(t('assigned'))}</b><span>${e(t('resOnly'))}</span></div><div class="scheme-building">${rows}${businesses}</div><div class="scheme-legend"><span><i class="legend-dot paid"></i>${e(t('paidStatus'))}</span><span><i class="legend-dot partial"></i>${e(t('partialStatus'))}</span><span><i class="legend-dot unpaid"></i>${e(t('unpaidStatus'))}</span></div><p class="small-help">${e(t('unitWarning'))} ${e(t('payLegend'))}</p>${detail}${waitingPick}`)} `;
+  };
+  const apartments=()=>{
+    const listed=db.units.filter(q=>!db.search||String(q.number).includes(db.search));
+    const rows=listed.map(q=>`<tr><td>${admin()?`<button class="unit-link" data-plan-unit="${q.number}">№ ${q.number} ↗</button>`:`<strong>№ ${q.number}</strong>`}</td><td>${admin()?`<select data-unit="${q.number}" data-edit="entrance" aria-label="${e(t('entrance'))}">${entranceOptions(q.entrance)}</select>`:(q.entrance||'—')}</td><td>${admin()?`<select data-unit="${q.number}" data-edit="floor" aria-label="${e(t('floor'))}">${floorOptions(q.floor)}</select>`:(q.floor||'—')}</td><td><span class="status ${q.entrance&&q.floor?'ok':''}">${e(q.entrance&&q.floor?t('registered'):t('pending'))}</span></td></tr>`).join('');
+    const search=`<input class="filter" id="search" style="max-width:330px;margin-bottom:12px" inputmode="numeric" placeholder="${e(t('search'))}" value="${e(db.search)}" />`;
+    const table=`${search}<div class="table-scroll"><table class="table"><thead><tr><th>${e(t('flat'))}</th><th>${e(t('entrance'))}</th><th>${e(t('floor'))}</th><th>${e(t('state'))}</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    const shops=db.shops.map(q=>reportItem({title:'🏪 '+q.name,sub:t('commercialFloor'),right:admin()?` `:''})).join('')||empty();
+    const shopForm=admin()?`<form id="shop-form" class="form section-gap"><div class="field"><label>${e(t('shopName'))}</label><input required name="name" maxlength="80" autocomplete="off" /></div><div class="field" style="align-self:end"><button class="btn green" type="submit">+ ${e(t('addShop'))}</button></div></form>${db.shops.map(q=>`<button class="btn danger small" style="margin:9px 7px 0 0" data-remove-shop="${e(q.id)}">× ${e(q.name)}</button>`).join('')}`:'';
+    return `${scheme()}<div class="section-gap">${box(t('apartments'),table,`<span class="badge">${listed.length}/60</span>`)}</div><div class="section-gap">${box(t('commercial'),`<p class="help">${e(t('shopsInfo'))}</p><div class="items">${shops}</div>${shopForm}`,`<span class="badge">${db.shops.length}</span>`)}</div>`;
+  };
+  const finances=()=>{
+    const s=sums();const own=admin()?db.txs:db.txs.filter(x=>String(x.flat)===String(db.flat)||(!x.flat&&x.type==='expense'));
+    const txRows=own.slice().reverse().map(q=>`<tr><td>${e(q.date)}</td><td>${e(q.description)}</td><td>${e(q.type==='income'?t('incomeType'):t('expenseType'))}</td><td>${q.flat?'№ '+q.flat:'—'}</td><td class="${q.type==='income'?'text-green':'text-red'}"><strong>${cash(q.amount)}</strong></td></tr>`).join('')||`<tr><td colspan="5">${e(t('none'))}</td></tr>`;
+    const form=admin()?`<form id="tx-form" class="form"><div class="field"><label>${e(t('type'))}</label><select name="type"><option value="income">${e(t('incomeType'))}</option><option value="expense">${e(t('expenseType'))}</option></select></div><div class="field"><label>${e(t('amount'))}</label><input required min="0.01" step="0.01" type="number" name="amount" /></div><div class="field"><label>${e(t('description'))}</label><input required name="description" maxlength="120" /></div><div class="field"><label>${e(t('associatedFlat'))}</label><input name="flat" type="number" min="1" max="60" /></div><div class="field"><label>${e(t('paymentPurpose'))}</label><select name="purpose"><option value="fee">${e(t('feePayment'))}</option><option value="other">${e(t('otherPayment'))}</option></select></div><div class="field"><label>${e(t('feePeriod'))}</label><input name="period" type="month" value="${todayMonth()}" /></div><div class="field all"><button class="btn" type="submit">+ ${e(t('add'))}</button></div></form>`:`<div class="items">${reportItem({title:t('ownFlat'),sub:t('myHistory'),right:'№ '+db.flat})}${reportItem({title:t('myFee'),sub:t('monthFee'),right:db.fee?cash(db.fee):t('notSet')})}${reportItem({title:t('myPaid'),sub:todayMonth(),right:cash(currentMonthPayments(db.flat))})}</div>`;
+    return `<div class="grid four" style="margin-bottom:16px">${metric('₾',t('balance'),cash(s.income-s.expense))}${metric('↗',t('income'),cash(s.income))}${metric('↘',t('expense'),cash(s.expense))}${metric('◉',t('monthFee'),db.fee?cash(db.fee):t('notSet'))}</div><div class="notice">${e(t('ledgerNotice'))}</div><div class="grid two">${box(admin()?t('txNew'):t('myHistory'),form)}${box(t('overview'),`<div class="items">${reportItem({title:t('income'),right:cash(s.income),class:'text-green'})}${reportItem({title:t('expense'),right:cash(s.expense),class:'text-red'})}${reportItem({title:t('balance'),right:cash(s.income-s.expense)})}</div>`)}</div><div class="section-gap">${box(t('tx'),`<div class="table-scroll"><table class="table"><thead><tr><th>${e(t('date'))}</th><th>${e(t('description'))}</th><th>${e(t('type'))}</th><th>${e(t('flat'))}</th><th>${e(t('amount'))}</th></tr></thead><tbody>${txRows}</tbody></table></div>`,admin()?`<button class="btn secondary small" data-export-csv>↓ ${e(t('report'))}</button>`:'')}</div>`;
+  };
+  const repairs=()=>{
+    const tickets=db.tickets.slice().reverse().map(q=>`<div class="item"><div><strong>⚒ ${e(q.title)}</strong><small>${e(q.text)} · № ${q.flat} · ${e(q.date)}</small></div><div style="display:grid;gap:7px;justify-items:end"><span class="pill ${e(q.status)}">${e(t(q.status))}</span>${admin()?`<select class="filter" style="width:125px;font-size:11px;padding:6px" data-ticket="${e(q.id)}"><option value="open" ${q.status==='open'?'selected':''}>${e(t('open'))}</option><option value="progress" ${q.status==='progress'?'selected':''}>${e(t('progress'))}</option><option value="done" ${q.status==='done'?'selected':''}>${e(t('done'))}</option></select>`:''}</div></div>`).join('')||empty();
+    const form=`<form id="ticket-form" class="form"><div class="field all"><label>${e(t('subject'))}</label><input name="title" required maxlength="100" /></div><div class="field all"><label>${e(t('details'))}</label><textarea name="text" required maxlength="600"></textarea></div><div class="field all"><label>${e(t('flat'))}</label><input name="flat" type="number" min="1" max="60" value="${admin()?'':db.flat}" required /></div><div class="field all"><button class="btn green" type="submit">+ ${e(t('ticketNew'))}</button></div></form>`;
+    return `<div class="grid two">${box(t('tickets'),`<div class="items">${tickets}</div>`)}${box(t('ticketNew'),form)}</div>`;
+  };
+  const polls=()=>{
+    const list=db.polls.slice().reverse().map(q=>{const total=q.yes+q.no,pc=total?Math.round(q.yes/total*100):0,voted=q.voters.includes(db.flat);
+      return `<div class="poll"><h3>${e(q.question)}</h3><span class="sub">${e(q.date)} · ${total} ${e(t('votes'))}</span><div class="meter"><span style="width:${pc}%"></span></div><div class="pill-row"><span class="pill done">${e(t('yes'))}: ${q.yes}</span><span class="pill">${e(t('no'))}: ${q.no}</span></div>${!admin()?`<div class="poll-buttons"><button class="btn green small" data-vote="${e(q.id)}" data-choice="yes" ${voted?'disabled':''}>${e(t('yes'))}</button><button class="btn secondary small" data-vote="${e(q.id)}" data-choice="no" ${voted?'disabled':''}>${e(t('no'))}</button>${voted?`<span class="pill done">${e(t('voted'))}</span>`:''}</div>`:''}</div>`;
+    }).join('')||empty();
+    return `<div class="notice">${e(t('pollNotice'))}</div><div class="grid two">${box(t('polls'),`<div class="items">${list}</div>`)}${admin()?box(t('pollNew'),`<form id="poll-form" class="form"><div class="field all"><label>${e(t('pollQuestion'))}</label><textarea name="question" maxlength="250" required></textarea></div><div class="field all"><button class="btn" type="submit">+ ${e(t('add'))}</button></div></form>`):box(t('residentHome'),`<p class="help">${e(t('demo'))}</p>`)}</div>`;
+  };
+  const news=()=>{
+    const list=db.posts.slice().reverse().map(q=>reportItem({title:'📣 '+q.title,sub:q.text+' · '+q.date})).join('')||empty();
+    return `<div class="grid two">${box(t('posts'),`<div class="items">${list}</div>`)}${admin()?box(t('postNew'),`<form id="post-form" class="form"><div class="field all"><label>${e(t('subject'))}</label><input name="title" required maxlength="100" /></div><div class="field all"><label>${e(t('details'))}</label><textarea name="text" required maxlength="600"></textarea></div><div class="field all"><button class="btn" type="submit">+ ${e(t('add'))}</button></div></form>`):''}</div>`;
+  };
+
+  const applicationState=q=>q.status==='approved'?t('approvedReview'):q.status==='rejected'?t('rejectedReview'):t('pendingReview');
+  const registration=()=>{
+    if(admin())return applications();
+    const prior=db.applications.find(q=>q.demoProfile==='demo_local_user');
+    const head='<div class="notice danger-notice">🔒 '+e(t('testNotice'))+'</div>';
+    const prev=prior?`<div class="profile-card"><div class="profile-avatar">♙</div><div><strong>${e(prior.name)}</strong><small>${e(t('entrance'))} №${prior.entrance} · ${e(t('flat'))} №${prior.flat} · ${e(t(prior.type==='owner'?'owner':'tenant'))}</small></div><span class="pill ${prior.status==='approved'?'done':'progress'}">${e(applicationState(prior))}</span></div><p class="small-help">${e(t('localWarning'))}</p>`:'';
+    const form=prior?`<div class="empty">◎ ${e(t('applicationExisting'))}</div>`:`<p class="help">${e(t('registrationHelp'))}</p><form id="registration-form" class="form"><div class="field all"><label>${e(t('demoName'))}</label><input name="name" placeholder="${e(t('demoNamePlaceholder'))}" maxlength="50" required autocomplete="off"/></div><div class="field"><label>${e(t('entrance'))}</label><select name="entrance"><option value="1">№1</option><option value="2">№2</option><option value="3">№3</option></select></div><div class="field"><label>${e(t('flat'))}</label><select name="flat">${db.units.map(q=>`<option value="${q.number}">№ ${q.number}</option>`).join('')}</select></div><div class="field all"><label>${e(t('residentType'))}</label><select name="type"><option value="owner">${e(t('owner'))}</option><option value="resident">${e(t('tenant'))}</option></select></div><div class="field all"><p class="small-help">📱 ${e(t('phoneLater'))}</p></div><div class="field all"><label class="check-label"><input type="checkbox" name="demoOnly" value="yes" required/> ${e(t('testNotice'))}</label></div><div class="field all"><button class="btn green" type="submit">${e(t('submitApplication'))} →</button></div></form>`;
+    return head+`<div class="grid two">${box(t('registrationTitle'),form)}${box(t('myApplication'),prev||'<p class="help">'+e(t('localWarning'))+'</p><div class="empty">'+e(t('none'))+'</div>')}</div>`;
+  };
+  const applications=()=>{
+    if(!admin())return registration();
+    const waiting=db.applications.filter(q=>q.status==='pending').length;
+    const list=db.applications.slice().reverse().map(q=>`<div class="review-row"><div class="profile-card"><div class="profile-avatar">♙</div><div><strong>${e(q.name)}</strong><small>${e(t(q.type==='owner'?'owner':'tenant'))} · ${e(t('entrance'))} №${q.entrance} · ${e(t('flat'))} №${q.flat}</small><small>${e(q.date)}</small></div></div><div class="review-actions"><span class="pill ${q.status==='approved'?'done':'progress'}">${e(applicationState(q))}</span>${q.status==='pending'?`<button class="btn green small" data-review="${e(q.id)}" data-review-status="approved">✓ ${e(t('approve'))}</button><button class="btn danger small" data-review="${e(q.id)}" data-review-status="rejected">✕ ${e(t('reject'))}</button>`:''}</div></div>`).join('')||empty();
+    return `<div class="notice">⚠ ${e(t('localWarning'))} ${e(t('testNotice'))}</div><div class="grid two">${box(t('applicationReview'),`<div class="stat-strip"><b>${waiting}</b><span>${e(t('pendingReview'))}</span></div><div class="items">${list}</div>`)}${box(t('registrationDemo'),`<p class="help">${e(t('registrationHelp'))}</p><div class="pill-row"><button class="btn green" data-role="resident" data-registration>♙ ${e(t('registration'))}</button></div>`)}</div>`;
+  };
+  const settings=()=>!admin()?box(t('settings'),`<div class="notice">${e(t('adminOnly'))}</div>`):`<div class="grid two">${box(t('setFee'),`<p class="help">${e(t('feeNotice'))}</p><form id="settings-form" class="form"><div class="field"><label>${e(t('amount'))}</label><input type="number" step="0.01" min="0" max="100000" name="fee" value="${e(db.fee)}" required /></div><div class="field" style="align-self:end"><button class="btn green" type="submit">${e(t('save'))}</button></div></form><div class="pill-row section-gap"><button class="btn secondary small" data-backup>↓ ${e(t('exportBackup'))}</button><button class="btn danger small" data-reset>${e(t('reset'))}</button></div>`)}${box(t('floorMap'),floors())}</div>`;
+  function render(){
+    document.documentElement.lang=db.lang;
+    const nav=sections.filter(k=>admin()?k!=='registration':k!=='applications').map(k=>`<button class="nav-btn ${db.tab===k?'active':''}" data-nav="${k}"><span class="i">${icons[k]}</span>${e(t(k))}</button>`).join('');
+    const mobile=['home','apartments','finances','repairs'].map(k=>`<button data-nav="${k}" class="${db.tab===k?'active':''}"><span class="i">${icons[k]}</span>${e(t(k))}</button>`).join('')+`<button data-more class="${moreOpen||['polls','news','settings','registration','applications'].includes(db.tab)?'active':''}"><span class="i">☷</span>${e(t('more'))}</button>`;
+    const tabs={home,apartments,finances,repairs,polls,news,settings,registration,applications};
+    el.innerHTML=`<div class="app"><aside class="side"><div class="brand"><div class="logo">⌂</div><div><strong>ჩვენი კორპუსი</strong><small>რუსთაველის 16 · ხაშური</small></div></div><nav class="nav">${nav}</nav><div class="side-foot">🔒 ${e(t('security'))}</div></aside><main class="main"><header class="top"><div><span class="eyebrow">${e(t('address'))}</span><div class="top-name">${e(t('building'))}</div></div><div class="switches"><button class="switch ${admin()?'selected':''}" data-role="admin">${e(t('admin'))}</button><button class="switch ${!admin()?'selected':''}" data-role="resident">${e(t('resident'))}</button><button class="switch" data-lang="${db.lang==='ka'?'ru':'ka'}">${db.lang==='ka'?'🇷🇺 RU':'🇬🇪 KA'}</button></div></header><div class="wrap"><div class="page-heading"><div><span class="eyebrow">${e(admin()?t('overview'):t('residentHome'))}</span><h1>${e(t(db.tab))}</h1><p>${e(t('house'))}</p></div><span class="badge">● ${e(t(db.role))}</span></div><div class="notice">⚠ ${e(t('demo'))}</div>${tabs[db.tab]?.()||home()}<div class="footer-note">${e(t('security'))}</div></div></main><nav class="bottom">${mobile}</nav>${moreOpen?`<div class="more-backdrop" data-more-close></div><div class="more-sheet"><b>${e(t('more'))}</b>${['polls','news','settings',admin()?'applications':'registration'].map(k=>`<button data-nav="${k}" class="${db.tab===k?'active':''}"><span>${icons[k]}</span>${e(t(k))}</button>`).join('')}</div>`:''}</div>`;
+  }
+  function download(filename,mime,contents){const blob=new Blob([contents],{type:mime}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);}
+  function csv(){const rows=[['date','type','description','flat','amount','purpose','period'],...db.txs.map(q=>[q.date,q.type,q.description,q.flat||'',q.amount,q.purpose||'',q.period||''])];download('rustaveli16-cashbook.csv','text/csv;charset=utf-8','\ufeff'+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n'));}
+  const formValues=form=>Object.fromEntries(new FormData(form).entries());
+  document.addEventListener('submit',ev=>{
+    if(!ev.target.matches('form[id$="-form"]'))return;ev.preventDefault();const f=ev.target,d=formValues(f);
+    if(f.id==='shop-form'){if(!admin())return notify(t('adminOnly'));if(!d.name.trim())return notify(t('invalid'));db.shops.push({id:uid(),name:d.name.trim()});}
+    else if(f.id==='tx-form'){if(!admin())return notify(t('adminOnly'));const amount=Number(d.amount),flat=d.flat?Number(d.flat):null;const type=d.type==='expense'?'expense':'income',purpose=type==='income'&&d.purpose==='fee'?'fee':'other';if(!Number.isFinite(amount)||amount<=0||!d.description.trim()||(flat!==null&&(!Number.isInteger(flat)||flat<1||flat>60))||(purpose==='fee'&&(!flat||!/^\d{4}-(0[1-9]|1[0-2])$/.test(d.period))))return notify(t('invalid'));db.txs.push({id:uid(),type,amount,description:d.description.trim(),flat,purpose,period:purpose==='fee'?d.period:null,date:now()});}
+    else if(f.id==='ticket-form'){const flat=Number(d.flat);if(!Number.isInteger(flat)||flat<1||flat>60||!d.title.trim()||!d.text.trim())return notify(t('invalid'));db.tickets.push({id:uid(),flat,title:d.title.trim(),text:d.text.trim(),status:'open',date:now()});}
+    else if(f.id==='poll-form'){if(!admin())return notify(t('adminOnly'));if(!d.question.trim())return notify(t('invalid'));db.polls.push({id:uid(),question:d.question.trim(),yes:0,no:0,voters:[],date:now()});}
+    else if(f.id==='post-form'){if(!admin())return notify(t('adminOnly'));if(!d.title.trim()||!d.text.trim())return notify(t('invalid'));db.posts.push({id:uid(),title:d.title.trim(),text:d.text.trim(),date:now()});}
+    else if(f.id==='registration-form'){
+      if(admin())return notify(t('adminOnly'));
+      if(db.applications.some(q=>q.demoProfile==='demo_local_user'))return notify(t('applicationExisting'));
+      if(d.demoOnly!=='yes'||!d.name.trim()||d.name.length>50||!['1','2','3'].includes(d.entrance)||!Number.isInteger(Number(d.flat))||Number(d.flat)<1||Number(d.flat)>60||!['owner','resident'].includes(d.type))return notify(t('invalid'));
+      db.applications.push({id:uid(),demoProfile:'demo_local_user',name:d.name.trim(),entrance:Number(d.entrance),flat:Number(d.flat),type:d.type,status:'pending',date:now()});
+      db.flat=Number(d.flat);
+      persist();render();notify(t('requestSent'));return;
+    }
+    else if(f.id==='settings-form'){if(!admin())return notify(t('adminOnly'));const amount=Number(d.fee);if(!Number.isFinite(amount)||amount<0||amount>100000)return notify(t('invalid'));db.fee=amount;}
+    else return;
+    persist();render();notify(t('saved'));
+  });
+  document.addEventListener('change',ev=>{
+    const x=ev.target;
+    if(x.dataset.unit&&admin()){const rec=db.units.find(q=>q.number===Number(x.dataset.unit));if(rec&&['floor','entrance'].includes(x.dataset.edit)){rec[x.dataset.edit]=Number(x.value);selectedUnit=rec.number;if(rec.entrance)db.entranceView=rec.entrance;persist();render();if(x.closest('.unit-details'))document.querySelector('.unit-details')?.scrollIntoView({block:'nearest'});}}
+    if(x.dataset.ticket&&admin()){const rec=db.tickets.find(q=>q.id===x.dataset.ticket);if(rec&&['open','progress','done'].includes(x.value)){rec.status=x.value;persist();render();}}
+    if(x.id==='demo-flat'){db.flat=Number(x.value);persist();render();}
+  });
+  document.addEventListener('input',ev=>{
+    if(ev.target.id!=='search')return;
+    db.search=ev.target.value;const cursor=ev.target.selectionStart;render();const el=document.getElementById('search');el?.focus();el?.setSelectionRange(cursor,cursor);
+  });
+  document.addEventListener('click',ev=>{
+    const x=ev.target.closest('[data-nav],[data-role],[data-lang],[data-vote],[data-remove-shop],[data-export-csv],[data-reset],[data-backup],[data-plan-unit],[data-entrance],[data-close-unit],[data-goto-finances],[data-more],[data-more-close],[data-review]');if(!x)return;
+    if(x.dataset.nav){db.tab=x.dataset.nav;db.search='';moreOpen=false;persist();render();window.scrollTo(0,0);return;}
+    if(x.hasAttribute('data-more')){moreOpen=!moreOpen;render();return;}
+    if(x.hasAttribute('data-more-close')){moreOpen=false;render();return;}
+    if(x.hasAttribute('data-entrance')){const n=Number(x.dataset.entrance);if([1,2,3].includes(n)){db.entranceView=n;selectedUnit=null;persist();render();}return;}
+    if(x.hasAttribute('data-plan-unit')){const n=Number(x.dataset.planUnit);if(!db.units.some(q=>q.number===n))return;if(!admin()&&db.flat!==n)return;selectedUnit=n;const rec=db.units.find(q=>q.number===n);if(rec.entrance)db.entranceView=rec.entrance;render();document.querySelector('.unit-details')?.scrollIntoView({block:'nearest',behavior:'smooth'});return;}
+    if(x.hasAttribute('data-close-unit')){selectedUnit=null;render();return;}
+    if(x.hasAttribute('data-goto-finances')){if(!admin())return;db.tab='finances';persist();render();window.scrollTo(0,0);return;}
+    if(x.hasAttribute('data-review')){
+      if(!admin())return notify(t('adminOnly'));
+      if(!['approved','rejected'].includes(x.dataset.reviewStatus))return;
+      const item=db.applications.find(q=>q.id===x.dataset.review&&q.status==='pending');
+      if(!item)return;
+      item.status=x.dataset.reviewStatus;
+      persist();render();notify(t(item.status==='approved'?'requestApproved':'requestRejected'));return;
+    }
+    if(x.dataset.role){db.role=x.dataset.role;db.tab=x.hasAttribute('data-registration')?'registration':'home';selectedUnit=null;moreOpen=false;persist();render();return;}
+    if(x.dataset.lang){db.lang=x.dataset.lang;persist();render();return;}
+    if(x.hasAttribute('data-export-csv')){if(admin())csv();return;}
+    if(x.hasAttribute('data-backup')){if(admin())download('rustaveli16-demo-backup.json','application/json',JSON.stringify(db,null,2));return;}
+    if(x.hasAttribute('data-remove-shop')){if(!admin())return notify(t('adminOnly'));db.shops=db.shops.filter(q=>q.id!==x.dataset.removeShop);persist();render();notify(t('deleted'));return;}
+    if(x.hasAttribute('data-vote')){if(admin())return notify(t('adminOnly'));const poll=db.polls.find(q=>q.id===x.dataset.vote);if(!poll)return;if(poll.voters.includes(db.flat))return notify(t('already'));if(!['yes','no'].includes(x.dataset.choice))return;poll[x.dataset.choice]++;poll.voters.push(db.flat);persist();render();notify(t('cast'));return;}
+    if(x.hasAttribute('data-reset')&&admin()&&confirm(t('resetConfirm'))){db=seed();persist();render();notify(t('deleted'));}
+  });
+  render();
+  if('serviceWorker'in navigator&&location.protocol==='https:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
+})();
+
+</script>
+</body>
+</html>
