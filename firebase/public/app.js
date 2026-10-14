@@ -4,12 +4,13 @@ import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWith
 import { getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, query, where, runTransaction,
   updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 import { firebaseConfig } from "./config.js";
+import { computeBalance, validMonth, amountToTetri } from './finance-math.js';
 
 const el=document.getElementById('app'),toast=document.getElementById('toast');
 let lang=localStorage.getItem('corp-language')==='ru'?'ru':'ka', screen='login', user=null,
     profile=null, isChair=false, application=null, membership=null, requests=[],members=[],units=[],
     profileCache=new Map(),working=false,editingUnit=1,announcements=[],repairs=[],
-    ledgerMonth=localMonth(),ledgerRate=null,receipts=[];
+    ledgerMonth=localMonth(),ledgerRate=null,receipts=[],monthsHistory=[],corrections=[],correctingPaymentId=null;
 function localMonth(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
 const dict={
 ka:{
@@ -23,6 +24,7 @@ ka:{
   finance:'ფინანსები',month:'თვე',monthlyFee:'თვიური შენატანი',setMonthlyFee:'შენატანის დადგენა',feeConfirm:'დავაფიქსიროთ ამ თვის შენატანი? შემდეგ ცვლილება შეუძლებელია.',feeMissing:'ამ თვის შენატანი ჯერ არ არის მითითებული.',
   paid:'შემოსულია',due:'დარიცხულია',debt:'დავალიანება',credit:'ზედმეტობა',noPayments:'ჩანაწერები არ არის',recordPayment:'ხელით გადახდის დამატება',paymentNote:'შენიშვნა',amountGel:'თანხა (₾)',allUnits:'60 ბინის ანგარიში',downloadReport:'CSV ანგარიშის გადმოწერა',
   immutableLedger:'ეს არის ხელით აღრიცხვა და არა ონლაინ გადახდა. ჩაწერილი ოპერაციები არ იშლება; შეცდომის შემთხვევაში საჭირო იქნება შემასწორებელი ჩანაწერის მექანიზმი. წინა თვეების ნაშთები არ გადადის ავტომატურად.',accessExpired:'ბინაზე წინა წვდომა გაუქმებულია. შეგიძლიათ ახალი განაცხადი გააგზავნოთ.',
+  opening:'წინა თვეების ნაშთი',monthlyPaid:'ამ თვეში გადახდილი',closing:'საბოლოო ნაშთი',paymentCancel:'გადახდის გაუქმება',cancelReason:'გაუქმების მიზეზი',confirmCorrection:'გაუქმდეს ეს გადახდა? ინფორმაცია დარჩება ისტორიაში.',correctionSaved:'გაუქმება ჩაწერილია',reversed:'გაუქმებულია',cancel:'გაუქმება',ledgerCumulative:'წინა თვეების დავალიანება ან ზედმეტობა გადადის შემდეგ თვეზე.',
   news:'განცხადებები',newNews:'ახალი განცხადება',headline:'სათაური',content:'ტექსტი',publish:'გამოქვეყნება',
   repairs:'სარემონტო განაცხადები',newRepair:'პრობლემის შეტყობინება',repairDetails:'პრობლემის აღწერა',sendRepair:'განაცხადის გაგზავნა',
   repairStatus:'მდგომარეობა',open:'ახალი',progress:'მიმდინარეობს',done:'დასრულებულია',setProgress:'მუშაობაში გადაყვანა',setDone:'დასრულება',
@@ -39,6 +41,7 @@ ru:{
   finance:'Финансы',month:'Месяц',monthlyFee:'Ежемесячный взнос',setMonthlyFee:'Установить взнос',feeConfirm:'Зафиксировать взнос на этот месяц? После сохранения его нельзя изменить.',feeMissing:'Взнос за этот месяц пока не установлен.',
   paid:'Поступило',due:'Начислено',debt:'Задолженность',credit:'Переплата',noPayments:'Записей пока нет',recordPayment:'Записать оплату вручную',paymentNote:'Примечание',amountGel:'Сумма (₾)',allUnits:'Отчёт по 60 квартирам',downloadReport:'Скачать CSV',
   immutableLedger:'Это ручной учёт, а не приём онлайн-платежей. Записи нельзя удалять; для исправления ошибок позже понадобится механизм корректирующих операций. Переплаты и долги прошлых месяцев пока не переносятся автоматически.',accessExpired:'Ранее одобренный доступ к квартире больше не действует. Можно подать новую заявку.',
+  opening:'Остаток с прошлых месяцев',monthlyPaid:'Оплачено за месяц',closing:'Итоговый остаток',paymentCancel:'Аннулировать поступление',cancelReason:'Причина отмены',confirmCorrection:'Аннулировать это поступление? История сохранится.',correctionSaved:'Отмена сохранена',reversed:'Аннулирован',cancel:'Отмена',ledgerCumulative:'Долги и переплаты прошлых месяцев переносятся на следующий месяц.',
   news:'Объявления',newNews:'Новое объявление',headline:'Заголовок',content:'Текст объявления',publish:'Опубликовать',
   repairs:'Заявки на ремонт',newRepair:'Сообщить о проблеме',repairDetails:'Описание проблемы',sendRepair:'Отправить заявку',
   repairStatus:'Статус',open:'Новая',progress:'В работе',done:'Завершена',setProgress:'В работу',setDone:'Завершить',
@@ -56,10 +59,11 @@ const configured=!!firebaseConfig&&!!firebaseConfig.projectId&&!!firebaseConfig.
 let auth=null,db=null;
 if(configured){const app=initializeApp(firebaseConfig);auth=getAuth(app);db=getFirestore(app);}
 const canWrite=()=>user?.emailVerified===true;
-const monthOk=v=>/^20[0-9]{2}-(0[1-9]|1[0-2])$/.test(String(v));
-const toTetri=v=>{const n=Number(v);return Number.isFinite(n)?Math.round(n*100):NaN};
+const monthOk=validMonth;
+const toTetri=amountToTetri;
 const money=v=>(Number(v||0)/100).toLocaleString(lang==='ka'?'ka-GE':'ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' ₾';
-const totalsFor=flat=>receipts.filter(r=>r.month===ledgerMonth&&Number(r.apartment)===flat).reduce((sum,r)=>sum+Number(r.amountTetri||0),0);
+const balanceFor=flat=>computeBalance(flat,ledgerMonth,monthsHistory,receipts,corrections);
+const totalsFor=flat=>balanceFor(flat).paidCurrent;
 
 async function refresh(){
   if(!user||!db)return render();
@@ -84,15 +88,19 @@ async function refresh(){
       repairs=repairSnap.docs.map(x=>({id:x.id,...x.data()}))
         .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
     }
-    ledgerRate=null;receipts=[];
+    ledgerRate=null;receipts=[];monthsHistory=[];corrections=[];
     if(isChair||membership){
-      const [rate,receiptDocs]=await Promise.all([
-        getDoc(doc(db,'months',ledgerMonth)),
-        isChair?getDocs(query(collection(db,'payments'),where('month','==',ledgerMonth))):
-          getDocs(query(collection(db,'payments'),where('apartment','==',membership.apartment)))
+      const [monthDocs,receiptDocs,correctionDocs]=await Promise.all([
+        getDocs(query(collection(db,'months'),where('month','<=',ledgerMonth))),
+        isChair?getDocs(query(collection(db,'payments'),where('month','<=',ledgerMonth))):
+          getDocs(query(collection(db,'payments'),where('apartment','==',membership.apartment))),
+        isChair?getDocs(query(collection(db,'corrections'),where('month','<=',ledgerMonth))):
+          getDocs(query(collection(db,'corrections'),where('apartment','==',membership.apartment)))
       ]);
-      ledgerRate=rate.data()||null;
-      receipts=receiptDocs.docs.map(x=>({id:x.id,...x.data()})).filter(r=>r.month===ledgerMonth);
+      monthsHistory=monthDocs.docs.map(x=>({id:x.id,...x.data()})).filter(m=>m.month<=ledgerMonth);
+      ledgerRate=monthsHistory.find(m=>m.month===ledgerMonth)||null;
+      receipts=receiptDocs.docs.map(x=>({id:x.id,...x.data()})).filter(m=>m.month<=ledgerMonth);
+      corrections=correctionDocs.docs.map(x=>({id:x.id,...x.data()})).filter(m=>m.month<=ledgerMonth);
     }
     if(isChair) {
       const [reqs,mem,loc]=await Promise.all([
@@ -353,7 +361,7 @@ document.addEventListener('submit',submit);
 document.addEventListener('click',handleAction);
 document.addEventListener('input',ev=>{if(ev.target.id==='search'){const v=ev.target.value.toLowerCase().trim();document.querySelectorAll('tr[data-search]').forEach(row=>{row.hidden=!row.dataset.search.includes(v);});}});
 document.addEventListener('change',ev=>{
-  if(ev.target.id==='finance-month'&&monthOk(ev.target.value)){ledgerMonth=ev.target.value;refresh();return;}
+  if(ev.target.id==='finance-month'&&monthOk(ev.target.value)){ledgerMonth=ev.target.value;correctingPaymentId=null;refresh();return;}
   if(ev.target.name==='apartment'&&ev.target.closest('#layout-form')){editingUnit=Number(ev.target.value);render();}
 });
 if(!configured)render();else onAuthStateChanged(auth,async current=>{user=current;profile=null;isChair=false;application=null;membership=null;requests=[];members=[];units=[];profileCache=new Map();if(current)await refresh();else render();});
