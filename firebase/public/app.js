@@ -5,6 +5,7 @@ import { getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, query, 
   updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 import { firebaseConfig } from "./config.js";
 import { computeBalance, validMonth, amountToTetri } from './finance-math.js';
+import { encryptFinanceSnapshot } from './encrypted-finance.js';
 
 const el=document.getElementById('app'),toast=document.getElementById('toast');
 let lang=localStorage.getItem('corp-language')==='ru'?'ru':'ka', screen='login', user=null,
@@ -23,8 +24,8 @@ ka:{
   noFinance:'კენჭისყრა დაემატება შემდეგ ეტაპზე.',
   finance:'ფინანსები',month:'თვე',monthlyFee:'თვიური შენატანი',setMonthlyFee:'შენატანის დადგენა',feeConfirm:'დავაფიქსიროთ ამ თვის შენატანი? შემდეგ ცვლილება შეუძლებელია.',feeMissing:'ამ თვის შენატანი ჯერ არ არის მითითებული.',
   paid:'შემოსულია',due:'დარიცხულია',debt:'დავალიანება',credit:'ზედმეტობა',noPayments:'ჩანაწერები არ არის',recordPayment:'ხელით გადახდის დამატება',paymentNote:'შენიშვნა',amountGel:'თანხა (₾)',allUnits:'60 ბინის ანგარიში',downloadReport:'CSV ანგარიშის გადმოწერა',
-  immutableLedger:'ეს არის ხელით აღრიცხვა და არა ონლაინ გადახდა. ჩაწერილი ოპერაციები არ იშლება; შეცდომის შემთხვევაში საჭირო იქნება შემასწორებელი ჩანაწერის მექანიზმი. წინა თვეების ნაშთები არ გადადის ავტომატურად.',accessExpired:'ბინაზე წინა წვდომა გაუქმებულია. შეგიძლიათ ახალი განაცხადი გააგზავნოთ.',
-  opening:'წინა თვეების ნაშთი',monthlyPaid:'ამ თვეში გადახდილი',closing:'საბოლოო ნაშთი',paymentCancel:'გადახდის გაუქმება',cancelReason:'გაუქმების მიზეზი',confirmCorrection:'გაუქმდეს ეს გადახდა? ინფორმაცია დარჩება ისტორიაში.',correctionSaved:'გაუქმება ჩაწერილია',reversed:'გაუქმებულია',cancel:'გაუქმება',ledgerCumulative:'წინა თვეების დავალიანება ან ზედმეტობა გადადის შემდეგ თვეზე.',
+  immutableLedger:'ეს არის მხოლოდ ხელით აღრიცხვა და არა ონლაინ გადახდის სისტემა. არასწორი გადახდა უქმდება ცალკე ჩანაწერით; ორიგინალი ისტორიაში რჩება.',accessExpired:'ბინაზე წინა წვდომა გაუქმებულია. შეგიძლიათ ახალი განაცხადი გააგზავნოთ.',
+  opening:'წინა თვეების ნაშთი',monthlyPaid:'ამ თვეში გადახდილი',closing:'საბოლოო ნაშთი',paymentCancel:'გადახდის გაუქმება',cancelReason:'გაუქმების მიზეზი',confirmCorrection:'გაუქმდეს ეს გადახდა? ინფორმაცია დარჩება ისტორიაში.',correctionSaved:'გაუქმება ჩაწერილია',reversed:'გაუქმებულია',cancel:'გაუქმება',ledgerCumulative:'წინა თვეების დავალიანება ან ზედმეტობა გადადის შემდეგ თვეზე.',backupTitle:'ფინანსების დაშიფრული არქივი',backupExplain:'მხოლოდ ფინანსები; სახელები და ტელეფონები არ შედის. ფაილი ინახება მხოლოდ თქვენს მოწყობილობაზე. პაროლი არ შეინახება და დაკარგვის შემთხვევაში ვერ აღდგება.',backupPass:'არქივის პაროლი (მინ. 14 სიმბოლო)',backupRepeat:'გაიმეორეთ პაროლი',backupAction:'დაშიფრული არქივის ჩამოტვირთვა',backupMismatch:'პაროლები არ ემთხვევა.',backupLimit:'არქივი მეტისმეტად დიდია. დაუკავშირდით ადმინისტრატორს.',
   news:'განცხადებები',newNews:'ახალი განცხადება',headline:'სათაური',content:'ტექსტი',publish:'გამოქვეყნება',
   repairs:'სარემონტო განაცხადები',newRepair:'პრობლემის შეტყობინება',repairDetails:'პრობლემის აღწერა',sendRepair:'განაცხადის გაგზავნა',
   repairStatus:'მდგომარეობა',open:'ახალი',progress:'მიმდინარეობს',done:'დასრულებულია',setProgress:'მუშაობაში გადაყვანა',setDone:'დასრულება',
@@ -40,8 +41,8 @@ ru:{
   noFinance:'Голосования добавим после проверки защищённой регистрации.',
   finance:'Финансы',month:'Месяц',monthlyFee:'Ежемесячный взнос',setMonthlyFee:'Установить взнос',feeConfirm:'Зафиксировать взнос на этот месяц? После сохранения его нельзя изменить.',feeMissing:'Взнос за этот месяц пока не установлен.',
   paid:'Поступило',due:'Начислено',debt:'Задолженность',credit:'Переплата',noPayments:'Записей пока нет',recordPayment:'Записать оплату вручную',paymentNote:'Примечание',amountGel:'Сумма (₾)',allUnits:'Отчёт по 60 квартирам',downloadReport:'Скачать CSV',
-  immutableLedger:'Это ручной учёт, а не приём онлайн-платежей. Записи нельзя удалять; для исправления ошибок позже понадобится механизм корректирующих операций. Переплаты и долги прошлых месяцев пока не переносятся автоматически.',accessExpired:'Ранее одобренный доступ к квартире больше не действует. Можно подать новую заявку.',
-  opening:'Остаток с прошлых месяцев',monthlyPaid:'Оплачено за месяц',closing:'Итоговый остаток',paymentCancel:'Аннулировать поступление',cancelReason:'Причина отмены',confirmCorrection:'Аннулировать это поступление? История сохранится.',correctionSaved:'Отмена сохранена',reversed:'Аннулирован',cancel:'Отмена',ledgerCumulative:'Долги и переплаты прошлых месяцев переносятся на следующий месяц.',
+  immutableLedger:'Это ручной учёт, а не приём онлайн-платежей. Ошибочное поступление аннулируется отдельной записью, а оригинал остаётся в истории.',accessExpired:'Ранее одобренный доступ к квартире больше не действует. Можно подать новую заявку.',
+  opening:'Остаток с прошлых месяцев',monthlyPaid:'Оплачено за месяц',closing:'Итоговый остаток',paymentCancel:'Аннулировать поступление',cancelReason:'Причина отмены',confirmCorrection:'Аннулировать это поступление? История сохранится.',correctionSaved:'Отмена сохранена',reversed:'Аннулирован',cancel:'Отмена',ledgerCumulative:'Долги и переплаты прошлых месяцев переносятся на следующий месяц.',backupTitle:'Зашифрованный архив финансов',backupExplain:'Только финансы: без имён и телефонов. Файл сохранится на устройстве. Пароль нигде не сохраняется; если его потерять, расшифровать файл не получится.',backupPass:'Пароль архива (минимум 14 символов)',backupRepeat:'Повторите пароль',backupAction:'Скачать зашифрованный архив',backupMismatch:'Пароли не совпадают.',backupLimit:'Архив слишком большой. Нужна отдельная процедура сохранения.',
   news:'Объявления',newNews:'Новое объявление',headline:'Заголовок',content:'Текст объявления',publish:'Опубликовать',
   repairs:'Заявки на ремонт',newRepair:'Сообщить о проблеме',repairDetails:'Описание проблемы',sendRepair:'Отправить заявку',
   repairStatus:'Статус',open:'Новая',progress:'В работе',done:'Завершена',setProgress:'В работу',setDone:'Завершить',
@@ -205,10 +206,15 @@ function renderFinance(){
     [t('apartment'),t('opening'),t('due'),t('monthlyPaid'),t('closing')]
     .map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+rows+'</tbody></table></div>'+
     '<div class="actions">'+btn('↓ '+t('downloadReport'),'download-finance')+'</div>';
+  const backupForm='<p class="muted">'+esc(t('backupExplain'))+'</p>'+
+    '<form id="backup-form" class="stack">'+
+    '<label>'+esc(t('backupPass'))+'<input name="pass" type="password" minlength="14" maxlength="1024" autocomplete="new-password" required></label>'+
+    '<label>'+esc(t('backupRepeat'))+'<input name="repeat" type="password" minlength="14" maxlength="1024" autocomplete="new-password" required></label>'+
+    '<button type="submit" class="btn green">'+esc(t('backupAction'))+'</button></form>';
   return card(t('finance'),picker+metrics+'<p class="muted">'+esc(t('ledgerCumulative'))+' '+esc(t('immutableLedger'))+'</p>')+
     card(t('setMonthlyFee'),feeForm)+card(t('recordPayment'),paymentForm)+
     (selected?card(t('paymentCancel'),correctionForm):'')+
-    card(t('allUnits'),report)+card(t('paid'),history);
+    card(t('allUnits'),report)+card(t('paid'),history)+card(t('backupTitle'),backupForm);
 }
 function renderResident(){
   if(membership){
@@ -250,7 +256,7 @@ function renderChair(){
     card(t('unitMap'),layout)+'<div class="notice">'+esc(t('noFinance'))+'</div>';
 }
 async function submit(ev){
-  const f=ev.target;if(!['auth-form','reset-form','application-form','layout-form','repair-form','news-form','fee-form','payment-form','correction-form'].includes(f.id))return;
+  const f=ev.target;if(!['auth-form','reset-form','application-form','layout-form','repair-form','news-form','fee-form','payment-form','correction-form','backup-form'].includes(f.id))return;
   ev.preventDefault();if(working)return;working=true;
   const d=Object.fromEntries(new FormData(f).entries());
   const actionButton=f.querySelector('button[type="submit"]');if(actionButton)actionButton.disabled=true;
@@ -313,6 +319,28 @@ async function submit(ev){
         apartment,month:ledgerMonth,amountTetri,note,createdBy:user.uid,createdAt:serverTimestamp()
       });
       await refresh();
+    }else if(f.id==='backup-form'){
+      if(!isChair||!canWrite())throw Error(t('failed'));
+      const password=String(d.pass||''),repeat=String(d.repeat||'');
+      if(password.length<14||password.length>1024)throw Error(t('backupMismatch'));
+      if(password!==repeat)throw Error(t('backupMismatch'));
+      // Fetch full financial history, independent of the month currently selected.
+      const [fees,entries,reversals]=await Promise.all([
+        getDocs(collection(db,'months')),getDocs(collection(db,'payments')),getDocs(collection(db,'corrections'))
+      ]);
+      const count=fees.size+entries.size+reversals.size;
+      if(count>25000)throw Error(t('backupLimit'));
+      const records=items=>items.docs.map(record=>({id:record.id,...record.data()}));
+      const payload={
+        schema:'chveni-korpusi-finance-snapshot-v1',savedAt:new Date().toISOString(),
+        monthFees:records(fees),payments:records(entries),corrections:records(reversals)
+      };
+      const archive=await encryptFinanceSnapshot(payload,password);
+      const url=URL.createObjectURL(new Blob([archive],{type:'application/json;charset=utf-8'}));
+      const anchor=document.createElement('a');
+      anchor.href=url;anchor.download='chveni-korpusi-finance-encrypted-'+localMonth()+'.json';
+      document.body.appendChild(anchor);anchor.click();anchor.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),3000);
     }else if(f.id==='correction-form'){
       if(!isChair||!canWrite()||!correctingPaymentId)throw Error(t('failed'));
       const payment=receipts.find(x=>x.id===correctingPaymentId&&x.month===ledgerMonth);
