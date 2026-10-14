@@ -76,6 +76,12 @@ async function refresh() {
   }catch(err){if(version===loadVersion){el.innerHTML='<div class="card notice error">'+esc(t('fail'))+': '+esc(err.message||String(err))+'</div>'+button(t('refresh'),'refresh','light');}}
 }
 
+function updateFooter(){
+  const f=document.getElementById('security-footer');
+  if(f)f.textContent=lang==='ka'
+    ?'მონაცემები ხელმისაწვდომია მხოლოდ უსაფრთხო ავტორიზაციის შემდეგ'
+    :'Данные доступны только после защищённой авторизации';
+}
 function renderGuest(){
   if(authTab==='reset'){
     el.innerHTML=html.top(t('resetTitle'),t('resetExplain'))+
@@ -280,6 +286,7 @@ document.addEventListener('change',ev=>{if(ev.target.id==='entrance-filter')appl
 document.getElementById('language').addEventListener('click',()=>{
   lang=lang==='ka'?'ru':'ka';localStorage.setItem('corp-lang',lang);
   document.documentElement.lang=lang;
+  updateFooter();
   document.getElementById('language').textContent=lang==='ka'?'🇷🇺 RU':'🇬🇪 KA';
   if(!enabled)refresh();else if(!user)renderGuest();else renderMember();
 });
@@ -290,4 +297,5 @@ if(supabase) {
     setTimeout(refresh,0);
   });
 }
+updateFooter();
 await refresh();
