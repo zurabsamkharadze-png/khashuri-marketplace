@@ -17,14 +17,14 @@ ka:{
   notReady:'სერვერი ჯერ არ არის დაკავშირებული',notReadyDesc:'ეს არის დაცული აპლიკაციის მომზადებული ვერსია. 60 ოჯახის რეალური რეგისტრაცია არ ჩაირთვება ახალი, დამოუკიდებელი და უფასო მონაცემთა ბაზის გამართვამდე.',
   guestIntro:'მცხოვრებთა დაცული რეგისტრაცია',signin:'შესვლა',signup:'რეგისტრაცია',email:'ელფოსტა',password:'პაროლი',first:'სახელი',last:'გვარი',phone:'ტელეფონის ნომერი',send:'გაგზავნა',wait:'მიმდინარეობს…',emailSent:'გადაამოწმეთ ელფოსტა და დაადასტურეთ ანგარიში, შემდეგ შედით.',forgot:'დაგავიწყდათ პაროლი?',resetTitle:'პაროლის აღდგენა',resetExplain:'შეიყვანეთ ანგარიშის ელფოსტა. თუ ასეთი ანგარიში არსებობს, აღდგენის ინსტრუქციას მიიღებთ.',resetSend:'აღდგენის ბმულის გაგზავნა',resetSent:'თუ ეს ელფოსტა სისტემაში არსებობს, პაროლის აღდგენის ბმული გამოიგზავნება.',backSignIn:'შესვლაზე დაბრუნება',newPassword:'ახალი პაროლი',repeatPassword:'გაიმეორეთ პაროლი',updatePassword:'პაროლის შეცვლა',passwordChanged:'პაროლი შეიცვალა. შეგიძლიათ გააგრძელოთ.',passwordMismatch:'პაროლები არ ემთხვევა.',account:'ჩემი ანგარიში',logout:'გასვლა',
   request:'განაცხადი',registerApt:'ბინაზე წვდომის მოთხოვნა',entrance:'სადარბაზო',floor:'სართული',flat:'ბინა',owner:'მესაკუთრე',resident:'მცხოვრები',submitRequest:'განაცხადის გაგზავნა',pending:'მოლოდინში',approved:'დამტკიცებულია',rejected:'უარყოფილია',retry:'ხელახალი განაცხადის გაგზავნა',yourRequest:'ჩემი განაცხადი',noRequest:'განაცხადი ჯერ არ არის გაგზავნილი',waiting:'თქვენი განაცხადი თავმჯდომარის დადასტურებას ელოდება.',rejectedMsg:'წინა განაცხადი უარყოფილია. შეგიძლიათ გაგზავნოთ ახალი.',approvedMsg:'თქვენ გაქვთ დამტკიცებული წვდომა მითითებულ ბინაზე.',building:'ხაშური, რუსთაველის 16 · 60 ბინა · 3 სადარბაზო',
-  chairman:'თავმჯდომარე',pendingRequests:'მომლოდინე განაცხადები',directory:'მცხოვრებთა ბაზა',records:'მცხოვრებთა ჩანაწერები',approve:'დამტკიცება',reject:'უარყოფა',confirmApprove:'დავამტკიცოთ განაცხადი?',confirmReject:'უარვყოთ განაცხადი?',edit:'შეცვლა',cancel:'გაუქმება',save:'შენახვა',search:'ძებნა სახელით, გვარით, ტელეფონით ან ბინით',allEntrances:'ყველა სადარბაზო',exportCsv:'CSV ფაილის გადმოწერა',exportConfirm:'CSV ფაილი შეიცავს პირად მონაცემებს (სახელები, ტელეფონები). გააგრძელებთ? შეინახეთ მხოლოდ უსაფრთხო ადგილას.',none:'ჩანაწერები არ არის',relation:'კავშირი',status:'სტატუსი',date:'თარიღი',refresh:'განახლება',
+  chairman:'თავმჯდომარე',pendingRequests:'მომლოდინე განაცხადები',directory:'მცხოვრებთა ბაზა',records:'მცხოვრებთა ჩანაწერები',approve:'დამტკიცება',reject:'უარყოფა',confirmApprove:'დავამტკიცოთ განაცხადი?',confirmReject:'უარვყოთ განაცხადი?',edit:'შეცვლა',cancel:'გაუქმება',save:'შენახვა',revoke:'წვდომის გაუქმება',revokeConfirm:'ნამდვილად გავაუქმოთ ამ ბინაზე მაცხოვრებლის წვდომა? მომხმარებლის ანგარიში არ წაიშლება.',accessRevoked:'წინა წვდომა გაუქმებულია. სურვილის შემთხვევაში, ახალი განაცხადის გაგზავნა შეგიძლიათ.',search:'ძებნა სახელით, გვარით, ტელეფონით ან ბინით',allEntrances:'ყველა სადარბაზო',exportCsv:'CSV ფაილის გადმოწერა',exportConfirm:'CSV ფაილი შეიცავს პირად მონაცემებს (სახელები, ტელეფონები). გააგრძელებთ? შეინახეთ მხოლოდ უსაფრთხო ადგილას.',none:'ჩანაწერები არ არის',relation:'კავშირი',status:'სტატუსი',date:'თარიღი',refresh:'განახლება',
   secure:'წვდომა მოწმდება სერვერზე. რიგითი მცხოვრებელი სხვის ტელეფონს ვერ ნახავს.',privacy:'მეზობლების მონაცემები დაამატეთ მხოლოდ მას შემდეგ, რაც დაცული სერვერი ამოქმედდება და მათი თანხმობა იქნება მიღებული.',fail:'ოპერაცია ვერ შესრულდა',session:'სესია დასრულდა. შედით თავიდან.',noRole:'თავმჯდომარის როლი ენიჭება მხოლოდ ხელით, უფლებამოსილი ადმინისტრატორის მიერ.',noFee:'ფინანსები და კენჭისყრები დაემატება შემდეგ ეტაპზე.',passwordHelp:'გამოიყენეთ უნიკალური, მინიმუმ 12-სიმბოლოიანი პაროლი.'
 },
 ru:{
   notReady:'Сервер пока не подключён',notReadyDesc:'Это подготовленная защищённая версия приложения. Реальная регистрация 60 семей не включится, пока не будет настроена новая отдельная бесплатная база данных.',
   guestIntro:'Защищённая регистрация жильцов',signin:'Вход',signup:'Регистрация',email:'Электронная почта',password:'Пароль',first:'Имя',last:'Фамилия',phone:'Номер телефона',send:'Отправить',wait:'Подождите…',emailSent:'Проверьте почту и подтвердите аккаунт, затем войдите.',forgot:'Забыли пароль?',resetTitle:'Восстановление пароля',resetExplain:'Введи адрес электронной почты. Если аккаунт существует, на него придёт ссылка для восстановления.',resetSend:'Отправить ссылку',resetSent:'Если аккаунт существует, на почту отправлена ссылка для восстановления пароля.',backSignIn:'Вернуться ко входу',newPassword:'Новый пароль',repeatPassword:'Повторите пароль',updatePassword:'Изменить пароль',passwordChanged:'Пароль изменён. Можно продолжать.',passwordMismatch:'Пароли не совпадают.',account:'Мой аккаунт',logout:'Выйти',
   request:'Заявка',registerApt:'Запрос доступа к квартире',entrance:'Подъезд',floor:'Этаж',flat:'Квартира',owner:'Собственник',resident:'Житель',submitRequest:'Отправить заявку',pending:'Ожидает',approved:'Одобрена',rejected:'Отклонена',retry:'Подать новую заявку',yourRequest:'Моя заявка',noRequest:'Заявка ещё не подана',waiting:'Твоя заявка ожидает проверки председателем.',rejectedMsg:'Предыдущая заявка отклонена. Можно отправить новую.',approvedMsg:'Твой доступ к квартире подтверждён.',building:'Хашури, Руставели 16 · 60 квартир · 3 подъезда',
-  chairman:'Председатель',pendingRequests:'Заявки на подтверждение',directory:'База жильцов',records:'Записи жильцов',approve:'Одобрить',reject:'Отклонить',confirmApprove:'Подтвердить заявку?',confirmReject:'Отклонить заявку?',edit:'Изменить',cancel:'Отмена',save:'Сохранить',search:'Поиск по имени, фамилии, телефону или квартире',allEntrances:'Все подъезды',exportCsv:'Скачать таблицу CSV',exportConfirm:'В файле CSV будут персональные данные жильцов (имена, телефоны). Продолжить? Храните файл только в защищённом месте.',none:'Записей пока нет',relation:'Статус жильца',status:'Статус',date:'Дата',refresh:'Обновить',
+  chairman:'Председатель',pendingRequests:'Заявки на подтверждение',directory:'База жильцов',records:'Записи жильцов',approve:'Одобрить',reject:'Отклонить',confirmApprove:'Подтвердить заявку?',confirmReject:'Отклонить заявку?',edit:'Изменить',cancel:'Отмена',save:'Сохранить',revoke:'Отозвать доступ',revokeConfirm:'Отозвать доступ жильца к этой квартире? Аккаунт не будет удалён.',accessRevoked:'Предыдущий доступ отозван. Можно подать новую заявку на квартиру.',search:'Поиск по имени, фамилии, телефону или квартире',allEntrances:'Все подъезды',exportCsv:'Скачать таблицу CSV',exportConfirm:'В файле CSV будут персональные данные жильцов (имена, телефоны). Продолжить? Храните файл только в защищённом месте.',none:'Записей пока нет',relation:'Статус жильца',status:'Статус',date:'Дата',refresh:'Обновить',
   secure:'Права доступа проверяются на сервере. Жители не могут видеть чужие телефоны.',privacy:'Вносите реальные сведения соседей только после запуска защищённой базы и получения их согласия.',fail:'Не удалось выполнить действие',session:'Сессия завершилась. Войди снова.',noRole:'Роль председателя назначается только вручную уполномоченным администратором.',noFee:'Финансы и голосования будут добавлены на следующем этапе.',passwordHelp:'Используйте уникальный пароль длиной не менее 12 символов.'
 }};
 const t=k=>dictionary[lang][k]||k;
@@ -116,9 +116,9 @@ const fieldOptions=(items)=>items.map(x=>'<option value="'+x+'">'+x+'</option>')
 function renderRequest(){
   const cur=ownRequests[0];
   if(ownMembers.length)return '<div class="notice">'+esc(t('approvedMsg'))+'</div>'+ownMembers.map(m=>'<div class="mini">№ '+m.apartment+' '+esc(t(m.relation))+'</div>').join('');
-  const status=cur?'<div class="notice '+(cur.status==='rejected'?'warning':'')+'">'+statusBadge(cur.status)+' '+esc(cur.status==='rejected'?t('rejectedMsg'):t('waiting'))+'</div>':'';
+  const revoked=cur?.status==='approved'&&ownMembers.length===0;
+  const status=cur?'<div class="notice '+(cur.status==='rejected'||revoked?'warning':'')+'">'+(revoked?'':statusBadge(cur.status)+' ')+esc(revoked?t('accessRevoked'):cur.status==='rejected'?t('rejectedMsg'):t('waiting'))+'</div>':'';
   if(cur?.status==='pending')return status;
-  if(cur?.status==='approved')return status+'<p>'+esc(t('approvedMsg'))+'</p>';
   const options=units.map(x=>'<option value="'+x.apartment+'">'+x.apartment+'</option>').join('');
   const form='<form id="request-form" class="grid"><label>'+esc(t('entrance'))+'<select name="entrance" required>'+fieldOptions([1,2,3])+'</select></label>'+
     '<label>'+esc(t('floor'))+'<select name="floor" required>'+fieldOptions([2,3,4,5,6,7,8])+'</select></label>'+
@@ -139,7 +139,7 @@ function renderChair(){
     const p=profileMap.get(m.user_id)||{};
     const u=units.find(u=>u.apartment===m.apartment)||{};
     const id=(p.first_name+' '+p.last_name+' '+p.phone+' '+m.apartment+' '+(u.entrance??'')+' '+(u.floor??'')).toLowerCase();
-    return '<tr data-filter="'+esc(id)+'" data-entrance="'+esc(u.entrance??'')+'"><td>'+esc(p.first_name)+'</td><td>'+esc(p.last_name)+'</td><td>'+esc(u.entrance??'—')+'</td><td>'+esc(u.floor??'—')+'</td><td>№ '+m.apartment+'</td><td>'+esc(p.phone)+'</td><td>'+button('✎ '+esc(t('edit')),'edit:'+esc(m.user_id),'light')+'</td></tr>';
+    return '<tr data-filter="'+esc(id)+'" data-entrance="'+esc(u.entrance??'')+'"><td>'+esc(p.first_name)+'</td><td>'+esc(p.last_name)+'</td><td>'+esc(u.entrance??'—')+'</td><td>'+esc(u.floor??'—')+'</td><td>№ '+m.apartment+'</td><td>'+esc(p.phone)+'</td><td><div class="actions">'+button('✎ '+esc(t('edit')),'edit:'+esc(m.user_id),'light')+button('× '+esc(t('revoke')),'revoke:'+esc(m.user_id)+':'+m.apartment,'danger')+'</div></td></tr>';
   }).join('');
   const selected=profiles.find(p=>p.id===editingId);
   const editForm=selected?'<div class="card"><h2>'+esc(t('edit'))+': '+esc(selected.first_name)+' '+esc(selected.last_name)+'</h2><form id="edit-form" class="grid">'+
@@ -267,6 +267,19 @@ async function dispatchClick(ev){
   if(action==='export-csv'){exportRosterCsv();return;}
   if(action==='cancelEdit'){editingId=null;renderMember();return;}
   if(action.startsWith('edit:')){if(role!=='chairman')return;editingId=action.slice(5);renderMember();window.scrollTo(0,0);return;}
+  if(action.startsWith('revoke:')){
+    if(role!=='chairman')return;
+    const match=/^revoke:([0-9a-f-]{36}):([1-9]|[1-5][0-9]|60)$/.exec(action);
+    if(!match)return show(t('fail'),true);
+    const member=members.find(m=>m.user_id===match[1]&&m.apartment===Number(match[2]));
+    if(!member)return show(t('fail'),true);
+    if(!confirm(t('revokeConfirm')+' № '+member.apartment))return;
+    button.disabled=true;
+    const {error}=await supabase.rpc('corp_revoke_member',{p_user_id:member.user_id,p_apartment:member.apartment,p_reason:''});
+    if(error){show(error.message,true);button.disabled=false;return;}
+    editingId=null;
+    await refresh();return;
+  }
   if(action==='logout'){const {error}=await supabase.auth.signOut();if(error)show(error.message,true);await refresh();return;}
   if(action.startsWith('approve:')||action.startsWith('reject:')){
     if(role!=='chairman')return;
