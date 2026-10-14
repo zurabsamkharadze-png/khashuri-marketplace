@@ -14,7 +14,7 @@
 
 - `public/index.html`, `style.css`, `app.js`: Georgian/Russian mobile-first site.
 - `public/config.js`: INTENTIONALLY null. Add only Firebase's **public Web app config** once the user's Google/Firebase project is connected.
-- `firestore.rules`: strict security rules enforced server-side; prevents unauthorized profile or phone reads, restricts announcements and repair tickets.
+- `firestore.rules`: strict security rules enforced server-side; prevents unauthorized profile or phone reads, restricts announcements, repair tickets, monthly charges and immutable receipt entries.
 - `package.json` / `tests/rules.test.mjs`: offline Firebase Emulator security regression tests; these still need to be executed with Firebase Emulator before production.
 - `firebase.json`: deploy the static site by **Firebase Hosting**, and Firestore rules. No Cloud Functions.
 
@@ -38,11 +38,13 @@
 - Chairman can assign or update entrance/floor for apartments 1–60. Check carefully before using real records.
 - Chairman-only announcements for approved residents (not public on an unsecured preview).
 - Resident repairs with description and chairman-only status updates; residents see only their own repair history.
+- **Manual monthly finances (no bank processing):** chairman fixes a uniform fee per month for 60 apartments, logs immutable receipt entries in integer tetri, and exports a CSV summary. Approved residents view fees and receipts only for their own apartment. Amounts are not invoices or bank-confirmed payments.
+- Each month is calculated separately. Older arrears and overpayments are **not** carried forward; no adjustment/reversal facility is implemented yet. Thus this section is not ready to serve as a legally authoritative ledger.
 - Georgian default and Russian toggle; responsive UI.
 
 ## Not yet implemented for production
 
-Real financial ledger, formal voting, backup/restore, membership revocation, profile edits and audit logs. Those functions in the old static demo must not be confused with production features. Firebase Security Rules need emulator tests and live integration tests before production use. The prototype uses simple client transactions without Cloud Functions; chairperson decisions can be updated only under chairman security rules.
+Production-ready audited financial corrections, arrears/overpayment carryover, formal voting, encrypted backup/restore, membership revocation, profile edits and audit logs. Those functions in the old static demo must not be confused with production features. Firebase Security Rules need emulator tests and live integration tests before production use. The prototype uses simple client transactions without Cloud Functions; chairperson decisions can be updated only under chairman security rules.
 
 ## Known constraints
 
@@ -54,4 +56,12 @@ Real financial ledger, formal voting, backup/restore, membership revocation, pro
 
 Run locally only after the Firebase tools and test packages are available: `cd firebase && npm install && npm run test:rules`. These tests use Firebase Emulator and the **demo** project identifier; no real cloud project or billing is required. An emulator binary and Java runtime are required, and initial setup may need internet access.
 
-Covered scenarios: logged-out private reads denied; no resident privilege escalation; verification required before apartment applications; announcements accessible only to approved members; repairs created only by approved residents for their apartment, with status editable only by chairman; unit mapping editable only by chairman. **Test file creation does not mean the tests have run.**
+Covered scenarios: logged-out private reads denied; no resident privilege escalation; verification required before apartment applications; announcements accessible only to approved members; repairs created only by approved residents for their apartment, with status editable only by chairman; unit mapping editable only by chairman; monthly charges immutable and chairman-only; receipts append-only and private to the approved apartment. **Test file creation does not mean the tests have run.**
+
+## Finance data model
+
+- `months/YYYY-MM`: `month`, `amountTetri`, `createdBy`, `createdAt`. Created only once by chairman; one monthly amount for all 60 flats. **Do not edit or delete** historical month settings; corrections require a future audited adjustment process.
+- `payments/<autoid>`: `month`, `apartment`, `amountTetri`, `note`, `createdBy`, `createdAt`. Immutable append-only manual receipt recording (not payment capture). The resident's Firestore list query MUST include `where('apartment','==',membership.apartment)`, and the server rules check the resident's approved membership for any document read.
+- Client arithmetic uses **integer tetri**, not floating-point GEL. Monthly fees and payment entries have bounds enforced in Firestore Rules. Only the current selected month is totaled; rollover not implemented.
+- CSV contains apartment-level financial status and is unencrypted when saved; the chairman should store it securely and not post it publicly.
+- The rules are committed but not yet deployed or exercised against a real Firebase project. Emulator tests have been written, but weren't executed in this environment because external npm downloads are unavailable.
