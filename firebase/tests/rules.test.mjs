@@ -5,7 +5,7 @@ import {
   initializeTestEnvironment, assertFails, assertSucceeds
 } from '@firebase/rules-unit-testing';
 import {
-  collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, serverTimestamp
+  collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, query, where, serverTimestamp
 } from 'firebase/firestore';
 
 let env;
@@ -121,4 +121,45 @@ test('residents cannot change an application decision',async()=>{
   await assertSucceeds(updateDoc(doc(fs(chairId),'applications',otherId),{
     status:'rejected',reviewedBy:chairId,reviewedAt:serverTimestamp()
   }));
+});
+
+test('a verified approved resident can read fee only, but only chairman fixes monthly charge',async()=>{
+  const month='2026-10';
+  const charge={month,amountTetri:1250,createdBy:chairId,createdAt:serverTimestamp()};
+  await assertFails(setDoc(doc(fs(resId),'months',month),{
+    ...charge,createdBy:resId
+  }));
+  await assertSucceeds(setDoc(doc(fs(chairId),'months',month),charge));
+  await assertSucceeds(getDoc(doc(fs(resId),'months',month)));
+  await assertFails(getDoc(doc(fs(otherId),'months',month)));
+  await assertFails(updateDoc(doc(fs(chairId),'months',month),{amountTetri:1500}));
+  await assertFails(setDoc(doc(fs(chairId),'months','2026-99'),{...charge,month:'2026-99'}));
+});
+
+test('manual receipts are immutable, private to the apartment, and chairman-only to create',async()=>{
+  const p={
+    apartment:1,month:'2026-10',amountTetri:950,note:'Sample paid in cash',
+    createdBy:chairId,createdAt:serverTimestamp()
+  };
+  await assertFails(addDoc(collection(fs(resId),'payments'),{...p,createdBy:resId}));
+  const saved=await assertSucceeds(addDoc(collection(fs(chairId),'payments'),p));
+  await assertSucceeds(getDoc(doc(fs(resId),'payments',saved.id)));
+  await assertFails(getDoc(doc(fs(otherId),'payments',saved.id)));
+  await assertSucceeds(getDocs(query(collection(fs(resId),'payments'),where('apartment','==',1))));
+  await assertFails(getDocs(collection(fs(resId),'payments')));
+  await assertFails(updateDoc(doc(fs(chairId),'payments',saved.id),{amountTetri:100}));
+  await assertFails(addDoc(collection(fs(chairId),'payments'),{
+    ...p,month:'2026-99'
+  }));
+});
+
+test('residents must not see other apartment receipts even if amount and month match',async()=>{
+  await env.withSecurityRulesDisabled(async context=>{
+    await setDoc(doc(context.firestore(),'payments','another-flat'),{
+      apartment:22,month:'2026-10',amountTetri:1500,note:'',
+      createdBy:chairId,createdAt:new Date()
+    });
+  });
+  await assertFails(getDoc(doc(fs(resId),'payments','another-flat')));
+  await assertSucceeds(getDoc(doc(fs(chairId),'payments','another-flat')));
 });
