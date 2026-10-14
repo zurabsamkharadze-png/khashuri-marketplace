@@ -39,12 +39,12 @@
 - Chairman-only announcements for approved residents (not public on an unsecured preview).
 - Resident repairs with description and chairman-only status updates; residents see only their own repair history.
 - **Manual monthly finances (no bank processing):** chairman fixes a uniform fee per month for 60 apartments, logs immutable receipt entries in integer tetri, and exports a CSV summary. Approved residents view fees and receipts only for their own apartment. Amounts are not invoices or bank-confirmed payments.
-- Each month is calculated separately. Older arrears and overpayments are **not** carried forward; no adjustment/reversal facility is implemented yet. Thus this section is not ready to serve as a legally authoritative ledger.
+- The report now carries outstanding debt and credit forward from ALL recorded previous months, including the effect of reversals. Historical fee rules are uniform across all apartments for a given month; there is no proration or special shop tariff. This section is still NOT a legally authoritative accounting ledger.
 - Georgian default and Russian toggle; responsive UI.
 
 ## Not yet implemented for production
 
-Production-ready audited financial corrections, arrears/overpayment carryover, formal voting, encrypted backup/restore, membership revocation, profile edits and audit logs. Those functions in the old static demo must not be confused with production features. Firebase Security Rules need emulator tests and live integration tests before production use. The prototype uses simple client transactions without Cloud Functions; chairperson decisions can be updated only under chairman security rules.
+Formal voting, restoration of encrypted financial snapshots to the server, encrypted full-app backup/restore, apartment-specific tariff overrides, membership revocation, profile edits and a comprehensive audit console. Financial reversals have a reason, original receipt and immutable reverse record, but no separate adjustment of monthly fee exists. Those functions in the old static demo must not be confused with production features. Firebase Security Rules need emulator tests and live integration tests before production use. The prototype uses simple client transactions without Cloud Functions; chairperson decisions can be updated only under chairman security rules.
 
 ## Known constraints
 
@@ -62,6 +62,12 @@ Covered scenarios: logged-out private reads denied; no resident privilege escala
 
 - `months/YYYY-MM`: `month`, `amountTetri`, `createdBy`, `createdAt`. Created only once by chairman; one monthly amount for all 60 flats. **Do not edit or delete** historical month settings; corrections require a future audited adjustment process.
 - `payments/<autoid>`: `month`, `apartment`, `amountTetri`, `note`, `createdBy`, `createdAt`. Immutable append-only manual receipt recording (not payment capture). The resident's Firestore list query MUST include `where('apartment','==',membership.apartment)`, and the server rules check the resident's approved membership for any document read.
-- Client arithmetic uses **integer tetri**, not floating-point GEL. Monthly fees and payment entries have bounds enforced in Firestore Rules. Only the current selected month is totaled; rollover not implemented.
+- Client arithmetic uses **integer tetri**, not floating-point GEL. Monthly fees and payment entries have bounds enforced in Firestore Rules. The chosen month shows the prior balance, current due, net month receipts after reversals, and closing balance. Earlier periods are included in the carry-forward. The oldest month in the fee collection is treated as the ledger's start.
 - CSV contains apartment-level financial status and is unencrypted when saved; the chairman should store it securely and not post it publicly.
+- `encrypted-finance.js`: chairman-only **on-device AES-256-GCM finance archive export** with PBKDF2-SHA256 passphrase derivation, 250,000 rounds, fresh random salt and nonce. The export includes every month, receipt and correction, not just the selected month; it excludes profiles, email addresses and phone numbers. The passphrase stays in the browser and is not stored. Losing the passphrase means losing access to that export. **No restore/import mechanism is offered yet**, so this is an encrypted archive, not a complete disaster-recovery solution.
 - The rules are committed but not yet deployed or exercised against a real Firebase project. Emulator tests have been written, but weren't executed in this environment because external npm downloads are unavailable.
+- `corrections/<originalReceiptId>`: immutable full reversal of an original receipt, with the same period/apartment, negative original amount, reason, actor and timestamp. A correction can occur only once per original ID; to fix the amount, record a NEW positive receipt after the reversal. The original is never erased. Firestore rules enforce this invariance.
+
+## Local tests
+
+Run `npm run test:unit` in the `firebase` folder (Node.js 20+): integer-tetri arithmetic (carryover, future-period exclusion, reversals, corrections and apartment isolation) plus encrypted file round-trip and wrong-password rejection. Run `npm run test:rules` with Firebase Emulator and dependencies installed to validate Firestore RLS (including once-only correction and apartment privacy). Source-defined tests are not the same as executed emulator tests.
