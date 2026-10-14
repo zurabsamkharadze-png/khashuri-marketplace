@@ -1,5 +1,7 @@
 -- 004: Require a verified email address before a resident can submit an apartment request.
--- Applies even if email confirmation is accidentally disabled for a sign-up flow.
+-- IMPORTANT: Supabase Auth MUST require email confirmation. If email confirmation is disabled,
+-- the provider may mark addresses as confirmed without verifying ownership; this check alone
+-- is not sufficient to prove control of the email inbox.
 begin;
 create or replace function public.corp_email_verified()
 returns boolean language sql stable security definer set search_path = ''
