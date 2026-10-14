@@ -45,6 +45,8 @@ async function refresh(){
   if(!user||!db)return render();
   try {
     await reload(user); user=auth.currentUser;
+    // Refresh the ID token so Firestore sees the new email_verified claim.
+    if(user.emailVerified)await getIdToken(user,true);
     profile=(await getDoc(doc(db,'profiles',user.uid))).data()||null;
     isChair=(await getDoc(doc(db,'roles',user.uid))).data()?.chairman===true;
     application=(await getDoc(doc(db,'applications',user.uid))).data()||null;
