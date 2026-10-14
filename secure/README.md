@@ -15,6 +15,8 @@ The existing browser-only demonstration remains available on the separate `chven
 - Residents can view only their own profile, request status and approved apartment membership; all data fetched only after authentication.
 - Chairman can see pending requests, approve/reject them with a server-side permission check and inspect a private residents directory.
 - Chairman-only server RPC allows correcting approved residents' names and phone numbers, logged in an audit table.
+- Chairman can revoke a single apartment membership without deleting the account; former members can submit a fresh application and membership revocations are audited.
+- Chairman can set or correct entrance/floor for any of 60 apartments, with a durable audit record.
 - Database Row-Level Security blocks unauthenticated access to the directory and disallows residents from elevating privileges, editing others' profiles or approving requests.
 - Role assignment to chairman is NOT exposed to public signup. Admin assignment requires verification of the actual person.
 
@@ -27,16 +29,18 @@ The existing browser-only demonstration remains available on the separate `chven
 - `migrations/002_member_edit.sql` — audited chairman-only profile corrections.
 - `migrations/003_profile_visibility.sql` — chairman can see only profiles linked to an apartment application or membership, not unrelated registered accounts.
 - `migrations/004_verified_applicants.sql` — server-side verified-email requirement before requesting apartment access.
+- `migrations/005_membership_revocation.sql` — audited chairman-only access revocation.
+- `migrations/006_unit_layout.sql` — audited chairman-only apartment layout corrections.
 
 ### To activate later without changing other websites
 
 1. Obtain a **NEW ISOLATED** backend project on a free tier that actually permits it. The existing Supabase organization already has two projects, and the current free limit may not permit a third project. **Do not run migrations in either old project.**
-2. With authorization and a dedicated project, execute the four migrations **in numeric order: 001 → 002 → 003 → 004** in the new database. Review security and confirm each SQL succeeds.
+2. With authorization and a dedicated project, execute all six migrations **in numeric order: 001 → 002 → 003 → 004 → 005 → 006** in the new database. Review security and confirm each SQL succeeds.
 3. Enable email/password registration **with email confirmation REQUIRED** in Auth and configure confirmed email redirect URLs for the intended new HTTPS domain. The SQL helper checks Supabase's `email_confirmed_at`; this is NOT proof of inbox ownership if Supabase is set to automatically confirm accounts. Be aware the default free email delivery capacity can be very limited: signups of 60 families may need to be staggered or use an authorized external SMTP service with verified terms.
 4. Set **only** the project's HTTPS Supabase URL and PUBLIC anon/publishable key in `config.js`. NEVER place a service-role/secret key in browser code. Database RLS must remain enabled.
 5. Publish `secure/` files on an approved independent HTTPS static domain. Do not use a third-party HTML-preview proxy for real private data.
 6. Have the intended chairman register and verify their email. Verify their exact auth user ID using authorized means; ONLY THEN, via the database SQL editor, assign `corp_roles.role='chairman'` for that verified UUID. Do NOT give chairman status automatically to the first registration.
-7. Validate with two real test accounts and one unverified account: an ordinary resident must not view another resident's profile, phone, audit history, requests or the chairman dashboard; an unverified email must not submit a request. Ensure repeated approvals and entrance/floor mismatches are blocked. Exercise the reset-password email link and chairman-only CSV/edit features. Test on two devices.
+7. Validate with two real test accounts and one unverified account: an ordinary resident must not view another resident's profile, phone, audit history, requests or the chairman dashboard; an unverified email must not submit a request. Ensure repeated approvals and entrance/floor mismatches are blocked. Exercise the reset-password email link and chairman-only CSV/edit features, member revocation/reapplication, and apartment layout corrections. Test on two devices.
 8. Get appropriate resident privacy notice/consent, establish a backup/restore policy and assess Georgia's applicable personal-data rules before inviting families.
 
 ### Free-tier and security boundary
