@@ -155,6 +155,13 @@
   Object.assign(tr.ka,{
     monthlyTitle:'60 ბინის ყოველთვიური ანგარიში',monthlyPeriod:'საანგარიშო თვე',monthlyDue:'თვის დარიცხვა',monthlyCollected:'მიღებული შენატანები',monthlyOutstanding:'გადაუხდელი თანხა',monthlyPaidCount:'სრულად გადახდილი',monthlyPartialCount:'ნაწილობრივ გადახდილი',monthlyUnpaidCount:'ჯერ არ გადაუხდიათ',monthlyDemoNotice:'მხოლოდ სატესტო ანგარიშია. არ გამოიყენოთ რეალურ აღრიცხვაში. ერთი და იგივე შენატანი გამოიყენება 60-ვე ბინაზე; ძველი ტარიფები და ზედმეტად გადახდილის გადატანა ჯერ არ არის დამატებული.'
   });
+
+  Object.assign(tr.ru,{
+    importDemo:'Восстановить тестовую копию',importConfirm:'Заменить тестовые данные этого устройства данными из файла? Перед заменой будет скачана резервная копия.',importSuccess:'Тестовые данные восстановлены',importInvalid:'Неверный формат тестовой копии',importTooLarge:'Файл слишком большой',importNotice:'Импорт только демонстрационных данных. JSON-файл не зашифрован, не храните в нём реальные сведения жильцов.'
+  });
+  Object.assign(tr.ka,{
+    importDemo:'სატესტო ასლის აღდგენა',importConfirm:'ჩავანაცვლოთ ამ მოწყობილობის სატესტო მონაცემები ფაილის მონაცემებით? ჩანაცვლებამდე ჩამოიტვირთება სარეზერვო ასლი.',importSuccess:'სატესტო მონაცემები აღდგენილია',importInvalid:'სატესტო ასლის ფაილი არასწორია',importTooLarge:'ფაილი ძალიან დიდია',importNotice:'შეიტანეთ მხოლოდ სატესტო ინფორმაცია. JSON ფაილი დაშიფრული არ არის; მასში არ შეინახოთ მცხოვრებლების რეალური მონაცემები.'
+  });
   const TEST_STEPS=[
     {key:'home',tab:'home',label:'guideStepHome',hint:'guideHintHome'},
     {key:'apartments',tab:'apartments',label:'guideStepApartments',hint:'guideHintApartments'},
@@ -325,7 +332,7 @@
     const list=db.applications.slice().reverse().map(q=>`<div class="review-row"><div class="profile-card"><div class="profile-avatar">♙</div><div><strong>${e(q.name)}</strong><small>${e(t(q.type==='owner'?'owner':'tenant'))} · ${e(t('entrance'))} №${q.entrance} · ${e(t('flat'))} №${q.flat}</small><small>${e(q.date)}</small></div></div><div class="review-actions"><span class="pill ${q.status==='approved'?'done':'progress'}">${e(applicationState(q))}</span>${q.status==='pending'?`<button class="btn green small" data-review="${e(q.id)}" data-review-status="approved">✓ ${e(t('approve'))}</button><button class="btn danger small" data-review="${e(q.id)}" data-review-status="rejected">✕ ${e(t('reject'))}</button>`:''}</div></div>`).join('')||empty();
     return `<div class="notice">⚠ ${e(t('localWarning'))} ${e(t('testNotice'))}</div><div class="grid two">${box(t('applicationReview'),`<div class="stat-strip"><b>${waiting}</b><span>${e(t('pendingReview'))}</span></div><div class="items">${list}</div>`)}${box(t('registrationDemo'),`<p class="help">${e(t('registrationHelp'))}</p><div class="pill-row"><button class="btn green" data-role="resident" data-registration>♙ ${e(t('registration'))}</button></div>`)}</div>`;
   };
-  const settings=()=>!admin()?box(t('settings'),`<div class="notice">${e(t('adminOnly'))}</div>`):`<div class="grid two">${box(t('setFee'),`<p class="help">${e(t('feeNotice'))}</p><form id="settings-form" class="form"><div class="field"><label>${e(t('amount'))}</label><input type="number" step="0.01" min="0" max="100000" name="fee" value="${e(db.fee)}" required /></div><div class="field" style="align-self:end"><button class="btn green" type="submit">${e(t('save'))}</button></div></form><div class="pill-row section-gap"><button class="btn secondary small" data-backup>↓ ${e(t('exportBackup'))}</button><button class="btn danger small" data-reset>${e(t('reset'))}</button></div>`)}${box(t('floorMap'),floors())}</div>`;
+  const settings=()=>!admin()?box(t('settings'),`<div class="notice">${e(t('adminOnly'))}</div>`):`<div class="grid two">${box(t('setFee'),`<p class="help">${e(t('feeNotice'))}</p><form id="settings-form" class="form"><div class="field"><label>${e(t('amount'))}</label><input type="number" step="0.01" min="0" max="100000" name="fee" value="${e(db.fee)}" required /></div><div class="field" style="align-self:end"><button class="btn green" type="submit">${e(t('save'))}</button></div></form><div class="pill-row section-gap"><button class="btn secondary small" data-backup>↓ ${e(t('exportBackup'))}</button><label class="btn secondary small" style="cursor:pointer">↑ ${e(t('importDemo'))}<input id="import-demo" type="file" accept="application/json,.json" style="position:absolute;width:1px;height:1px;opacity:0;left:-9999px" /></label><button class="btn danger small" data-reset>${e(t('reset'))}</button></div>`)}${box(t('floorMap'),floors())}</div>`;
   function render(){
     document.documentElement.lang=db.lang;
     const nav=sections.filter(k=>admin()?k!=='registration':k!=='applications').map(k=>`<button class="nav-btn ${db.tab===k?'active':''}" data-nav="${k}"><span class="i">${icons[k]}</span>${e(t(k))}</button>`).join('');
@@ -336,6 +343,26 @@
   function download(filename,mime,contents){const blob=new Blob([contents],{type:mime}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);}
   function csv(){const rows=[['date','type','description','flat','amount','purpose','period'],...db.txs.map(q=>[q.date,q.type,q.description,q.flat||'',q.amount,q.purpose||'',q.period||''])];download('rustaveli16-cashbook.csv','text/csv;charset=utf-8','\ufeff'+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n'));}
 
+
+  function validateDemoBackup(p){
+    if(!p||typeof p!=='object'||Array.isArray(p)||!Array.isArray(p.units)||p.units.length!==60)return false;
+    if(!Number.isFinite(Number(p.fee))||Number(p.fee)<0||Number(p.fee)>100000)return false;
+    if(!['ka','ru'].includes(p.lang)||!['admin','resident'].includes(p.role))return false;
+    if(!['home','guide','apartments','finances','repairs','polls','news','settings','registration','applications'].includes(p.tab))return false;
+    if(!Number.isInteger(Number(p.flat))||Number(p.flat)<1||Number(p.flat)>60)return false;
+    const numbers=p.units.map(u=>u?.number);
+    if(new Set(numbers).size!==60||p.units.some(u=>!u||!Number.isInteger(u.number)||u.number<1||u.number>60||![0,1,2,3].includes(Number(u.entrance))||![0,2,3,4,5,6,7,8].includes(Number(u.floor))))return false;
+    for(const k of ['shops','txs','tickets','polls','posts','applications']){
+      if(!Array.isArray(p[k])||p[k].length>3000)return false;
+    }
+    if(p.txs.some(x=>!x||!['income','expense'].includes(x.type)||!Number.isFinite(Number(x.amount))||Number(x.amount)<=0||typeof x.date!=='string'||!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(x.date)||typeof x.description!=='string'||x.description.length>250||((x.flat!==null&&x.flat!==undefined&&x.flat!=='')&&(!Number.isInteger(Number(x.flat))||Number(x.flat)<1||Number(x.flat)>60))))return false;
+    if(p.tickets.some(x=>!x||!['open','progress','done'].includes(x.status)||typeof x.title!=='string'||typeof x.text!=='string'||x.title.length>200||x.text.length>1000))return false;
+    if(p.polls.some(x=>!x||typeof x.question!=='string'||!Number.isInteger(x.yes)||!Number.isInteger(x.no)||!Array.isArray(x.voters)))return false;
+    if(p.posts.some(x=>!x||typeof x.title!=='string'||typeof x.text!=='string'))return false;
+    if(p.applications.some(x=>!x||typeof x.name!=='string'||!['pending','approved','rejected'].includes(x.status)))return false;
+    if(p.shops.some(x=>!x||typeof x.name!=='string'))return false;
+    return true;
+  }
   function monthlyCsv(){
     const month=db.reportMonth,fee=Number(db.fee)||0;
     const rows=[['apartment','month','charge_gel','paid_gel','balance_gel','status'],...db.units.map(u=>{
@@ -368,6 +395,22 @@
   });
   document.addEventListener('change',ev=>{
     const x=ev.target;
+    if(x.id==='import-demo'){
+      if(!admin())return notify(t('adminOnly'));
+      const file=x.files&&x.files[0];if(!file)return;
+      if(file.size>1024*1024){notify(t('importTooLarge'));return;}
+      file.text().then(raw=>{
+        let candidate;
+        try{candidate=JSON.parse(raw);}catch{notify(t('importInvalid'));return;}
+        if(!validateDemoBackup(candidate)){notify(t('importInvalid'));return;}
+        if(!confirm(t('importConfirm')))return;
+        download('rustaveli16-demo-before-import.json','application/json',JSON.stringify(db,null,2));
+        candidate.testProgress=candidate.testProgress&&typeof candidate.testProgress==='object'&&!Array.isArray(candidate.testProgress)?candidate.testProgress:{};
+        candidate.reportMonth=/^[0-9]{4}-(0[1-9]|1[0-2])$/.test(candidate.reportMonth||'')?candidate.reportMonth:todayMonth();
+        db=candidate;selectedUnit=null;moreOpen=false;persist();render();notify(t('importSuccess'));
+      }).catch(()=>notify(t('importInvalid')));
+      return;
+    }
     if(x.id==='report-month'&&/^[0-9]{4}-(0[1-9]|1[0-2])$/.test(x.value)){db.reportMonth=x.value;persist();render();return;}
     if(x.dataset.unit&&admin()){const rec=db.units.find(q=>q.number===Number(x.dataset.unit));if(rec&&['floor','entrance'].includes(x.dataset.edit)){rec[x.dataset.edit]=Number(x.value);selectedUnit=rec.number;if(rec.entrance)db.entranceView=rec.entrance;persist();render();if(x.closest('.unit-details'))document.querySelector('.unit-details')?.scrollIntoView({block:'nearest'});}}
     if(x.dataset.ticket&&admin()){const rec=db.tickets.find(q=>q.id===x.dataset.ticket);if(rec&&['open','progress','done'].includes(x.value)){rec.status=x.value;persist();render();}}
