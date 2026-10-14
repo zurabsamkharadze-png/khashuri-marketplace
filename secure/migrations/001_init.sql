@@ -177,6 +177,17 @@ grant execute on function public.corp_review_request(uuid,boolean,text) to authe
 revoke all on function public.corp_is_chairman() from public,anon;
 grant execute on function public.corp_is_chairman() to authenticated;
 
+-- Explicit database privileges: anonymous visitors receive no directory access.
+revoke all on public.corp_profiles, public.corp_roles, public.corp_units,
+ public.corp_requests, public.corp_members, public.corp_audit
+from anon, authenticated;
+grant select on public.corp_profiles to authenticated;
+grant select on public.corp_roles to authenticated;
+grant select on public.corp_units to authenticated;
+grant select, insert on public.corp_requests to authenticated;
+grant select on public.corp_members to authenticated;
+grant select on public.corp_audit to authenticated;
+
 -- Privilege assignment is deliberately manual by a trusted operator after identity verification.
 -- For example, only in the SQL editor: update public.corp_roles
 -- set role='chairman' where user_id='<verified UUID>';
