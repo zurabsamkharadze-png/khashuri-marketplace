@@ -159,18 +159,31 @@ function listRepairs(canManage){
 }
 function renderFinance(){
   const fee=ledgerRate?.amountTetri??null;
-  const paid=isChair?receipts.reduce((a,r)=>a+Number(r.amountTetri||0),0):totalsFor(Number(membership?.apartment));
-  const billed=(fee??0)*(isChair?60:1);
-  const metrics='<div class="grid section-gap">'+
-    '<div class="card"><p class="muted">'+esc(t('due'))+'</p><strong>'+money(billed)+'</strong></div>'+
-    '<div class="card"><p class="muted">'+esc(t('paid'))+'</p><strong>'+money(paid)+'</strong></div>'+
-    '<div class="card"><p class="muted">'+esc(t('debt'))+'</p><strong>'+money(Math.max(0,billed-paid))+'</strong></div>'+
-    '<div class="card"><p class="muted">'+esc(t('credit'))+'</p><strong>'+money(Math.max(0,paid-billed))+'</strong></div></div>';
-  const month='<label>'+esc(t('month'))+'<input type="month" id="finance-month" value="'+esc(ledgerMonth)+'" min="2020-01" max="2099-12"></label>';
-  const history=receipts.slice().sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)).slice(0,80)
-    .map(r=>'<div class="mini">№ '+esc(r.apartment)+' · <strong>'+money(r.amountTetri)+'</strong><p class="muted">'+esc(r.note||'')+'</p></div>').join('')||
-    '<p class="muted">'+esc(t('noPayments'))+'</p>';
-  if(!isChair)return card(t('finance'),month+'<p>'+esc(t('monthlyFee'))+': '+(fee===null?esc(t('feeMissing')):money(fee))+'</p>'+metrics+history);
+  const flats=isChair?Array.from({length:60},(_,i)=>i+1):[membership.apartment];
+  const ledger=flats.map(flat=>({flat,...balanceFor(flat)}));
+  const sum=key=>ledger.reduce((total,item)=>total+item[key],0);
+  const figures=[[t('opening'),sum('opening')],[t('due'),sum('dueCurrent')],
+    [t('monthlyPaid'),sum('paidCurrent')],[t('closing'),sum('closing')],
+    [t('debt'),sum('debt')],[t('credit'),sum('credit')]];
+  const metrics='<div class="grid section-gap">'+figures.map(([label,value])=>
+    '<div class="card"><p class="muted">'+esc(label)+'</p><strong>'+money(value)+'</strong></div>'
+  ).join('')+'</div>';
+  const picker='<label>'+esc(t('month'))+'<input type="month" id="finance-month" value="'+esc(ledgerMonth)+'" min="2020-01" max="2099-12"></label>';
+  const correctionById=new Map(corrections.map(c=>[c.paymentId,c]));
+  const currentReceipts=receipts.filter(r=>r.month===ledgerMonth).slice()
+    .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)).slice(0,150);
+  const history=currentReceipts.map(r=>{
+    const c=correctionById.get(r.id);
+    const cancel=isChair&&!c?btn(t('paymentCancel'),'correct:'+r.id,'danger'):'';
+    const flag=c?'<span class="status rejected">'+esc(t('reversed'))+'</span>':'';
+    return '<div class="mini row"><div>№ '+esc(r.apartment)+' · <strong>'+money(r.amountTetri)+'</strong> '+
+       flag+'<p class="muted">'+esc(r.note||'')+'</p>'+
+       (c?'<p class="muted">'+esc(t('cancelReason'))+': '+esc(c.reason)+'</p>':'')+
+       '</div><div class="actions">'+cancel+'</div></div>';
+  }).join('')||'<p class="muted">'+esc(t('noPayments'))+'</p>';
+  if(!isChair)return card(t('finance'),picker+'<p>'+esc(t('monthlyFee'))+': '+
+    (fee===null?esc(t('feeMissing')):money(fee))+'</p><p class="muted">'+esc(t('ledgerCumulative'))+'</p>'+
+    metrics+history);
   const feeForm=fee===null?'<form id="fee-form" class="grid"><label>'+esc(t('amountGel'))+
     '<input type="number" name="fee" step="0.01" min="0" max="100000" value="0" required></label>'+
     '<div><button type="submit" class="btn green">'+esc(t('setMonthlyFee'))+'</button></div></form>':
@@ -180,10 +193,22 @@ function renderFinance(){
     '<label>'+esc(t('amountGel'))+'<input type="number" name="amount" step="0.01" min="0.01" max="1000000" required></label>'+
     '<div class="wide"><label>'+esc(t('paymentNote'))+'<input name="note" type="text" maxlength="250"></label></div>'+
     '<div class="wide"><button type="submit" class="btn green">'+esc(t('recordPayment'))+'</button></div></form>';
-  const data=Array.from({length:60},(_,i)=>i+1).map(n=>{const paid=totalsFor(n),due=fee??0;return '<tr><td>№ '+n+'</td><td>'+money(due)+'</td><td>'+money(paid)+'</td><td>'+money(Math.max(0,due-paid))+'</td><td>'+money(Math.max(0,paid-due))+'</td></tr>';}).join('');
-  const report='<div class="table-wrap"><table><thead><tr>'+[t('apartment'),t('due'),t('paid'),t('debt'),t('credit')].map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+data+'</tbody></table></div><div class="actions">'+btn('↓ '+t('downloadReport'),'download-finance')+'</div>';
-  return card(t('finance'),month+metrics+'<p class="muted">'+esc(t('immutableLedger'))+'</p>')+
-    card(t('setMonthlyFee'),feeForm)+card(t('recordPayment'),paymentForm)+card(t('allUnits'),report)+card(t('paid'),history);
+  const selected=currentReceipts.find(p=>p.id===correctingPaymentId&&!correctionById.has(p.id));
+  const correctionForm=selected?'<form id="correction-form" class="stack">'+
+    '<strong>№ '+esc(selected.apartment)+' · '+money(selected.amountTetri)+'</strong>'+
+    '<label>'+esc(t('cancelReason'))+'<textarea name="reason" minlength="5" maxlength="250" required></textarea></label>'+
+    '<div class="actions"><button type="submit" class="btn danger">'+esc(t('paymentCancel'))+'</button>'+
+    btn(t('cancel'),'correct-cancel')+'</div></form>':'';
+  const rows=ledger.map(q=>'<tr><td>№ '+q.flat+'</td><td>'+money(q.opening)+'</td><td>'+
+    money(q.dueCurrent)+'</td><td>'+money(q.paidCurrent)+'</td><td>'+money(q.closing)+'</td></tr>').join('');
+  const report='<div class="table-wrap"><table><thead><tr>'+
+    [t('apartment'),t('opening'),t('due'),t('monthlyPaid'),t('closing')]
+    .map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+rows+'</tbody></table></div>'+
+    '<div class="actions">'+btn('↓ '+t('downloadReport'),'download-finance')+'</div>';
+  return card(t('finance'),picker+metrics+'<p class="muted">'+esc(t('ledgerCumulative'))+' '+esc(t('immutableLedger'))+'</p>')+
+    card(t('setMonthlyFee'),feeForm)+card(t('recordPayment'),paymentForm)+
+    (selected?card(t('paymentCancel'),correctionForm):'')+
+    card(t('allUnits'),report)+card(t('paid'),history);
 }
 function renderResident(){
   if(membership){
