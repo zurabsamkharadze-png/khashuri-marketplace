@@ -98,6 +98,59 @@ service cloud.firestore {
           request.resource.data.floor;
       allow update,delete: if false;
     }
+
+    // Apartment announcements are available only to an approved resident or chairman.
+    match /announcements/{announcementId} {
+      allow get, list: if signed() &&
+        (chairman() || exists(/databases/$(database)/documents/members/$(request.auth.uid)));
+      allow create: if chairman() &&
+        request.resource.data.keys().hasAll(['title','body','authorUid','createdAt']) &&
+        request.resource.data.keys().hasOnly(['title','body','authorUid','createdAt']) &&
+        request.resource.data.title is string &&
+        request.resource.data.title.size() >= 3 &&
+        request.resource.data.title.size() <= 130 &&
+        request.resource.data.body is string &&
+        request.resource.data.body.size() >= 3 &&
+        request.resource.data.body.size() <= 2500 &&
+        request.resource.data.authorUid == request.auth.uid &&
+        request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
+    }
+
+    // A verified, approved resident can file a repair request for THEIR apartment.
+    // The chairman can see all requests and only update progress fields.
+    match /repairs/{repairId} {
+      allow get, list: if signed() &&
+        (chairman() || resource.data.authorUid == request.auth.uid);
+      allow create: if signed() &&
+        request.auth.token.email_verified == true &&
+        exists(/databases/$(database)/documents/members/$(request.auth.uid)) &&
+        request.resource.data.keys().hasAll([
+          'authorUid','apartment','title','details','status','createdAt','updatedAt'
+        ]) &&
+        request.resource.data.keys().hasOnly([
+          'authorUid','apartment','title','details','status','createdAt','updatedAt'
+        ]) &&
+        request.resource.data.authorUid == request.auth.uid &&
+        request.resource.data.apartment ==
+          get(/databases/$(database)/documents/members/$(request.auth.uid)).data.apartment &&
+        validFlat(request.resource.data.apartment) &&
+        request.resource.data.title is string &&
+        request.resource.data.title.size() >= 4 &&
+        request.resource.data.title.size() <= 140 &&
+        request.resource.data.details is string &&
+        request.resource.data.details.size() >= 4 &&
+        request.resource.data.details.size() <= 1500 &&
+        request.resource.data.status == 'open' &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.updatedAt == request.time;
+      allow update: if chairman() &&
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status','updatedAt']) &&
+        request.resource.data.status in ['open','progress','done'] &&
+        request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
     match /{document=**} { allow read,write: if false; }
   }
 }
