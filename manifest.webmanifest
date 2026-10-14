@@ -1,0 +1,18 @@
+{
+  "name": "ჩვენი კორპუსი — რუსთაველის 16",
+  "short_name": "ჩვენი კორპუსი",
+  "lang": "ka",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f7fa",
+  "theme_color": "#182d45",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
