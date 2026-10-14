@@ -180,6 +180,8 @@ async function submit(ev){
         await updateProfile(current,{displayName:d.first.trim()+' '+d.last.trim()});
         await sendEmailVerification(current);
         toastMsg(t('verifySent'));
+        // Auth may fire before Firestore profile creation finishes; read it again.
+        await refresh();
       }else await signInWithEmailAndPassword(auth,d.email.trim(),d.password);
     }else if(f.id==='reset-form'){
       await sendPasswordResetEmail(auth,d.email.trim());
